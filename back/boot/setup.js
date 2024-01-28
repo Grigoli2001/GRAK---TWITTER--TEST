@@ -1,6 +1,7 @@
+require('dotenv').config();
 const express = require('express');
 const app = express();
-const PORT = process.env.PORT || 8888;
+const PORT = process.env.PORT;
 
 const cors = require('cors');
 const helmet = require('helmet');
@@ -8,13 +9,17 @@ const morgan = require('morgan');
 const session = require('express-session');
 const mongoose = require('mongoose');
 const logger = require('../middleware/winston');
+const notFound = require('../middleware/notFound');
+
+
 
 const tweetRoutes = require('../routes/tweet.routes');
+const authRoutes = require('../routes/auth.routes');
 
 // connect to the database
 const connectToDB = async () => {
-    mongoose.connect("mongodb+srv://RaunakBhansali:951203@cluster0.reeyyqp.mongodb.net/?retryWrites=true&w=majority")
-        .then(() => logger.info("Database connected successfully"))
+    mongoose.connect(process.env.MONGO_URI)
+        .then(() => logger.info("MongoDB connected successfully"))
         .catch((err) => console.log(err));
 };
 
@@ -23,7 +28,7 @@ const registerCoreMiddleWare = async () => {
     try {
         app.use(
             session({
-                secret: 'secret',
+                secret: process.env.APP_SECRET,
                 resave: false,
                 saveUninitialized: true,
                 cookie: {
@@ -39,6 +44,9 @@ const registerCoreMiddleWare = async () => {
         app.use(helmet());
     
         app.use('/tweets', tweetRoutes);
+        app.use('/auth', authRoutes);
+
+        app.use(notFound);
     } catch (err) {
         logger.error("Error thrown while executing registerCoreMiddleWare");
         process.exit(1);
