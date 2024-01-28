@@ -1,0 +1,264 @@
+import React, { useState, useEffect } from "react";
+import { IoMdClose, IoMdArrowBack } from "react-icons/io";
+import { FcGoogle } from "react-icons/fc";
+import { FaApple, FaRegEye, FaEyeSlash } from "react-icons/fa";
+import { Button } from "@material-tailwind/react";
+import ReactLoading from "react-loading";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
+const LoginPopup = ({ onClose }) => {
+  const [users, setUsers] = useState({
+    email: "",
+    password: "",
+  });
+  const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isEmailFocused, setIsEmailFocused] = useState(false);
+  const [isPasswordFocused, setIsPasswordFocused] = useState(false);
+  const [togglePassword, setTogglePassword] = useState(false);
+  const [emailExists, setEmailExists] = useState(true);
+  useEffect(() => {
+    setTimeout(() => {
+      setLoading(false);
+    }, 100);
+  }, []);
+
+  const handleNext = () => {
+    if (users.email === "") {
+      return;
+    }
+    return emailExists ? setCurrentPage(2) : handleEmailNotExists();
+  };
+
+  const handleEmailNotExists = () => {
+    toast.warn("Email does not exists", {
+      position: "bottom-center",
+      autoClose: 2000,
+      hideProgressBar: true,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+    });
+  };
+  return (
+    <div>
+      <div
+        className={`w-[600px] min-h-[300px] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black rounded-xl ${
+          currentPage === 1 ? "pb-20" : "pb-5"
+        }`}
+      >
+        {loading ? (
+          <ReactLoading
+            type={"spin"}
+            color={"blue"}
+            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+          />
+        ) : (
+          <div>
+            <div className="flex flex-row items-center justify-left">
+              <button
+                onClick={onClose}
+                className=" hover:bg-blue-gray-900 rounded-full text-white font-bold m-2 p-2"
+              >
+                <IoMdClose />
+              </button>
+              <div className="absolute top-2 left-[46%]">
+                <svg
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                  className="h-10 r-4qtqp9 r-yyyyoo r-dnmrzs r-bnwqim r-1plcrui r-lrvibr r-1nao33i r-rxcuwo r-1777fci r-m327ed r-494qqr fill-current text-gray-50 "
+                >
+                  <g>
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path>
+                  </g>
+                </svg>
+              </div>
+            </div>
+            <div className="flex justify-center">
+              <div
+                className={`flex flex-col ${
+                  currentPage === 1 ? "w-7/12" : "w-9/12"
+                }`}
+              >
+                {/* Here we check if email exists */}
+                {currentPage === 1 && (
+                  <>
+                    <div className="mt-4">
+                      <h2 className="text-white text-3xl font-bold">
+                        Sign in to X
+                      </h2>
+                    </div>
+                    <div className="mt-8 mb-6">
+                      <Button
+                        color="white"
+                        className="normal-case flex justify-center items-center gap-3 h-[35px] w-[300px] rounded-full self-start"
+                      >
+                        <FcGoogle className="text-2xl" />
+                        <span>Sign in with Google</span>
+                      </Button>
+                    </div>
+                    <div className="">
+                      <Button
+                        color="white"
+                        className="normal-case flex justify-center items-center gap-3 h-[35px] w-[300px] rounded-full self-start"
+                      >
+                        <FaApple className="text-2xl" />
+                        <span>Sign in with Apple</span>
+                      </Button>
+                    </div>
+
+                    {/* or with 2 lines */}
+                    <div className="flex flex-row items-center justify-center w-[300px] mt-5">
+                      <div className="w-2/4 h-px bg-gray-800"></div>
+                      <div className="mx-4 text-gray-200">or</div>
+                      <div className="w-2/4 h-px bg-gray-800"></div>
+                    </div>
+
+                    {/* Here we check if email exists */}
+                    <div className="mt-5 relative">
+                      <input
+                        onFocus={() => setIsEmailFocused(true)}
+                        onBlur={() => setIsEmailFocused(false)}
+                        type="email"
+                        value={users.email}
+                        onChange={(e) =>
+                          setUsers({ ...users, email: e.target.value })
+                        }
+                        className={`bg-black text-white w-[300px] h-[60px] rounded-sm p-4 pt-7 border-gray-900 border-2 focus:outline-none focus:border-blue-600 transition-all `}
+                      />
+                      <label
+                        htmlFor="email"
+                        className={`absolute top-4 left-4  ${
+                          isEmailFocused ? "text-blue-600" : "text-gray-400"
+                        } transition-all text-base ${
+                          isEmailFocused || users.email
+                            ? "translate-y-[-12px] text-sm"
+                            : ""
+                        }`}
+                      >
+                        Email
+                      </label>
+                    </div>
+                    <div className="mt-7 relative">
+                      <Button
+                        color="white"
+                        className="normal-case flex justify-center items-center gap-3 h-[35px] w-[300px] rounded-full self-start"
+                        onClick={handleNext}
+                      >
+                        <span className="text-base">Next</span>
+                      </Button>
+                    </div>
+
+                    <div className="mt-5 relative">
+                      <Button
+                        variant="outlined"
+                        className="normal-case flex justify-center items-center gap-3 h-[35px] w-[300px] rounded-full self-start hover:bg-gray-900"
+                      >
+                        <span className="text-white text-base">
+                          Forgot password?
+                        </span>
+                      </Button>
+                    </div>
+
+                    <div className="mt-14 relative text-gray-700 text-sm">
+                      Don't have an account?&nbsp;
+                      <a href="#" className="text-blue-600">
+                        Sign up
+                      </a>
+                    </div>
+                  </>
+                )}
+                {currentPage === 2 && (
+                  <>
+                    <div>
+                      <h2 className="text-white text-3xl font-bold mt-5">
+                        Enter your password
+                      </h2>
+                      <div className="relative mt-6">
+                        {/* This should be username we need to fetch it from the db */}
+                        <input
+                          type="text"
+                          value={users.email}
+                          disabled
+                          className=" text-gray-800 w-full h-[60px] rounded-md p-4 pt-7 border-gray-900 border-2 focus:outline-none focus:border-blue-600 transition-all "
+                          style={{ backgroundColor: "#0b0b0b" }}
+                        />
+                        <label
+                          htmlFor="email"
+                          className="absolute top-4 left-4  text-gray-800 transition-all  translate-y-[-12px] text-xs"
+                        >
+                          Username
+                        </label>
+                      </div>
+                      {/* password box */}
+                      <div className="mt-5 relative">
+                        <input
+                          onFocus={() => setIsPasswordFocused(true)}
+                          onBlur={() => setIsPasswordFocused(false)}
+                          type={togglePassword ? "text" : "password"}
+                          value={users.password}
+                          onChange={(e) =>
+                            setUsers({ ...users, password: e.target.value })
+                          }
+                          className="bg-black text-white w-full h-[60px] rounded-md p-4 pt-7 pr-14 border-gray-900 border-2 focus:outline-none focus:border-blue-600 transition-all "
+                        />
+                        <label
+                          htmlFor="email"
+                          className={`absolute top-4 left-4  ${
+                            isPasswordFocused
+                              ? "text-blue-600"
+                              : "text-gray-800"
+                          } transition-all ${
+                            (isPasswordFocused || users.password) &&
+                            " translate-y-[-12px] text-xs"
+                          }`}
+                        >
+                          Password
+                        </label>
+
+                        <div className="absolute top-4 right-4">
+                          <button
+                            onClick={() => setTogglePassword(!togglePassword)}
+                          >
+                            {togglePassword ? (
+                              <FaEyeSlash className="text-gray-800 text-2xl" />
+                            ) : (
+                              <FaRegEye className="text-gray-800 text-2xl" />
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                      <a href="/" className="text-blue-600 text-xs mt-2 ml-2">
+                        Forgot password?
+                      </a>
+
+                      <div className="mt-48 relative">
+                        <Button
+                          color="white"
+                          className="normal-case flex justify-center items-center gap-3 h-[50px] w-full rounded-full self-start"
+                        >
+                          <span className="text-base">Log in</span>
+                        </Button>
+                      </div>
+                      <span className="text-gray-600 text-sm">
+                        Don't have an account?&nbsp;
+                        <a href="#" className="text-blue-600">
+                          Sign up
+                        </a>
+                      </span>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+        <ToastContainer />
+      </div>
+    </div>
+  );
+};
+
+export default LoginPopup;
