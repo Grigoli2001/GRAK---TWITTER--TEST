@@ -1,16 +1,17 @@
 const tweetModel = require('../models/tweetModel');
+const statusCode = require('../constants/statusCode');
 
 const getAllTweets = async (req, res) => {
     try {
         const tweets = await tweetModel.find();
-        res.status(200).json({
+        res.status(statusCode.success).json({
             status: "success",
             data: {
                 tweets,
             },
         });
     } catch (err) {
-        res.status(404).json({
+        res.status(statusCode.badRequest).json({
             status: "fail",
             message: err,
         });
@@ -21,13 +22,13 @@ const getTweetById = async (req, res) => {
     const tweets = await tweetModel.findOne({ tweet_id: req.params.id });
 
     if (!tweets) {
-        res.status(404).json({
+        res.status(statusCode.badRequest).json({
             status: "fail",
             message: "No tweet found with that ID",
         });
     }
 
-    res.status(200).json({
+    res.status(statusCode.success).json({
         status: "success",
         data: {
             tweets,
@@ -46,14 +47,14 @@ const createTweet = async (req, res) => {
             tweet_media: req.body.tweet_media,
         });
 
-        res.status(201).json({
+        res.status(statusCode.success).json({
             status: "success",
             data: {
                 tweet: newTweet,
             },
         });
     } catch (err) {
-        res.status(404).json({
+        res.status(statusCode.badRequest).json({
             status: "fail",
             message: err,
         });
@@ -69,7 +70,7 @@ const updateTweet = async (req, res) => {
         });
 
         if (!tweets) {
-            res.status(404).json({
+            res.status(statusCode.badRequest).json({
                 status: "fail",
                 message: "No tweet found with that ID",
             });
