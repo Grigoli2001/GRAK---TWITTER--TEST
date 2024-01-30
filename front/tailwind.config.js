@@ -1,4 +1,5 @@
 const withMT = require("@material-tailwind/react/utils/withMT");
+const colors = require("tailwindcss/colors");
 
 module.exports = withMT({
   content: [
@@ -8,15 +9,18 @@ module.exports = withMT({
     "./public/index.html",
   ],
   theme: {
-    extend: {
-      colors: {
-        customGreen: "#00cc99",
-        // Add more custom colors as needed
-      },
-    },
     dark: {
       backgroundColor: "black",
       textColor: "white",
+    },
+    extend: {
+      colors: {
+        "twitter-blue": "rgb(29 155 240 / <alpha-value>)",
+        ...colors,
+      },
+      boxShadow: {
+        "all-round": "2px 2px 20px -5px rgba(0, 0, 0, 0.5)",
+      },
     },
   },
   plugins: [],
