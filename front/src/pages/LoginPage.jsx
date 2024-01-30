@@ -82,14 +82,14 @@ const LoginPage = () => {
               </h2>
               <Button
                 color="white"
-                className="flex justify-center items-center gap-3 sm:h-[40px] sm:w-[300px] rounded-full mb-2 sm:self-center md:self-start"
+                className="flex justify-center normal-case text-sm items-center gap-3 sm:h-[40px] sm:w-[300px] rounded-full mb-2 sm:self-center md:self-start"
               >
                 <FcGoogle className="text-2xl" />
                 <span>Sign Up with Google</span>
               </Button>
               <Button
                 color="white"
-                className="flex justify-center items-center gap-3 sm:h-[40px] sm:w-[300px] rounded-full sm:self-center md:self-start"
+                className="flex justify-center normal-case text-sm items-center gap-3 sm:h-[40px] sm:w-[300px] rounded-full sm:self-center md:self-start"
               >
                 <FaApple className="text-2xl" />
                 <span>Sign Up with Apple</span>

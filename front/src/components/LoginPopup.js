@@ -223,9 +223,9 @@ const LoginPopup = ({ onClose }) => {
                             onClick={() => setTogglePassword(!togglePassword)}
                           >
                             {togglePassword ? (
-                              <FaEyeSlash className="text-gray-800 text-2xl" />
+                              <FaEyeSlash className="text-gray-100 text-2xl" />
                             ) : (
-                              <FaRegEye className="text-gray-800 text-2xl" />
+                              <FaRegEye className="text-gray-100 text-2xl" />
                             )}
                           </button>
                         </div>

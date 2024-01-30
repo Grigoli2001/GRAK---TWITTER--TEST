@@ -8,7 +8,12 @@ module.exports = withMT({
     "./public/index.html",
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        customGreen: "#00cc99",
+        // Add more custom colors as needed
+      },
+    },
     dark: {
       backgroundColor: "black",
       textColor: "white",
