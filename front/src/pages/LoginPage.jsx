@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { FaApple } from "react-icons/fa";
 import { Button } from "@material-tailwind/react";
-import RegisterPopup from "../components/RegisterPopup";
-import LoginPopup from "../components/LoginPopup";
+import RegisterPopup from "../components/authComponents/RegisterPopup";
+import LoginPopup from "../components/authComponents/LoginPopup";
+import LoginFooter from "../components/authComponents/LoginFooter";
 const LoginPage = () => {
   const [isRegisterPopupOpen, setIsRegisterPopupOpen] = useState(false);
   const [isLoginPopupOpen, setIsLoginPopupOpen] = useState(false);
@@ -125,65 +126,7 @@ const LoginPage = () => {
             </div>
           </div>
         </div>
-        <footer className="flex flex-wrap justify-center items-center gap-0 max-w-screen-//#endregion mx-auto min-h-[6vh] mb-1 mt-3 ">
-          <a href="/" className="text-gray-600 text-[13px] mx-2">
-            About
-          </a>
-          <a href="/" className="text-gray-600 text-[13px] mx-2">
-            Download the X app
-          </a>
-          <a href="/" className="text-gray-600 text-[13px] mx-2">
-            Help center
-          </a>
-          <a href="/" className="text-gray-600 text-[13px] mx-2">
-            Terms of Service
-          </a>
-          <a href="/" className="text-gray-600 text-[13px] mx-2">
-            Privacy Policy
-          </a>
-          <a href="/" className="text-gray-600 text-[13px] mx-2">
-            Cookie Policy
-          </a>
-          <a href="/" className="text-gray-600 text-[13px] mx-2">
-            Accessibility
-          </a>
-          <a href="/" className="text-gray-600 text-[13px] mx-2">
-            Ads info
-          </a>
-          <a href="/" className="text-gray-600 text-[13px] mx-2">
-            Blog
-          </a>
-          <a href="/" className="text-gray-600 text-[13px] mx-2">
-            Status
-          </a>
-          <a href="/" className="text-gray-600 text-[13px] mx-2">
-            Careers
-          </a>
-          <a href="/" className="text-gray-600 text-[13px] mx-2">
-            Brand Resources
-          </a>
-          <a href="/" className="text-gray-600 text-[13px] mx-2">
-            Advertising
-          </a>
-          <a href="/" className="text-gray-600 text-[13px] mx-2">
-            Marketing
-          </a>
-          <a href="/" className="text-gray-600 text-[13px] mx-2">
-            X for Business
-          </a>
-          <a href="/" className="text-gray-600 text-[13px] mx-2">
-            Developers
-          </a>
-          <a href="/" className="text-gray-600 text-[13px] mx-2">
-            Directory
-          </a>
-          <a href="/" className="text-gray-600 text-[13px] mx-2">
-            Settings
-          </a>
-          <a href="/" className="text-gray-600 text-[13px] mx-2">
-            © 2024 X, GRAK.
-          </a>
-        </footer>
+        <LoginFooter />
       </div>
       <div ref={containerRef}>
         {isRegisterPopupOpen && <RegisterPopup onClose={closeRegisterPopup} />}

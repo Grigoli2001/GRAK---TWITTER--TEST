@@ -5,6 +5,9 @@ import ReactLoading from "react-loading";
 import { Checkbox } from "@material-tailwind/react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { requests } from "../../constants/requests";
+import instance from "../../constants/axios";
+import useAppStateContext from "../../hooks/useAppStateContext";
 
 const RegisterPopup = ({ onClose }) => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -23,20 +26,25 @@ const RegisterPopup = ({ onClose }) => {
   const [verificationInput, setverificationInput] = useState("");
   const [emailAlreadyExists, setEmailAlreadyExists] = useState(false);
 
+  const { dispatch } = useAppStateContext();
+
   const nameInputRef = useRef(null);
   const emailInputRef = useRef(null);
   const monthInputRef = useRef(null);
   const [user, setUser] = useState({
+    email: "",
     name: "",
     password: "",
-    email: "",
-    month: "",
-    day: "",
-    year: "",
+    // formatted for postgre
+    dob: "",
     isGetmoreMarked: false,
     isConnectMarked: false,
     isPersonalizedMarked: false,
   });
+
+  const [month, setMonth] = useState("");
+  const [day, setDay] = useState("");
+  const [year, setYear] = useState("");
   const months = [
     "January",
     "February",
@@ -51,10 +59,8 @@ const RegisterPopup = ({ onClose }) => {
     "November",
     "December",
   ];
-
-  const formattedDOB = `${user.month.slice(0, 3)} ${user.day}, ${
-    user.year
-  }`.trim();
+  // this is for the 3rd page
+  const formattedDOB = `${month.slice(0, 3)} ${day}, ${year}`.trim();
 
   //   Year from 1900 to 2023
   const years = Array.from(Array(123).keys())
@@ -99,6 +105,7 @@ const RegisterPopup = ({ onClose }) => {
       setError(false);
       return true;
     }
+
     setError(true);
     setInvalidEmail(true);
     return false;
@@ -111,6 +118,14 @@ const RegisterPopup = ({ onClose }) => {
         if (emailAlreadyExists) {
           setError(true);
         } else if (user.email.length > 0) {
+          setUser({
+            ...user,
+            dob: `${year}-${String(months.indexOf(month) + 1).padStart(
+              2,
+              "0"
+            )}-${day}`,
+          });
+
           setCurrentPage(currentPage + 1);
         }
         break;
@@ -142,13 +157,51 @@ const RegisterPopup = ({ onClose }) => {
         }
         break;
       case 5:
-        alert("You are now registered" + JSON.stringify(user));
+        finishRegistration();
         break;
-
       default:
         break;
     }
   };
+  // This checks if email already exists after user types in the email
+
+  useEffect(() => {
+    if (user.email.length > 0 && !isEmailFocused && !invalidEmail) {
+      instance
+        .post(requests.check, { userInfo: user.email })
+        .then((response) => {
+          if (response.data.message === "User exists") {
+            setEmailAlreadyExists(true);
+            setError(true);
+          } else {
+            setEmailAlreadyExists(false);
+            setError(false);
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
+  }, [isEmailFocused, invalidEmail, user.email]);
+
+  const finishRegistration = () => {
+    instance
+      .post(requests.signup, user)
+      .then((response) => {
+        dispatch({
+          type: "Login",
+          payload: {
+            token: response.data.token,
+            email: user.email,
+            username: user.username,
+          },
+        });
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
   return (
     <div>
       <div className=" w-[600px] min-h-[300px] h-[650px] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black rounded-xl pb-6 ">
@@ -262,7 +315,7 @@ const RegisterPopup = ({ onClose }) => {
                             Invalid email
                           </p>
                         </>
-                      ) : error ? (
+                      ) : error & emailAlreadyExists ? (
                         <>
                           <p className="text-red-600 text-xs !absolute left-3 bottom-2">
                             Email already exists
@@ -293,10 +346,8 @@ const RegisterPopup = ({ onClose }) => {
                               ? "border-blue-600"
                               : "border-gray-600"
                           } border-2 rounded-md w-full text-bottom pt-4 pl-1`}
-                          value={user.month}
-                          onChange={(e) =>
-                            setUser({ ...user, month: e.target.value })
-                          }
+                          value={month}
+                          onChange={(e) => setMonth(e.target.value)}
                           ref={monthInputRef}
                         >
                           <option value="" disabled></option>
@@ -322,10 +373,8 @@ const RegisterPopup = ({ onClose }) => {
                           className={`text-white h-16 bg-black ${
                             isDayFocused ? "border-blue-600" : "border-gray-600"
                           } border-2 rounded-md w-full pt-4 pl-1`}
-                          value={user.day}
-                          onChange={(e) =>
-                            setUser({ ...user, day: e.target.value })
-                          }
+                          value={day}
+                          onChange={(e) => setDay(e.target.value)}
                         >
                           <option value="" disabled></option>
                           {Array.from(Array(31).keys()).map((day, index) => (
@@ -352,10 +401,8 @@ const RegisterPopup = ({ onClose }) => {
                               ? "border-blue-600"
                               : "border-gray-600"
                           } border-2 rounded-md w-full text-bottom pt-4`}
-                          value={user.year}
-                          onChange={(e) =>
-                            setUser({ ...user, year: e.target.value })
-                          }
+                          value={year}
+                          onChange={(e) => setYear(e.target.value)}
                         >
                           <option value="" disabled></option>
                           {years.map((year, index) => (
@@ -381,9 +428,9 @@ const RegisterPopup = ({ onClose }) => {
                         disabled={
                           user.name.length < 4 ||
                           user.email.length < 4 ||
-                          user.month.length < 1 ||
-                          user.day.length < 1 ||
-                          user.year.length < 1 ||
+                          month.length < 1 ||
+                          day.length < 1 ||
+                          year.length < 1 ||
                           invalidEmail ||
                           error
                         }
