@@ -57,25 +57,18 @@ const createTweet = async (req, res) => {
             },
         });
     } catch (err) {
-<<<<<<< HEAD
-        res.status(statusCode.badRequest).json({
-            status: "fail",
-            message: err,
-        });
-=======
         if (err.name === 'ValidationError') {
-            res.status(400).json({
+            res.status(statusCode.badRequest).json({
                 status: "fail",
                 message: "Invalid data provided",
                 errors: err.errors,
             });
         } else {
-            res.status(500).json({
+            res.status(statusCode.queryError).json({
                 status: "error",
                 message: "Internal server error",
             });
         }
->>>>>>> efb3ba2 (tweet routes/ services)
     }
 };
 
