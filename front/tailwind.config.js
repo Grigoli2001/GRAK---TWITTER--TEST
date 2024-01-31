@@ -9,15 +9,6 @@ module.exports = withMT({
     "./public/index.html",
   ],
   theme: {
-<<<<<<< HEAD
-    extend: {
-      colors: {
-        customGreen: "#00cc99",
-        // Add more custom colors as needed
-      },
-    },
-=======
->>>>>>> origin/feat-home
     dark: {
       backgroundColor: "black",
       textColor: "white",

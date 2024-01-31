@@ -9,6 +9,8 @@ import Notifications from './pages/Notifications';
 import Bookmarks from './pages/Bookmarks';
 import NotFound from './pages/NotFound/NotFoundSearch';
 import TestLayout from './components/layouts/TestLayout';
+import MessageLayout from "./components/layouts/MessageLayout";
+
 
 // test 
 
@@ -38,7 +40,7 @@ function App() {
                         </Route>
                 </Route>
 
-                <Route element={<TestLayout/>}>
+                <Route element={<MessageLayout/>}>
                   <Route path="/messages" element={<Messages />} />
                 </Route>
                 <Route path="*" element={<NotFound />} />

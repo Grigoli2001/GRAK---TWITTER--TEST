@@ -5,3 +5,11 @@
 {"level":"info","message":"Application started successfully","timestamp":"2024-01-28T14:39:19.108Z"}
 {"level":"info","message":"Listening on 127.0.0.1:8888","timestamp":"2024-01-28T14:39:19.109Z"}
 {"level":"info","message":"Database connected successfully","timestamp":"2024-01-28T14:39:20.116Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-01-30T18:10:01.106Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-01-30T18:10:01.111Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-01-30T18:10:01.147Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-01-30T18:10:01.167Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-01-30T18:13:01.349Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-01-30T18:13:01.353Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-01-30T18:13:01.390Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-01-30T18:13:01.410Z"}
