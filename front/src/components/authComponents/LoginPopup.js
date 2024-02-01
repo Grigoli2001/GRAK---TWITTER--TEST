@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { IoMdClose, IoMdArrowBack } from "react-icons/io";
+import { IoMdClose } from "react-icons/io";
 import { FcGoogle } from "react-icons/fc";
 import { FaApple, FaRegEye, FaEyeSlash } from "react-icons/fa";
 import { Button } from "@material-tailwind/react";
 import ReactLoading from "react-loading";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { requests } from "../../constants/requests";
+import instance from "../../constants/axios";
+import useAppStateContext from "../../hooks/useAppStateContext";
 
 const LoginPopup = ({ onClose }) => {
-  const [users, setUsers] = useState({
+  const [user, setuser] = useState({
     email: "",
     password: "",
   });
@@ -17,7 +20,9 @@ const LoginPopup = ({ onClose }) => {
   const [isEmailFocused, setIsEmailFocused] = useState(false);
   const [isPasswordFocused, setIsPasswordFocused] = useState(false);
   const [togglePassword, setTogglePassword] = useState(false);
-  const [emailExists, setEmailExists] = useState(true);
+
+  const { dispatch } = useAppStateContext();
+
   useEffect(() => {
     setTimeout(() => {
       setLoading(false);
@@ -25,12 +30,43 @@ const LoginPopup = ({ onClose }) => {
   }, []);
 
   const handleNext = () => {
-    if (users.email === "") {
+    if (user.email === "") {
       return;
     }
-    return emailExists ? setCurrentPage(2) : handleEmailNotExists();
+    instance
+      .post(requests.check, { userInfo: user.email })
+      .then((response) => {
+        console.log(response.data);
+        if (response.data.message === "User exists") {
+          return setCurrentPage(2);
+        }
+        return handleEmailNotExists();
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   };
 
+  const handleLogin = () => {
+    if (user.password === "") {
+      return;
+    }
+    setLoading(true);
+    instance
+      .post(requests.login, { userInfo: user.email, password: user.password })
+      .then((response) => {
+        if (response.data.token) {
+          dispatch({ type: "Login", payload: response.data });
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+        setLoading(false);
+        if (error.response.status === 404) {
+          return handleWrongPassword();
+        }
+      });
+  };
   const handleEmailNotExists = () => {
     toast.warn("Email does not exists", {
       position: "bottom-center",
@@ -40,8 +76,23 @@ const LoginPopup = ({ onClose }) => {
       pauseOnHover: true,
       draggable: true,
       progress: undefined,
+      style: { backgroundColor: "#1268fc", color: "#fff" },
     });
   };
+
+  const handleWrongPassword = () => {
+    toast.warn("Wrong Password", {
+      position: "bottom-center",
+      autoClose: 2000,
+      hideProgressBar: true,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      style: { backgroundColor: "#1268fc", color: "#fff" },
+    });
+  };
+
   return (
     <div>
       <div
@@ -122,23 +173,23 @@ const LoginPopup = ({ onClose }) => {
                         onFocus={() => setIsEmailFocused(true)}
                         onBlur={() => setIsEmailFocused(false)}
                         type="email"
-                        value={users.email}
+                        value={user.email}
                         onChange={(e) =>
-                          setUsers({ ...users, email: e.target.value })
+                          setuser({ ...user, email: e.target.value })
                         }
-                        className={`bg-black text-white w-[300px] h-[60px] rounded-sm p-4 pt-7 border-gray-900 border-2 focus:outline-none focus:border-blue-600 transition-all `}
+                        className={`bg-black text-white w-[300px] h-[60px] rounded-md p-4 pt-7 border-gray-900 border-2 focus:outline-none focus:border-blue-600 transition-all `}
                       />
                       <label
                         htmlFor="email"
                         className={`absolute top-4 left-4  ${
                           isEmailFocused ? "text-blue-600" : "text-gray-400"
                         } transition-all text-base ${
-                          isEmailFocused || users.email
+                          isEmailFocused || user.email
                             ? "translate-y-[-12px] text-sm"
                             : ""
                         }`}
                       >
-                        Email
+                        Email or username
                       </label>
                     </div>
                     <div className="mt-7 relative">
@@ -180,7 +231,7 @@ const LoginPopup = ({ onClose }) => {
                         {/* This should be username we need to fetch it from the db */}
                         <input
                           type="text"
-                          value={users.email}
+                          value={user.email}
                           disabled
                           className=" text-gray-800 w-full h-[60px] rounded-md p-4 pt-7 border-gray-900 border-2 focus:outline-none focus:border-blue-600 transition-all "
                           style={{ backgroundColor: "#0b0b0b" }}
@@ -198,9 +249,9 @@ const LoginPopup = ({ onClose }) => {
                           onFocus={() => setIsPasswordFocused(true)}
                           onBlur={() => setIsPasswordFocused(false)}
                           type={togglePassword ? "text" : "password"}
-                          value={users.password}
+                          value={user.password}
                           onChange={(e) =>
-                            setUsers({ ...users, password: e.target.value })
+                            setuser({ ...user, password: e.target.value })
                           }
                           className="bg-black text-white w-full h-[60px] rounded-md p-4 pt-7 pr-14 border-gray-900 border-2 focus:outline-none focus:border-blue-600 transition-all "
                         />
@@ -211,7 +262,7 @@ const LoginPopup = ({ onClose }) => {
                               ? "text-blue-600"
                               : "text-gray-800"
                           } transition-all ${
-                            (isPasswordFocused || users.password) &&
+                            (isPasswordFocused || user.password) &&
                             " translate-y-[-12px] text-xs"
                           }`}
                         >
@@ -238,6 +289,7 @@ const LoginPopup = ({ onClose }) => {
                         <Button
                           color="white"
                           className="normal-case flex justify-center items-center gap-3 h-[50px] w-full rounded-full self-start"
+                          onClick={handleLogin}
                         >
                           <span className="text-base">Log in</span>
                         </Button>

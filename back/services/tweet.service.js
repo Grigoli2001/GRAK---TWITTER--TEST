@@ -44,7 +44,10 @@ const createTweet = async (req, res) => {
             user_id: req.body.user_id,
             tweet_text: req.body.tweet_text,
             tweet_schedule: req.body.tweet_schedule,
-            tweet_media: req.body.tweet_media,
+            tweet_media: {
+                data: req.file.buffer,
+                contentType: req.file.mimetype,
+            }
         });
 
         res.status(statusCode.success).json({
@@ -54,12 +57,19 @@ const createTweet = async (req, res) => {
             },
         });
     } catch (err) {
-        res.status(statusCode.badRequest).json({
-            status: "fail",
-            message: err,
-        });
+        if (err.name === 'ValidationError') {
+            res.status(statusCode.badRequest).json({
+                status: "fail",
+                message: "Invalid data provided",
+                errors: err.errors,
+            });
+        } else {
+            res.status(statusCode.queryError).json({
+                status: "error",
+                message: "Internal server error",
+            });
+        }
     }
-
 };
 
 const updateTweet = async (req, res) => {
