@@ -5,6 +5,7 @@ import App from "./App";
 import { BrowserRouter } from "react-router-dom";
 import reportWebVitals from "./reportWebVitals";
 import { AppStateProvider } from "./context/appStateProvider";
+import { ToastContainer } from "react-toastify";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
@@ -12,6 +13,7 @@ root.render(
     <BrowserRouter>
       <AppStateProvider>
         <App />
+        <ToastContainer />
       </AppStateProvider>
     </BrowserRouter>
   </React.StrictMode>

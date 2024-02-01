@@ -307,7 +307,6 @@ const LoginPopup = ({ onClose }) => {
             </div>
           </div>
         )}
-        <ToastContainer />
       </div>
     </div>
   );

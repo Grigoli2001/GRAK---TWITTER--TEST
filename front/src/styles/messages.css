@@ -1,0 +1,27 @@
+.message-history div:last-child {
+  margin-bottom: 15px;
+}
+
+.msgtaskbar {
+    background-color: rgba(255, 255, 255, 0.7); 
+    backdrop-filter: blur(12px);
+}
+
+
+.user.active{
+    background-color: #e6e6e6;
+    border-right: 2px solid rgb(29 155 240 / 0.8);
+    width: 100%;
+}
+
+.last-message p{
+    display: block;
+}
+
+.last-message .msgSend{
+    border-bottom-right-radius: 4px;
+}
+
+.last-message .msgReceive{
+    border-bottom-left-radius: 4px;
+}

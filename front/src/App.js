@@ -19,6 +19,8 @@ import MonetizationSettings from "./pages/Settings/MonetizationSettings";
 import CreatorSettings from "./pages/Settings/CreatorSettings";
 import TestLayout from './components/layouts/TestLayout';
 import SettingsLayout from './components/layouts/SettingsLayout';
+import MessageWindow from "./components/MessageWindow";
+import MessageInfo from "./components/MessageInfo";
 
 // test 
 
@@ -48,9 +50,25 @@ function App() {
                         </Route>
                 </Route>
 
-      <Route element={<TestLayout />}>
-        <Route path="/messages" element={<Messages />} />
+                <Route element={<MessageLayout />}>
+        <Route path="/messages" element={<MessageWindow />} />
+        <Route path="/messages/:id" element={<MessageWindow />} />
+        <Route path="/messages/:id/info" element={<MessageInfo />} />
       </Route>
+      <Route element={<SettingsLayout/>}>
+                  <Route path="/settings" >
+                    <Route index element={<Navigate to="account" replace />} />
+                    <Route path="account" element={<AccountSettings />} />
+                    <Route path="security" element={<SecuritySettings />} />
+                    <Route path="privacy" element={<PrivacySettings />} />
+                    <Route path="notifications" element={<NotificationSettings />} />
+                    <Route path="accessibility" element={<AccessibilitySettings />} />
+                    <Route path="monetization" element={<MonetizationSettings />} />
+                    <Route path="creator" element={<CreatorSettings />} />
+                  </Route>
+                </Route>
+
+
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
