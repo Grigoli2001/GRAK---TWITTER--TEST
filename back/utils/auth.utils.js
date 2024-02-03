@@ -1,3 +1,7 @@
+const otpGenerator = require("otp-generator");
+const nodemailer = require("nodemailer");
+const logger = require("../middleware/winston");
+
 const makeUsername = (name) => {
   const username =
     name
@@ -29,7 +33,47 @@ const checkExisting = async (client, data, column) => {
   }
 };
 
+const generateOTP = () => {
+  //numbers only
+  return otpGenerator.generate(6, {
+    lowerCaseAlphabets: false,
+    upperCaseAlphabets: false,
+    specialChars: false,
+  });
+};
+
+const sendEmail = async (to, subject, text) => {
+  const transporter = nodemailer.createTransport({
+    host: process.env.EMAIL_SERVICE,
+    port: process.env.EMAIL_PORT,
+    secure: false,
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASSWORD,
+    },
+  });
+
+  const mailOptions = {
+    from: process.env.EMAIL,
+    to: to,
+    subject: subject,
+    text: text,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    return true;
+  } catch (error) {
+    logger.error("Error while sending email:", error);
+    return false;
+  } finally {
+    transporter.close();
+  }
+};
+
 module.exports = {
   makeUsername,
   checkExisting,
+  generateOTP,
+  sendEmail,
 };

@@ -186,6 +186,28 @@ const RegisterPopup = ({ onClose }) => {
     }
   }, [isEmailFocused, invalidEmail, user.email]);
 
+  useEffect(() => {
+    if (currentPage === 4) {
+      console.log("Sending OTP");
+      sendOTP();
+    }
+  }, [currentPage]);
+
+  const sendOTP = async () => {
+    setLoading(true);
+    try {
+      const response = await instance.post(requests.sendOTP, {
+        email: user.email,
+      });
+      setVerificationCode(response.data.otp);
+      console.log(response.data.otp);
+      setLoading(false);
+    } catch (error) {
+      console.log(error);
+      setLoading(false);
+    }
+  };
+
   const finishRegistration = () => {
     instance
       .post(requests.signup, user)
@@ -686,9 +708,12 @@ const RegisterPopup = ({ onClose }) => {
                         Verification Code
                       </label>
                     </div>
-                    <a href="/" className="text-blue-600 text-xs ml-3">
+                    <span
+                      onClick={sendOTP.bind(this)}
+                      className="text-blue-600 text-xs ml-3 hover:pointer hover:underline mt-2 cursor-pointer w-32"
+                    >
                       Didn't receive email?
-                    </a>
+                    </span>
 
                     {/* Next Button */}
 

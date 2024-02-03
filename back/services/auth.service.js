@@ -3,7 +3,12 @@ const logger = require("../middleware/winston");
 const pool = require("../database/db_setup");
 const jwt = require("jsonwebtoken");
 
-const { makeUsername, checkExisting } = require("../utils/auth.utils");
+const {
+  makeUsername,
+  checkExisting,
+  generateOTP,
+  sendEmail,
+} = require("../utils/auth.utils");
 
 const signup = async (req, res) => {
   const {
@@ -143,9 +148,27 @@ const logout = (req, res) => {
   return res.status(200).json({ message: "Disconnected" });
 };
 
+const sendOTP = async (req, res) => {
+  const email = req.body.email;
+  const otp = generateOTP();
+  const subject = "OTP for verification";
+  const text = `Your OTP is ${otp}`;
+  const mailSent = await sendEmail(email, subject, text);
+  if (mailSent) {
+    return res
+      .status(statusCodes.success)
+      .json({ message: "OTP sent", otp: otp });
+  } else {
+    return res
+      .status(statusCodes.queryError)
+      .json({ message: "Error while sending OTP" });
+  }
+};
+
 module.exports = {
   signup,
   login,
   logout,
   checkExistingUser,
+  sendOTP,
 };

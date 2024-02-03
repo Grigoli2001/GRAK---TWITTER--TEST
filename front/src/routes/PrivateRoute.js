@@ -8,7 +8,7 @@ const PrivateRoute = () => {
   return appState?.isAuthenticated && appState?.user ? (
     <Outlet />
   ) : (
-    <Navigate to="/login" />
+    <Navigate to="/" />
   );
 };
 

@@ -7,5 +7,6 @@ router.post("/login", authServices.login);
 router.post("/check", authServices.checkExistingUser);
 router.post("/signup", authServices.signup);
 router.get("/logout", authServices.logout);
+router.post("/sendOTP", authServices.sendOTP);
 
 module.exports = router;

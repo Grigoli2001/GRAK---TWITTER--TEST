@@ -21,54 +21,58 @@ import TestLayout from "./components/layouts/TestLayout";
 import SettingsLayout from "./components/layouts/SettingsLayout";
 import MessageWindow from "./components/MessageWindow";
 import MessageInfo from "./components/MessageInfo";
+import PrivateRoute from "./routes/PrivateRoute";
+import PublicRoute from "./routes/PublicRoute";
 
 // test
 
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<LoginPage />} />
-
-      <Route element={<TestLayout />}>
-        <Route path="/home" element={<Feed />} />
-
-        <Route path="/notifications" element={<Notifications />} />
-        <Route path="/bookmarks" element={<Bookmarks />} />
-        <Route path=":username" element={<Profile />}>
-          {/* photo */}
-          {/* cover */}
-          {/* bio */}
-          {/* followers */}
-          {/* following */}
+      <Route element={<PublicRoute />}>
+        <Route path="/" element={<LoginPage />} />
+      </Route>
+      <Route element={<PrivateRoute />}>
+        <Route element={<TestLayout />}>
+          <Route path="/home" element={<Feed />} />
+          <Route path="/notifications" element={<Notifications />} />
+          <Route path="/bookmarks" element={<Bookmarks />} />
+          <Route path=":username" element={<Profile />}>
+            {/* photo */}
+            {/* cover */}
+            {/* bio */}
+            {/* followers */}
+            {/* following */}
+          </Route>
         </Route>
-      </Route>
 
-      <Route
-        element={
-          <TestLayout excludeRenderWidgets={["SearchBar", "Trending"]} />
-        }
-      >
-        <Route path="/explore">
-          <Route index element={<Explore />} />
-          {/* any search features */}
+        <Route
+          element={
+            <TestLayout excludeRenderWidgets={["SearchBar", "Trending"]} />
+          }
+        >
+          <Route path="/explore">
+            <Route index element={<Explore />} />
+            {/* any search features */}
+          </Route>
         </Route>
-      </Route>
 
-      <Route element={<MessageLayout />}>
-        <Route path="/messages" element={<MessageWindow />} />
-        <Route path="/messages/:id" element={<MessageWindow />} />
-        <Route path="/messages/:id/info" element={<MessageInfo />} />
-      </Route>
-      <Route element={<SettingsLayout />}>
-        <Route path="/settings">
-          <Route index element={<Navigate to="account" replace />} />
-          <Route path="account" element={<AccountSettings />} />
-          <Route path="security" element={<SecuritySettings />} />
-          <Route path="privacy" element={<PrivacySettings />} />
-          <Route path="notifications" element={<NotificationSettings />} />
-          <Route path="accessibility" element={<AccessibilitySettings />} />
-          <Route path="monetization" element={<MonetizationSettings />} />
-          <Route path="creator" element={<CreatorSettings />} />
+        <Route element={<MessageLayout />}>
+          <Route path="/messages" element={<MessageWindow />} />
+          <Route path="/messages/:id" element={<MessageWindow />} />
+          <Route path="/messages/:id/info" element={<MessageInfo />} />
+        </Route>
+        <Route element={<SettingsLayout />}>
+          <Route path="/settings">
+            <Route index element={<Navigate to="account" replace />} />
+            <Route path="account" element={<AccountSettings />} />
+            <Route path="security" element={<SecuritySettings />} />
+            <Route path="privacy" element={<PrivacySettings />} />
+            <Route path="notifications" element={<NotificationSettings />} />
+            <Route path="accessibility" element={<AccessibilitySettings />} />
+            <Route path="monetization" element={<MonetizationSettings />} />
+            <Route path="creator" element={<CreatorSettings />} />
+          </Route>
         </Route>
       </Route>
 

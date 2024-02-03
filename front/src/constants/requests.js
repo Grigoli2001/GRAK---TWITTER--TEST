@@ -3,4 +3,5 @@ export const requests = {
   signup: "/auth/signup",
   check: "/auth/check",
   logout: "/auth/logout",
+  sendOTP: "/auth/sendOTP",
 };
