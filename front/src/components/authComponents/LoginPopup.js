@@ -9,7 +9,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { requests } from "../../constants/requests";
 import instance from "../../constants/axios";
 import useAppStateContext from "../../hooks/useAppStateContext";
-
+import { useNavigate } from "react-router-dom";
 const LoginPopup = ({ onClose }) => {
   const [user, setuser] = useState({
     email: "",
@@ -22,6 +22,8 @@ const LoginPopup = ({ onClose }) => {
   const [togglePassword, setTogglePassword] = useState(false);
 
   const { dispatch } = useAppStateContext();
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     setTimeout(() => {
@@ -57,6 +59,8 @@ const LoginPopup = ({ onClose }) => {
       .then((response) => {
         if (response.data.token) {
           dispatch({ type: "Login", payload: response.data });
+          setLoading(false);
+          navigate("/home");
         }
       })
       .catch((error) => {

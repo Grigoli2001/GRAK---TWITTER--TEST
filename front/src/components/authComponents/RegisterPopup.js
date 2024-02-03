@@ -8,6 +8,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { requests } from "../../constants/requests";
 import instance from "../../constants/axios";
 import useAppStateContext from "../../hooks/useAppStateContext";
+import { useNavigate } from "react-router-dom";
 
 const RegisterPopup = ({ onClose }) => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -27,6 +28,7 @@ const RegisterPopup = ({ onClose }) => {
   const [emailAlreadyExists, setEmailAlreadyExists] = useState(false);
 
   const { dispatch } = useAppStateContext();
+  const navigate = useNavigate();
 
   const nameInputRef = useRef(null);
   const emailInputRef = useRef(null);
@@ -196,6 +198,7 @@ const RegisterPopup = ({ onClose }) => {
             username: user.username,
           },
         });
+        navigate("/home");
       })
       .catch((error) => {
         console.log(error);
