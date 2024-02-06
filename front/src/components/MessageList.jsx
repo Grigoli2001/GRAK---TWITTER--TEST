@@ -34,7 +34,7 @@ const MessageList = () => {
         autoComplete="off"
         name="search"
         placeholder="Search Direct Messages"
-        className="focus-within:border-slate-500 w-full flex items-center justify-start rounded-full border border-gray bg-transparent w-full py-2 px-8 placeholder:text-gray-500 bg-slate-100 text-[15px]"
+        className="focus-within:border-slate-500  flex items-center justify-start rounded-full border border-gray bg-transparent w-full py-2 px-8 placeholder:text-gray-500 bg-slate-100 text-[15px]"
         />
 
         </div>

@@ -33,7 +33,7 @@ const MessageWindow = () => {
 
 
     return (
-        <div className='h-screen sticky top-0 border-r border-r-gray-200 border-l border-r-gray-200  flex flex-col w-[250px] flex-[2]'>
+        <div className='h-screen sticky top-0 border-r border-l border-r-gray-200  flex flex-col w-[250px] flex-[2]'>
 
 {!id ? (
             <div className='flex flex-col items-center justify-center h-full'>
@@ -56,7 +56,7 @@ const MessageWindow = () => {
                     </div>
                 </div>
 
-                <div className='message-history flex flex-col h-full overflow-y-scroll overflow-x-hidden px-4 gap-3'>
+                <div className='message-history flex flex-col h-full overflow-y-auto overflow-x-hidden px-4 gap-3'>
                     <SendMessage  message={'heyy'}/>
                     <ReceiveMessage  message={'heyy'}/>
                     <SendMessage  message={'heyy'}/>
@@ -91,37 +91,36 @@ const MessageWindow = () => {
                 </div>
                 <div className='flex flex-col sticky bottom-0 bg-white h-fit px-4 py-1'>
                         <div className='bg-gray-100 rounded-[16px] w-full  outline-none px-4'>
-                        <div className='flex flex-row justify-between items-center'>
-                            <div className=''>
-                            <Button variant="icon" size="icon-sm" className="pointer-events-auto">
-                                <label htmlFor="msg_media">
-                                    <GrImage title="Media" />
-                                    <input id="msg_media" name="msg_media" className="hidden" type="file" accept="image/*, video/*" />
-                                </label>
-                            </Button>
+                            <div className='flex flex-row justify-between items-center flex-nowrap'>
+
+                                <Button variant="icon" size="icon-sm" className="pointer-events-auto">
+                                    <label htmlFor="msg_media">
+                                        <GrImage title="Media" />
+                                        <input id="msg_media" name="msg_media" className="hidden" type="file" accept="image/*, video/*" />
+                                    </label>
+                                </Button>
 
 
-                            <Button variant="icon" size="icon-sm">
-                                <label htmlFor="msg_gif">
-                                    <MdOutlineGifBox title="GIF" />
-                                </label>
-                                <input id="msg_gif" name="msg_gif" className="hidden" type="file" accept="image/gif" />
-                            </Button>
+                                <Button variant="icon" size="icon-sm">
+                                    <label htmlFor="msg_gif">
+                                        <MdOutlineGifBox title="GIF" />
+                                    </label>
+                                    <input id="msg_gif" name="msg_gif" className="hidden" type="file" accept="image/gif" />
+                                </Button>
 
-                            <Button variant="icon" size="icon-sm">
-                                <label htmlFor="msg_emoji">
-                                    <BsEmojiSmile title="Emoji" />
-                                </label>
-                                <input id="msg_emoji" name="msg_emoji" className="hidden" type="file" accept="image/gif" />
-                            </Button>
+                                <Button variant="icon" size="icon-sm">
+                                    <label htmlFor="msg_emoji">
+                                        <BsEmojiSmile title="Emoji" />
+                                    </label>
+                                    <input id="msg_emoji" name="msg_emoji" className="hidden" type="file" accept="image/gif" />
+                                </Button>
 
+                                <textarea  placeholder='Start a new message' id="textbox" onInput={autoResize} value={message} className='flex-3 bg-gray-100  no-scrollbar px-4 py-2 outline-none w-[370px] resize-none h-[40px]' rows={1} onChange={(e) => setMessage(e.target.value)}/>
+
+                                <Button variant="icon" size="icon-sm" disabled={ message ? false : true}>
+                                    <AiOutlineSend />
+                                </Button>
                             </div>
-                            <textarea  placeholder='Start a new message' id="textbox" onInput={autoResize} value={message} className='flex-3 bg-gray-100 rounded-full px-4 py-2 outline-none w-[370px] resize-none h-[40px]' rows={1} onChange={(e) => setMessage(e.target.value)}/>
-
-                            <Button variant="icon" size="icon-sm" disabled={ message ? false : true}>
-                                <AiOutlineSend />
-                            </Button>
-                        </div>
                         </div>
                 </div>
                 </div>}

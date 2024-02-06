@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import { Button } from './Button'
+import { cn } from '../utils/style'
 
 /**
  * Follow button component which takes followed prop
  * Special Case of Button Component with its own internal state
  * TODO: handle follow/unfollow logic
  */
-export const FollowButton = ({followed}) => {
+export const FollowButton = ({followed, ...props}) => {
 
     const [isFollowed, setIsFollowed] = useState(followed)
     const [isHovered, setIsHovered] = useState(false)
@@ -14,26 +15,37 @@ export const FollowButton = ({followed}) => {
     const handleFollow = (evt) => {
         evt.stopPropagation()
         evt.preventDefault()
-        setIsFollowed(!isFollowed)
+        setIsFollowed(true)
+        
+    }
+
+    const handleUnFollow = (evt) => {
+        // opens modal
+        evt.stopPropagation()
+        evt.preventDefault()
+        setIsFollowed(false)
     }
 
     return (
          
             !isFollowed ? 
 
-            <Button onClick={handleFollow} size='sm' variant='dark'>
+            <Button onClick={handleFollow} variant='dark' {...props}>
                 Follow
             </Button>
             
             :
 
             <Button 
-            onClick={handleFollow} 
+            onClick={handleUnFollow} 
             onMouseOver={() => setIsHovered(true)} 
             onMouseOut={()=>setIsHovered(false)} 
             variant='outlined' 
-            size='sm' ripple={true} 
-            className={!isHovered ? 'bg-white text-black' : 'hover:bg-red-200 text-red-500 border-red-400'}>
+            {...props}
+            className={cn(props.className, {
+                'bg-white text-black': !isHovered,
+                'hover:bg-red-200 text-red-500 border-red-400': isHovered
+            })}>
                 {isHovered ? 'Unfollow' : 'Following'}
             </Button>
 

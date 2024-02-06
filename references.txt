@@ -1,0 +1,5 @@
+# Navigatable Modals
+https://medium.com/@stephen.ligtenberg/programmatically-controlled-modal-with-react-router-v6-2853a3d9a976
+
+#sync tabs with current path
+https://github.com/mui/material-ui/issues/18811
