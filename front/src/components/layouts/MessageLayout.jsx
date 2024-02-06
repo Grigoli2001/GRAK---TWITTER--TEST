@@ -10,9 +10,9 @@ const MessageLayout = (props) => {
     <UserProvider>
       <div className="flex h-full w-full max-w-[1300px] mx-auto">
           <SideNav />
-          <main className='min-w-fit flex-[1]'>
+          <div className='min-w-fit flex-1'>
               <MessageList />
-          </main>
+          </div>
           <Outlet/>
       </div>
     </UserProvider>

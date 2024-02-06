@@ -6,7 +6,7 @@ import React from 'react'
  */
 const TextCounter = ({className, textCount, maxLength, ...props}) => {
   return (
-    <span {...props} className={`text-xs text-slate-400 ${className}`}>{textCount}/{maxLength}</span>
+    <span {...props} className={`text-xs text-slate-400 ${className ?? ''}`}>{textCount ?? '0'}/{maxLength}</span>
   )
 }
 

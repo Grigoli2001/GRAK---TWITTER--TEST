@@ -7,12 +7,19 @@ import { Outlet } from "react-router-dom";
 const TestLayout = (props) => {
   return (
     <UserProvider>
-      <div className="flex h-full w-full max-w-[1300px] mx-auto">
+      <div className="main-container flex h-full w-full max-w-[1300px] mx-auto">
+
         <SideNav />
-        <main className="min-w-fit flex-[2]">
+
+        <main className={!props.excludeRightNav ? 'max-w-[650px]' : 'w-full'}>
           <Outlet />
         </main>
-        <RightNav {...props} />
+
+        {
+          !props.excludeRightNav && 
+            <RightNav {...props} />
+
+        }
       </div>
     </UserProvider>
   );

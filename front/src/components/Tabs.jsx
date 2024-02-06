@@ -1,39 +1,39 @@
 import { forwardRef } from 'react'
-import { Tab as BaseTab, tabClasses } from "@mui/base/Tab";
+import { Tab as BaseTab } from "@mui/base/Tab";
+import { cn } from '../utils/style'
 
 /**
- * Twitter Component Tab Navigator
  * Used only with Tabs component by mui/base --see Feed.jsx
  * Uses text prop to display text as child and for width of feed indicator
  * Extends material-ui Tab component
- * TODO: conditional classes with cslx
  */
-export const Tab = forwardRef((props, ref) => {
 
-    // add as style to after pseudo element
+export const Tab = forwardRef(({children,...props}, ref) => {
+
+    // switch to using span as indicator after inline style/stylesheet error which styled all after elmts instead of the selected one
     const calcWidth = (text) => {
         let width = text?.length * 0.5
         return width 
     }
 
-    const activeClasses = `text-black font-bold after:left-1/2 after:-translate-x-1/2 after:absolute after:bottom-0 after:h-1 after:bg-twitter-blue after:rounded-full`
     const slotProps = {
-        root: (ownerState) => ({ 
-            className: `py-3 hover:bg-gray-400/30  flex-1 relative ${
-              ownerState.selected ? activeClasses : 'text-slate-500 font-semibold'
-            }`, 
-          }),
+        root: (ownerState) => { 
+        // console.log(typeof ownerState.slots.root.render, 'ownerState.isActive')
+          return({ 
+            className: cn(
+              'group py-3 hover:bg-gray-400/30  flex-1 relative text-center text-slate-500 font-semibold', 
+              {
+                "text-black font-bold`": ownerState.selected,
+              })
+            })
+          }
     }
+    // console.log(slotProps, 'slotProps')
   return  (
   <BaseTab {...props} slotProps={slotProps} ref={ref}>
-    <style type="text/css">
-      {
-        `::after {
-          width: ${calcWidth(props.text)}rem;`
-      }
-    </style>
-    {/* prioritise text over children */}
-    { props.text ?? props.children }
+    <span className='absolute bottom-0 h-1 left-1/2 -translate-x-1/2 rounded-full bg-twitter-blue transition-all duration-200 ease-in-out hidden group-[.base--selected]:block' 
+    style={{ width: `${calcWidth(props.text)}rem` }}></span>
+    {  children ?? props.text }
   </BaseTab>
   )
 })

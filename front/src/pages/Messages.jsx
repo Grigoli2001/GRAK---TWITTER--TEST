@@ -4,7 +4,7 @@ import MessageWindow from '../components/MessageWindow'
 
 const Messages = () => {
   return (
-    <div className='flex flex-'>
+    <div className='flex'>
       <MessageList />
       <MessageWindow />
     </div>

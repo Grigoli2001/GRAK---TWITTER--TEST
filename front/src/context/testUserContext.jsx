@@ -2,7 +2,7 @@ import { createContext } from "react";
 import { users } from "../constants/feedTest";
 
 export const UserContext = createContext(null);
-const user = users[0];
+const user = users[6];
 
 export const UserProvider = ({ children }) => {
   return (

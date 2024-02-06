@@ -1,22 +1,25 @@
-import { useState } from 'react'
-import { NavLink } from 'react-router-dom';
-
-import TweetMedia from './TweetMedia'
-import { ExtAvatar }  from '../User';
-import MiniDialog from '../MiniDialog';
+import { useState, useContext } from 'react'
+import { NavLink, useNavigate } from 'react-router-dom';
+import { UserContext } from '../../context/testUserContext';
+import TweetMedia, { TweetMiniMedia } from './TweetMedia'
+import { ExtAvatar, UserCard  }  from '../User';
 import {Button} from '../Button';
+import { Popover, PopoverContent, PopoverHandler } from '@material-tailwind/react';
+
 
 // icons
 import { GoHeart, GoHeartFill, GoUpload } from "react-icons/go";
-import { FaRegComment, FaRetweet, FaRegBookmark, FaBookmark } from "react-icons/fa6";
+import { FaRegComment, FaRetweet, FaRegBookmark, FaBookmark, FaEllipsis } from "react-icons/fa6";
 import { MdVerified } from "react-icons/md";
 import { CIQuote } from '../customIcons';
+import { RiDeleteBinLine } from "react-icons/ri";
 
 // utils
-import { showUsername, showName, timeAgo, quantiyFormat } from '../../utils/utils';
+import { showUsername, timeAgo, quantiyFormat } from '../../utils/utils';
+import { cn } from '../../utils/style';
 
 
-const TweetAction = ({Icon, ActiveIcon, actionCount, title, color, onClick, isActive, }) => {
+const TweetAction = ({Icon, ActiveIcon, actionCount, title, color, onClick, isActive,tooltip }) => {
 
     if (!ActiveIcon) ActiveIcon = Icon
     // avoid tailwind purging
@@ -42,7 +45,8 @@ const TweetAction = ({Icon, ActiveIcon, actionCount, title, color, onClick, isAc
         <div onClick={onClick} className={`group flex items-center justify-center cursor-pointer`}>
 
           {/* For some reason Icon padding is removing icon */}
-          <Button variant="icon" size="icon-sm"  className={`text-black ${style.bg} ${style.text} transition-colors duration-100`}> 
+          <Button variant="icon" size="icon-sm" tooltip={tooltip}  className={`text-black ${style.bg} ${style.text} transition-colors duration-100`}> 
+          {/* style has to applied directly on the button to ovverrife variant defaults */}
             {isActive ? <ActiveIcon/> : <Icon/> } 
           </Button>
 
@@ -58,11 +62,14 @@ const TweetAction = ({Icon, ActiveIcon, actionCount, title, color, onClick, isAc
     )
 }
 
-const Tweet = ({user, post}) => {
+const BaseTweet = ({tweetUser, post, isLast}) => {
 
   const [postState, setPostState] = useState(post)
+  const { user } = useContext(UserContext)
+ 
 
-  const handleLike = () => {
+  const handleLike = (e) => {
+    e.stopPropagation()
     console.log('liked')
     setPostState(prev => ({
       ...postState, 
@@ -71,11 +78,11 @@ const Tweet = ({user, post}) => {
     }))
 
     console.log(postState)
-
-
   }
 
-  const handleRetweet = () => {
+  const handleRetweet = (e) => {
+    // e.stopPropagation() do not stop propagation let it go to parent div for dialog who will then handle the stop propagation to the tweet
+
     console.log('retweeted')
     setPostState({
       ...postState,
@@ -84,46 +91,83 @@ const Tweet = ({user, post}) => {
     })
   }
 
-  const handleReply = () => {
+  const handleReply = (e) => {
+    e.stopPropagation()
     console.log('replied')
   }
 
-  const handleBookmark = () => {
+  const handleBookmark = (e) => {
     console.log('bookmarked')
+    e.stopPropagation()
     setPostState({
       ...postState,
       bookmarked: !postState.bookmarked
     })
-
   }
 
-  const handleShare = () => {
+  const handleShare = (e) => {
+    e.stopPropagation()
     console.log('shared')
   }
 
+  const navigate = useNavigate()
+  
   return (
 
-    <div className="tweet w-full h-fit p-4 pb-0 grid grid-cols-[70px_auto] border-b border-b-solid border-gray-200">
+    // tweets for feed page, post is diff for single post view
+    <div onClick={() => navigate(`/${tweetUser.username}/status/${post.id}`)} 
+      className={cn('tweet w-full h-fit p-4 pb-0 grid grid-cols-[auto_1fr] hover:bg-gray-100 cursor-pointer', {
+      'border-b border-b-solid border-gray-200': !isLast})}>
 
-          <NavLink to={`/${user.username}`} className="mr-4 mt-3 self-start">
+          <NavLink onClick={(e) => e.stopPropagation()} to={`/${tweetUser.username}`} className="mr-4 mt-3 self-start">
             <ExtAvatar src = {user?.avatar} size="sm" />
           </NavLink>
 
         <div className="grid gap-y-2">
+          <div 
+          onClick={(e) => {e.stopPropagation()}} 
+          className="flex items-center gap-x-2 text-slate-400 relative"
+          >
+              <UserCard user={user} >
+                  <NavLink 
+                  to={`/${tweetUser.username}`} 
+                  className="flex items-center w-fit gap-x-1 text-black !outline-none" href="/">
+                    <span className={cn("font-bold hover:underline text-ellipsis text-nowrap max-w-[300px] overflow-hidden", {
+                      // "underline": showUserCard
+                    })}>
+                      {tweetUser.name}
+                    </span> 
+                    { tweetUser.verified && <MdVerified className='text-twitter-blue'/>  }
+                    { showUsername(tweetUser)} 
+                  </NavLink>
+              </UserCard>
+               
+                <span className='text-nowrap'>· { timeAgo(postState?.createdAt)} </span>
+                {
+                postState?.updatedAt &&
+                <span className="text-sm font-medium italic">edited</span>
+                }
 
-          <div className="flex items-center gap-x-2 text-slate-400">
-              
-              <a className="flex items-center gap-x-1 text-black hover:underline" href="/">
-                <span className="font-bold  ">{showName(user)}</span> { user.verified && <MdVerified className='text-twitter-blue'/>  }
-              </a>
+                {
+                  user.id === tweetUser.id && 
+                  <Popover placement='top-end' offset={{ mainAxis: -20}}>
+                    <PopoverHandler>
+                      <Button variant='icon' size='icon-sm' className='text-slate-400 text-xs ml-auto'>
+                        <FaEllipsis/>
+                      </Button>
+                    </PopoverHandler>
+                    <PopoverContent className='!p-0 !shadow-all-round text-black w-fit bg-white rounded-xl font-bold !outline-none z-10 overflow-hidden'>
+                        <ul className='list-none text-sm'>
+                          <span className='text-red-500 flex items-center gap-x-2 p-2 hover:bg-gray-100 cursor-pointer'><RiDeleteBinLine/> Delete </span>
+                        </ul>
+                    </PopoverContent>
+                  </Popover>
+                }
 
-              { showUsername(user)} · { timeAgo(postState?.createdAt)} 
-              {
-              postState?.updatedAt &&
-              <span className="text-slate-400 text-sm font-medium italic">edited</span>
-              }
+                
           </div>
 
+        
           <div className="text-justify break-words">
               { postState?.caption }
           </div>
@@ -133,20 +177,24 @@ const Tweet = ({user, post}) => {
             <TweetMedia mediaType={postState?.media?.mediaType ?? 'image'} src={postState?.media?.src} alt="" />
           }
 
-          <div className="flex items-center justify-between p-4">
+          <div className="flex items-center justify-between px-4 py-2">
             <TweetAction Icon={FaRegComment} actionCount={postState.replies} title="Reply" color="blue" onClick={handleReply}/>
             
-            <MiniDialog>
-              <MiniDialog.Wrapper>
-                <MiniDialog.Dialog className='absolute -left-2 right-0 w-fit bg-white rounded-xl shadow-all-round font-bold !outline-none z-10'>
-                    <ul className='list-none text-sm'>
-                        <li className='hover:bg-slate-200/50 p-3 cursor-pointer flex items-center gap-2 whitespace-nowrap' onClick={handleRetweet}><FaRetweet/> { postState.retweeted ? 'Undo Repost':'Repost' } </li>
-                        <li className='hover:bg-slate-200/50 p-3 cursor-pointer flex items-center gap-2 whitespace-nowrap'><CIQuote/> Quote</li>
-                    </ul>
-                </MiniDialog.Dialog>
-                <TweetAction Icon={FaRetweet} actionCount={postState.retweets} title="Retweet" color="green" isActive={postState.retweeted}/>
-              </MiniDialog.Wrapper>
-            </MiniDialog>
+            <div onClick={e => e.stopPropagation()}>
+              <Popover placement='bottom-start' offset={{ mainAxis: -50}}>
+                <PopoverHandler >
+                  <div >
+                    <PopoverContent  className='!p-0 !shadow-all-round text-black w-fit bg-white rounded-xl font-bold !outline-none z-10 overflow-hidden'>
+                        <ul className='list-none text-sm'>
+                            <li className='hover:bg-slate-200/50 p-3 cursor-pointer flex items-center gap-2 whitespace-nowrap' onClick={handleRetweet}><FaRetweet/> { postState.retweeted ? 'Undo Repost':'Repost' } </li>
+                            <li className='hover:bg-slate-200/50 p-3 cursor-pointer flex items-center gap-2 whitespace-nowrap'><CIQuote/> Quote</li>
+                        </ul>
+                    </PopoverContent>
+                    <TweetAction Icon={FaRetweet} actionCount={postState.retweets} title="Retweet" color="green" isActive={postState.retweeted}/>
+                  </div>
+                </PopoverHandler>
+              </Popover>
+            </div>
             
             <TweetAction Icon={GoHeart} ActiveIcon={GoHeartFill} actionCount={postState.likes} title="Like" color="red" onClick={handleLike} isActive={postState.liked}/>
 
@@ -161,17 +209,13 @@ const Tweet = ({user, post}) => {
 
 )}
 
+// todo change naming to currentUser to avoid confusion
+const Tweet = ({user, post, isLast, asMedia}) => {
+  return (
+    asMedia ? <TweetMiniMedia  user={user} post={post}/>
+    : <BaseTweet tweetUser={user} post={post} isLast={isLast}/>
+
+  )
+}
+
 export default Tweet
-
-
-            
-    //  if post is uses post allow edit
-    //    <div onclick="dth('div')" className="relative ml-auto mr-4 w-10 h-10 flex items-center justify-center rounded-[100%] hover:bg-slate-200 text-lg cursor-pointer">
-    //      <div className="absolute bottom-[50%] right-[50%] invisible bg-white flex flex-col w-[100px]">
-    //        <span
-    //        className="text-sm hover:bg-slate-200 p-2">Edit Post</span>
-    //        <span " className="text-sm hover:bg-slate-200 p-2">Delete Post</span>
-    //      </div>
-    //      <i className="fa-solid fa-ellipsis pointer-events-none"></i>
-    //    </div>
-    //  {% endif %}

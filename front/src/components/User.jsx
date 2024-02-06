@@ -1,9 +1,15 @@
-import React, { createElement } from 'react'
+import { useState, useEffect, useContext, useLayoutEffect, useRef, Fragment } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Avatar } from '@material-tailwind/react'
 import { defaultAvatar } from '../utils/utils'
 import { MdVerified } from 'react-icons/md'
-import { showName, showUsername } from '../utils/utils'
+import { showUsername } from '../utils/utils'
 import { NavLink } from 'react-router-dom'
+import { FollowButton } from './FollowButton'
+import { UserContext } from '../context/testUserContext'
+import { Popover, PopoverContent, PopoverHandler } from '@material-tailwind/react'
+import { users } from '../constants/feedTest'
+import { cn } from '../utils/style'
 
 /**
  * Custom Avatar component which takes variant and size props
@@ -11,40 +17,137 @@ import { NavLink } from 'react-router-dom'
  */
 export const ExtAvatar = ({src, ...props}) => {
   return (
-    <Avatar src={src ?? defaultAvatar} {...props} />
+    <Avatar src={src ?? defaultAvatar} {...props} className={`hover:brightness-90 transition-opacity ${props.className ?? ''}`} />
   )
 }
 
-export const UserBlock = ({user, children, withNav, avatarSize="md", textSize="md"}) => {
-
-  // TODO: add as variant ?
-  const textSizes = {
+const textSizes = {
       xs: 'text-xs',
       sm: 'text-sm',
       md: 'text-base',
       lg: 'text-lg',
   }
-  let keys = Object.keys(textSizes)
-  const index = keys.findIndex(size => size == textSize)
-  const finalTextSize = textSizes[textSize] ?? textSizes.md
-  const prevSize =textSizes[keys[index - 1]] ?? 'text-xs'
 
-  const ParentComponent = withNav ? NavLink : 'div'
+export const UserBlock = ({user, children, withNav, avatarSize="md", textSize="sm", withCard}) => {
 
-  // TODO add hover card
+  // TODO: add as variant ?
+  const [test, setTest] = useState(textSizes[textSize] ?? textSizes.md)
+  const [ prevTest, setPrevTest] = useState('text-xs')
+  // const finalTextSize = textSizes[textSize] ?? textSizes.md
+
+  useLayoutEffect(() => {
+    let keys = Object.keys(textSizes)
+    const index = keys.findIndex(size => size === textSize)
+    setPrevTest(textSizes[keys[index - 1]] ?? 'text-xs')
+  }, [textSize])
+
+  const BaseBlock = withNav ? NavLink : 'div'
   const navProps = withNav ? { to: `/${user.username}` } : {}
 
+  const CardBlock = withCard ? UserCard : Fragment
+
+
   return (
-      <ParentComponent  {...navProps} className='flex items-center gap-x-2 p-2 hover:bg-slate-200/50 cursor-pointer transition-colors duration-200'>
-          <div className='flex-shrink-0'>
-              <ExtAvatar src={user.avatar} size={avatarSize} />
-          </div>
-          <div className={`flex flex-col items-start pointer-events-none mr-auto ${finalTextSize}`}>
-              <p className='font-bold inline-flex items-center gap-1'>{showName(user)} {user.verified && <MdVerified className='text-twitter-blue' /> }</p>
-              <p className={`text-slate-400 ${prevSize}`}>{showUsername(user)}</p>
-          </div>
+    // sol'n for now to allow long names with overflow as ellipsis
+    <CardBlock {...(withCard && {user:user})} >
+      <BaseBlock  {...navProps} 
+        className={ cn('flex items-center gap-x-2 hover:bg-slate-200/50 cursor-pointer transition-colors duration-200 line-clamp-1 p-2', {
+          'p-1': test === 'xs' || test === 'sm',
+        })}>
+          
+          <ExtAvatar src={user.avatar} size={avatarSize} />
+
+            <div className='min-w-0 max-w-full'>
+              <span className='flex items-center'><p className={`font-bold flex-shrink-1 truncate ${test}`}>{user.name}</p>{user.verified && <MdVerified className='min-w-4 text-twitter-blue' />}</span>
+              <p className={`text-slate-400 ${prevTest}`}>{showUsername(user)}</p>
+            </div>
+
           {children}
-      </ParentComponent>
+
+      </BaseBlock>
+    </CardBlock>
   )
 }
+
+export const UserCard = ({user, children}) => {
+  const navigate = useNavigate()
+  const [showUserCard, setShowUserCard] = useState(false)
+
+  // user card handlers
+  const ucTimeout = useRef(null);
+  const handleShowUserCard = () => {
+    clearTimeout(ucTimeout.current);
+    ucTimeout.current = setTimeout(() => {
+      setShowUserCard(true);
+    }, 700);
+  };
+
+  const handleHideUserCard = () => {
+    clearTimeout(ucTimeout.current);
+    ucTimeout.current = setTimeout(() => {
+    setShowUserCard(false);
+    }, 300);
+  };
+  const userCardTriggers = {
+    onMouseEnter: handleShowUserCard,
+    onMouseLeave:handleHideUserCard
+  }
+  return (
+    
+      <Popover open={showUserCard}  placement='bottom-start' handler={setShowUserCard}>
+        <PopoverHandler {...userCardTriggers}>
+          { children }
+        </PopoverHandler>
+        <PopoverContent {...userCardTriggers} className='!p-0 !shadow-all-round text-black w-fit bg-white rounded-xl font-bold !outline-none z-10 overflow-hidden'>
+        <div onClick={() => navigate(`/${user.username}`) }className=" font-normal text-black bg-white shadow-all-round p-3 rounded-lg z-10 cursor-pointer">
+              <div className="flex flex-col items-start">
+                <ExtAvatar src={user.avatar} size="md" />
+                <h2 className="font-bold">{user.name}</h2>
+                <p className="text-xs text-slate-400">{showUsername(user)}</p>
+                <p className="">{user.bio}</p>
+                <div className="flex items-center gap-2">
+                  <p className=""><b>10</b> Followers</p>
+                  <p className=""><b>10</b> Following</p>
+                </div>
+            </div>
+          </div>
+        </PopoverContent>
+      </Popover>
+  )
+}
+
+export const UserDisplayer = ({api, limit,withCard, FallbackComponent}) => {
+
+  const { user } = useContext(UserContext)
+  const [userBlocks, setUserBlocks] = useState([])
+
+  useEffect(() => {
+      // use api to fetch certain users
+      let w = users.filter((otherUser) => otherUser.id !== user.id)
+      if (limit) {
+          w = w.slice(0, limit)
+      }
+      setUserBlocks(w)
+  }, [])
+
+  return (
+
+      <div className='flex flex-col gap-y-4 pb-4'>
+          {
+             userBlocks.length ? 
+                userBlocks.map((user) => {
+                    return (
+                          <UserBlock key={user.id} user={user} avatarSize='sm' textSize='lg' withNav={true} withCard={withCard}>
+                              <div className='ml-auto'>
+                                    <FollowButton followed={false} size='sm' />
+                              </div>
+                          </UserBlock>)
+               })  
+             : 
+                FallbackComponent ??  <div>Nothing to show here</div>
+          }
+      </div>
+  )
+}
+
 

@@ -78,7 +78,7 @@ function Settings() {
         autoComplete="off"
         name="search"
         placeholder="Search Settings"
-        className="focus-within:border-slate-500 w-full flex items-center justify-start rounded-full border border-black bg-transparent w-full py-2 px-8 placeholder:text-gray-500 bg-slate-100"
+        className="focus-within:border-slate-500 w-full flex items-center justify-start rounded-full border border-black bg-transparent py-2 px-8 placeholder:text-gray-500 bg-slate-100"
         />
 
         </div>
