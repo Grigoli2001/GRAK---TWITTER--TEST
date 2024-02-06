@@ -8,11 +8,8 @@ module.exports = withMT({
     "./node_modules/@material-tailwind/react/theme/components/**/*.{js,ts,jsx,tsx}",
     "./public/index.html",
   ],
+  darkMode: "media", // or 'media' or 'class'
   theme: {
-    dark: {
-      backgroundColor: "black",
-      textColor: "white",
-    },
     extend: {
       colors: {
         "twitter-blue": "rgb(29 155 240 / <alpha-value>)",

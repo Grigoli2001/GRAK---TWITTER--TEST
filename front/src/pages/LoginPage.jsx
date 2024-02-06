@@ -5,6 +5,7 @@ import { Button } from "@material-tailwind/react";
 import RegisterPopup from "../components/authComponents/RegisterPopup";
 import LoginPopup from "../components/authComponents/LoginPopup";
 import LoginFooter from "../components/authComponents/LoginFooter";
+import Google from "../components/authComponents/Google";
 const LoginPage = () => {
   const [isRegisterPopupOpen, setIsRegisterPopupOpen] = useState(false);
   const [isLoginPopupOpen, setIsLoginPopupOpen] = useState(false);
@@ -31,30 +32,15 @@ const LoginPage = () => {
   };
   const containerRef = useRef(null);
 
-  // useEffect(() => {
-  //   const handleClickOutside = (event) => {
-  //     if (
-  //       containerRef.current &&
-  //       !containerRef.current.contains(event.target)
-  //     ) {
-  //       // Clicked outside the container, close or do something
-  //       closeRegisterPopup();
-  //     }
-  //   };
-
-  //   // Add event listener when the component mounts
-  //   document.addEventListener("mousedown", handleClickOutside);
-
-  //   // Remove event listener when the component unmounts
-  //   return () => {
-  //     document.removeEventListener("mousedown", handleClickOutside);
-  //   };
-  // }, []);
+  const openSignUpFromLogin = () => {
+    setIsLoginPopupOpen(false);
+    setIsRegisterPopupOpen(true);
+  };
   return (
     <div className="relative">
       <div
         className={`login_page_container w-full min-h-screen ${
-          blur ? "bg-blue-gray-900" : "bg-black"
+          blur ? "bg-gray-300 dark:bg-blue-gray-900" : "bg-white dark:bg-black"
         } flex flex-col ${
           (isRegisterPopupOpen || isLoginPopupOpen) && "pointer-events-none"
         }`}
@@ -66,7 +52,7 @@ const LoginPage = () => {
             <svg
               viewBox="0 0 24 24"
               aria-hidden="true"
-              className="h-10 sm:h-14 r-4qtqp9 r-yyyyoo r-dnmrzs r-bnwqim r-1plcrui r-lrvibr r-1nao33i r-rxcuwo r-1777fci r-m327ed r-494qqr md:h-1/2 fill-current text-gray-50 max-h-80"
+              className="h-10 sm:h-14 r-4qtqp9 r-yyyyoo r-dnmrzs r-bnwqim r-1plcrui r-lrvibr r-1nao33i r-rxcuwo r-1777fci r-m327ed r-494qqr md:h-1/2 fill-current dark:text-gray-50 max-h-80"
             >
               <g>
                 <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path>
@@ -75,22 +61,26 @@ const LoginPage = () => {
           </div>
           <div className="flex mt-10 md:basis-7/12 md:min-h-full content-center sm:justify-center lg:justify-normal">
             <div className="flex flex-col justify-center">
-              <h1 className="text-gray-50 text-4xl sm:text-6xl font-bold pb-12 sm:self-center md:self-start">
+              <h1 className="text-black dark:text-gray-50 text-4xl sm:text-6xl font-bold pb-12 sm:self-center md:self-start">
                 Happening Now
               </h1>
-              <h2 className="text-gray-50 text-2xl sm:text-2xl font-bold mb-8 sm:self-center md:self-start">
+              <h2 className="text-black dark:text-gray-50 text-2xl sm:text-2xl font-bold mb-8 sm:self-center md:self-start">
                 Join today.
               </h2>
-              <Button
+              {/* <Button
                 color="white"
-                className="flex justify-center normal-case text-sm items-center gap-3 sm:h-[40px] sm:w-[300px] rounded-full mb-2 sm:self-center md:self-start"
+                className="flex justify-center normal-case text-sm items-center gap-3 sm:h-[40px] sm:w-[300px] rounded-full mb-2 sm:self-center md:self-start border-2 shadow-none border-gray-300"
               >
                 <FcGoogle className="text-2xl" />
                 <span>Sign Up with Google</span>
-              </Button>
+              </Button> */}
+              <div className="flex justify-center items-center sm:w-[300px] content-center sm:self-center md:self-start mb-4">
+                <Google />
+              </div>
+
               <Button
                 color="white"
-                className="flex justify-center normal-case text-sm items-center gap-3 sm:h-[40px] sm:w-[300px] rounded-full sm:self-center md:self-start"
+                className="flex justify-center normal-case text-sm items-center gap-3 sm:h-[40px] sm:w-[300px] rounded-full sm:self-center md:self-start shadow-none border-2 border-gray-300"
               >
                 <FaApple className="text-2xl" />
                 <span>Sign Up with Apple</span>
@@ -112,7 +102,7 @@ const LoginPage = () => {
                 Policy, including Cookie Use.
               </span>
 
-              <h3 className="text-white font-bold sm:self-center md:self-start">
+              <h3 className="text-black dark:text-white font-bold sm:self-center md:self-start">
                 Already have an account?
               </h3>
               <Button
@@ -130,7 +120,13 @@ const LoginPage = () => {
       </div>
       <div ref={containerRef}>
         {isRegisterPopupOpen && <RegisterPopup onClose={closeRegisterPopup} />}
-        {isLoginPopupOpen && <LoginPopup onClose={closeLoginPopup} />}
+        {isLoginPopupOpen && (
+          <LoginPopup
+            onClose={closeLoginPopup}
+            openSignUpFromLogin={openSignUpFromLogin}
+            Google={<Google />}
+          />
+        )}
       </div>
     </div>
   );
