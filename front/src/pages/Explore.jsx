@@ -23,7 +23,7 @@ const Explore = () => {
         <section>
             <div className='flex sticky items-center p-2 gap-4 top-0  bg-white/85 w-full z-[50] gap-y-2 border-b border-b-solid border-slate-200 backdrop-blur-md'>
                 <SearchBar fetchResults={'/api'} className={'!my-auto'}/>
-                <Button variant='icon' size='icon-sm' className="text-black hover:bg-gray-300/50">
+                <Button variant='icon' size='icon-sm' tooltip="Settings" className="text-black hover:bg-gray-300/50">
                     <FiSettings/>
                 </Button>
             </div>

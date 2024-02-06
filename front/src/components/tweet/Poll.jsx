@@ -4,7 +4,7 @@ import OptionSelector from '../OptionSelector';
 import { Button } from '../Button';
 import  TextCounter from './TextCounter';
 import { TweetContext } from './TweetCreate'
-
+import CustomInput from '../CustomInput';
 /**
  * Input For Poll 
  * TODO: clean this up
@@ -34,7 +34,9 @@ const Choice = forwardRef(({choice, choices,setChoices, handleAddChoice, handleR
   return (
 
     <>
-      <div className='focus-within:border-twitter-blue border border-slate-300 relative flex items-center gap-2 rounded-md'>
+
+    <CustomInput name={`choice-${choice.id}`} handleUpdate={handleChoiceText} maxLength={choiceMaxLength} value={choice.text} placeholder={placeholderText} withTextCount={true} asTextArea={false} />
+      {/* <div className='focus-within:border-twitter-blue border border-slate-300 relative flex items-center gap-2 rounded-md'>
         
         <input type='text' data-id={choice.id} onChange={handleChoiceText} maxLength={choiceMaxLength} required className="peer rounded-md outline-none border-none w-full h-full px-2 py-4 overflow-hidden"/>
         
@@ -47,11 +49,11 @@ const Choice = forwardRef(({choice, choices,setChoices, handleAddChoice, handleR
 
         <TextCounter textCount={choice.text.length} maxLength={choiceMaxLength} className={'absolute top-2 right-4'} />
         
-      </div>
+      </div> */}
 
       <div className='flex items-center justify-start gap-2 px-4'>
           { ( choice.id > 1) && 
-            <Button variant="icon" size="icon-sm" onClick={() => handleAddChoice()} disabled={choices.length >= 4}>
+            <Button variant="icon" size="icon-sm" tooltip="Add Choice" onClick={() => handleAddChoice()} disabled={choices.length >= 4}>
               <FaPlus className="text-twitter-blue"/> 
             </Button>
 
@@ -59,7 +61,7 @@ const Choice = forwardRef(({choice, choices,setChoices, handleAddChoice, handleR
           { 
           
           ( choice.id > 2) &&  
-          <Button variant="icon" size="icon-sm" className="text-red-500 hover:bg-red-200" onClick={() => handleRemoveChoice()}>
+          <Button variant="icon" size="icon-sm" tooltip="Remove Choice" className="text-red-500 hover:bg-red-200" onClick={() => handleRemoveChoice()}>
             <FaMinus/> 
           </Button>
 

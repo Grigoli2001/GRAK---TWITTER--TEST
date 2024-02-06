@@ -2,22 +2,28 @@
 export const users = [
     {
         "id": 1,
-        "username": "testuser",
+        "username": "testing15chars",
         "email": "test@test.com",
-        "fname": "Test",
-        "lname": "User",
-        "bio": "I'm a test user",
+        "name": "TestingThisLongNameOfExactlyFiftyCharacter Surname",
+        "bio": 'my new bio',
+        "dob": "2004-03-22T18:07:00.000Z",
+        "join_date": "2021-01-26T18:07:00.000Z",
+        location: "Testville, Testland",
+        verified: true,
+        cover:"https://plus.unsplash.com/premium_photo-1673306778968-5aab577a7365?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
     }, 
 
     {
         "id": 2,
         "username": "raunak_test",
         "email": "raunak@test.com",
-        "fname": "Raunak",
-        "lname": "Bhansali",
+        "name": "Raunak Bhansali",
         "bio": "I'm Raunak the developer",
         "avatar": "https://plus.unsplash.com/premium_photo-1687187499277-e1c59bd3032f?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
         verified: true,
+        join_date: "2021-01-26T18:07:00.000Z",
+        cover:"https://plus.unsplash.com/premium_photo-1676478746894-95d39780d573?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+        likesIsPublic: true,
     
     }, 
 
@@ -25,45 +31,44 @@ export const users = [
         "id": 3,
         "username": "amay_test",
         "email": "amay@test.com",
-        "fname": "Amay",
-        "lname": "Sunil Shenoy",
+        "name": "Amay Sunil Shenoy",
         "bio": "I'm Amay the developer",
         "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjB8fHVzZXJ8ZW58MHx8MHx8fDA%3D",
+        "join_date": "2021-01-26T18:07:00.000Z",
     }, 
     {
         "id": 4,
         "username": "grigoli_test",
         "email": "grigoli@test.com",
-        "fname": "Grigoli",
-        "lname": "Patsatsia",
+        "name": "Grigoli Patsatsia",
         "bio": "I'm Grigoli the developer",
         "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=1780&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+        join_date: "2021-01-26T18:07:00.000Z",
     }, 
     {
         "id": 5,
         "username": "matt_test",
         "email": "matt@test.com",
-        "fname": "Matt",
-        "lname": "Test",
+        "name": "Matt Test",
         "bio": "I'm Matt the developer",
+        join_date: "2021-01-26T18:07:00.000Z",
     },
 
     {
         "id": 6,
         "username": "sim1",
         "email": "matt@test.com",
-        "fname": "Matt",
-        "lname": "Test",
+        "name": "Matt Test",
         "bio": "I'm Matt the developer",
+        join_date: "2021-01-26T18:07:00.000Z",
     },
 
     {
         "id": 7,
         "username": "sim2",
         "email": "matt@test.com",
-        "fname": "Totally",
-        "lname": "Test",
-        "bio": "I'm Matt the developer",
+        "name": "Totally Test",
+        join_date: "2021-01-26T18:07:00.000Z",
     }
 ]
 
@@ -96,6 +101,45 @@ export const forYouTweets = [
         },
         liked: true
     }, 
+
+    {
+        id: 6,
+        caption: "Dance vibes! 💃",
+        userId: 3,
+        createdAt: "2024-02-01T14:30:00.000Z",
+        likes: 500,
+        retweets: 20,
+        replies: 10,
+        media: {
+            src:"https://www.youtube.com/shorts/YwkEHtQKvig?feature=share",
+            mediaType: "video"
+        },
+        liked: true
+    },
+    {
+        id: 7,
+        caption: "Beautiful sunset view",
+        userId: 1,
+        createdAt: "2024-02-02T10:45:00.000Z",
+        likes: 25,
+        retweets: 5,
+        replies: 2,
+        media: {
+            src:"https://images.unsplash.com/photo-1683009427598-9c21a169f98f?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+            mediaType: "image"
+        },
+        retweeted: true
+    },
+  
+    {
+        id: 8,
+        caption: "Chill vibes for the weekend!",
+        userId: 4,
+        createdAt: "2024-02-02T20:15:00.000Z",
+        likes: 15,
+        retweets: 2,
+        replies: 3
+    }
    
 ]
 
@@ -129,6 +173,67 @@ export const followedTweets = [
             mediaType: "image"
         }
         
+    }, {
+        id: 10,
+        caption: "Epic roller coaster ride! 🎢",
+        userId: 3,
+        createdAt: "2024-01-28T16:20:00.000Z",
+        likes: 40,
+        retweets: 8,
+        replies: 4,
+        media: {
+            src:"https://www.youtube.com/shorts/k-9obR_Y3oU?feature=share",
+            mediaType: "video"
+        },
+        bookmarked: true
+    },
+    {
+        id: 9,
+        caption: "Sunny day at the beach",
+        userId: 1,
+        createdAt: "2024-02-01T12:00:00.000Z",
+        likes: 5,
+        retweets: 3,
+        replies: 1,
+        media: {
+            src:"https://images.unsplash.com/photo-1684698937050-ae323feb1fb0?q=80&w=2075&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+            mediaType: "image"
+        },
+        liked: true
+    },
+    // ... (three more tweets with media)
+
+    {
+        id: 11,
+        caption: "Tech conference day!",
+        userId: 5,
+        createdAt: "2024-02-02T14:45:00.000Z",
+        likes: 8,
+        retweets: 1,
+        replies: 2
+        // (no media for this tweet)
+    },
+    {
+        id: 12,
+        caption: "New game release",
+        userId: 4,
+        createdAt: "2024-02-02T20:15:00.000Z",
+        likes: 15,
+        retweets: 2,
+        replies: 3
+    },
+    {
+        id: 1,
+        caption: "New game release 2",
+        userId: 4,
+        createdAt: "2024-02-02T20:15:00.000Z",
+        likes: 15,
+        retweets: 2,
+        replies: 3,
+        media: {
+            src:"http://distribution.bbb3d.renderfarming.net/video/mp4/bbb_sunflower_2160p_60fps_normal.mp4",
+            mediaType: "video"
+        },
     }
 
 ]

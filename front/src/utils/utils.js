@@ -3,11 +3,6 @@ export function showUsername(user) {
     return `@${user?.username}`;
 }
 
-export function showName(user) {
-    // returns the full name of a user
-    return `${user?.fname} ${user?.lname}`;
-}
-
 export const defaultAvatar = "https://pbs.twimg.com/profile_images/1707730440331673600/oZeLdbKN_bigger.png"
 
 export function timeAgo (date) {
@@ -48,9 +43,54 @@ export function quantiyFormat (number) {
 
 export function parseMedia(media){
     // returns if media is image or video
+    // TODO: read file headers to determine media type
     if (media.includes("mp4")) {
         return "video";
     }
     return "image";
 }
 
+export const months = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December'
+]
+
+export function getYears(minAge, maxAge) {
+    if (minAge > maxAge) {
+        throw new Error("minAge cannot be greater than maxAge")
+    }
+
+    const getCurrentYear = new Date().getFullYear();
+    const startYear = getCurrentYear - minAge;
+    const endYear = getCurrentYear - maxAge;
+
+    const yearsArray = [];
+
+    for (let year = startYear; year >= endYear; year--) {
+        yearsArray.push(year);
+    }
+    return yearsArray;
+} 
+export function getDaysInMonth(year, month) {
+    // Months are 0-indexed, so we subtract 1 from the provided month
+    const date = new Date(year, month);
+    const daysInMonth = [];
+  
+    // Iterate through each day of the month and push the day number
+    while (date.getMonth() === month) {
+      daysInMonth.push(date.getDate());
+      date.setDate(date.getDate() + 1);
+    }
+  
+    return daysInMonth;
+  }

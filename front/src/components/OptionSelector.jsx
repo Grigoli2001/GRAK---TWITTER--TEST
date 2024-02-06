@@ -12,17 +12,17 @@ import { PiCaretDown } from "react-icons/pi";
  * TODO: use array of objects for options with display and value keys
  * Extends material-ui Select and Option component
  */
-export default function OptionSelector({title, options}) {
+export default function OptionSelector({title, options, defaultValue,...props}) {
 
   const selectRef = useRef(null)
 
   return (
       
-      <Select title={title} defaultValue={1} className={'flex'} ref={selectRef}>
+      <Select {...props} title={title} defaultValue={defaultValue || (options?.length && options[0]) || 1} className={'flex'} ref={selectRef}>
         {
           options?.map((option, index) => {
             return (
-              <Option key={index} value={option}>{option}</Option>
+              <Option key={index} data-value={option} value={option}>{option}</Option>
             )
           })
         }
@@ -142,7 +142,7 @@ const Select = forwardRef((props, ref) => {
           return {
             ...resolvedSlotProps,
             className: clsx(
-              `text-sm font-sans relative p-1.5 my-3 w-full rounded-xl overflow-auto outline-0 bg-white dark:bg-slate-900 border border-solid border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-300 shadow shadow-slate-200 dark:shadow-slate-900 [.open_&]:opacity-100 [.open_&]:scale-100 transition-[opacity,transform] [.closed_&]:opacity-0 [.closed_&]:scale-90 [.placement-top_&]:origin-bottom [.placement-bottom_&]:origin-top`,
+              `text-sm z-[1000] font-sans relative p-1.5 my-3 w-full rounded-xl overflow-auto outline-0 bg-white dark:bg-slate-900 border border-solid border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-300 shadow shadow-slate-200 dark:shadow-slate-900 [.open_&]:opacity-100 [.open_&]:scale-100 transition-[opacity,transform] [.closed_&]:opacity-0 [.closed_&]:scale-90 [.placement-top_&]:origin-bottom [.placement-bottom_&]:origin-top`,
               resolvedSlotProps?.className,
             ),
           };
@@ -157,7 +157,7 @@ const Select = forwardRef((props, ref) => {
           return {
             ...resolvedSlotProps,
             className: clsx(
-              `z-10 max-h-[300px] min-w-20`,
+              `z-[1000] max-h-[300px] min-w-20`,
               resolvedSlotProps?.className,
             ),
             style: {

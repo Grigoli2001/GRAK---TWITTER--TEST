@@ -30,12 +30,12 @@ const MessageInfo = () => {
 
 
     return (
-        <div className='h-screen sticky top-0 border-r border-r-gray-200 border-l border-r-gray-200  flex flex-col w-[250px] flex-[2]'>
+        <div className='h-screen sticky top-0 border-r border-l border-r-gray-200  flex flex-col w-[250px] flex-[2]'>
 
             <div className='flex flex-col h-full relative'>
                 <div className='msgtaskbar flex flex-row items-center bg-white w-[100%] sticky px-4 py-2 shadow-sm gap-3'>
                     <NavLink to={`/messages/${params.id}`} className='flex flex-row items-center justify-center gap-2'>
-                    <Button variant='icon' size='icon-sm' className="text-black hover:bg-gray-300/50">
+                    <Button variant='icon' size='icon-sm' tooltip="Back" className="text-black hover:bg-gray-300/50">
                         <IoMdArrowBack />
                     </Button>
                     </NavLink>
