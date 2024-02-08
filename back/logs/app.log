@@ -1370,3 +1370,171 @@
 {"level":"info","message":"::1 - - [08/Feb/2024:01:22:24 +0000] \"OPTIONS /auth/signup HTTP/1.1\" 204 0 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T01:22:24.511Z"}
 {"level":"info","message":"USER ADDED","timestamp":"2024-02-08T01:22:24.556Z"}
 {"level":"info","message":"::1 - - [08/Feb/2024:01:22:24 +0000] \"POST /auth/signup HTTP/1.1\" 200 244 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T01:22:24.559Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:01:30:15 +0000] \"OPTIONS /auth/check HTTP/1.1\" 204 0 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T01:30:15.082Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:01:30:15 +0000] \"POST /auth/check HTTP/1.1\" 200 33 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T01:30:15.085Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:01:30:21 +0000] \"OPTIONS /auth/signup HTTP/1.1\" 204 0 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T01:30:21.943Z"}
+{"level":"info","message":"USER ADDED","timestamp":"2024-02-08T01:30:21.978Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:01:30:21 +0000] \"POST /auth/signup HTTP/1.1\" 200 246 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T01:30:21.981Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:01:32:05 +0000] \"OPTIONS /auth/check HTTP/1.1\" 204 0 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T01:32:05.182Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:01:32:05 +0000] \"POST /auth/check HTTP/1.1\" 200 25 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T01:32:05.184Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:01:32:05 +0000] \"OPTIONS /auth/login HTTP/1.1\" 204 0 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T01:32:05.190Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:01:32:05 +0000] \"POST /auth/login HTTP/1.1\" 200 219 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T01:32:05.194Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-08T15:35:34.937Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-08T15:35:34.940Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-08T15:35:34.963Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-08T15:35:34.998Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:15:35:43 +0000] \"OPTIONS /auth/check HTTP/1.1\" 204 0 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T15:35:43.267Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:15:35:43 +0000] \"POST /auth/check HTTP/1.1\" 200 25 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T15:35:43.324Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:15:35:43 +0000] \"OPTIONS /auth/login HTTP/1.1\" 204 0 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T15:35:43.335Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:15:35:43 +0000] \"POST /auth/login HTTP/1.1\" 200 221 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T15:35:43.350Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-08T15:38:13.926Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-08T15:38:13.929Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-08T15:38:13.960Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-08T15:38:13.997Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:15:38:43 +0000] \"OPTIONS /auth/check HTTP/1.1\" 204 0 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T15:38:43.236Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:15:38:43 +0000] \"POST /auth/check HTTP/1.1\" 200 25 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T15:38:43.293Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-08T15:40:28.465Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-08T15:40:28.470Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-08T15:40:28.489Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-08T15:40:28.556Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:15:41:08 +0000] \"OPTIONS /auth/check HTTP/1.1\" 204 0 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T15:41:08.918Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:15:41:08 +0000] \"POST /auth/check HTTP/1.1\" 200 25 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T15:41:08.945Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:15:41:08 +0000] \"OPTIONS /auth/login HTTP/1.1\" 204 0 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T15:41:08.961Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:15:41:08 +0000] \"POST /auth/login HTTP/1.1\" 200 228 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T15:41:08.971Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-08T15:44:42.651Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-08T15:44:42.655Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-08T15:44:42.683Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-08T15:44:42.716Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-08T15:45:54.105Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-08T15:45:54.109Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-08T15:45:54.145Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-08T15:45:54.179Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-08T15:46:47.005Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-08T15:46:47.009Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-08T15:46:47.043Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-08T15:46:47.074Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:15:47:05 +0000] \"OPTIONS /auth/check HTTP/1.1\" 204 0 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T15:47:05.458Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:15:47:05 +0000] \"POST /auth/check HTTP/1.1\" 200 25 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T15:47:05.486Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:15:47:09 +0000] \"OPTIONS /auth/login HTTP/1.1\" 204 0 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T15:47:09.023Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:15:47:09 +0000] \"POST /auth/login HTTP/1.1\" 404 35 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T15:47:09.058Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:15:47:11 +0000] \"POST /auth/login HTTP/1.1\" 404 35 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T15:47:11.939Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:15:47:24 +0000] \"OPTIONS /auth/check HTTP/1.1\" 204 0 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T15:47:24.610Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:15:47:24 +0000] \"POST /auth/check HTTP/1.1\" 200 25 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T15:47:24.617Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:15:47:28 +0000] \"OPTIONS /auth/login HTTP/1.1\" 204 0 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T15:47:28.077Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:15:47:28 +0000] \"POST /auth/login HTTP/1.1\" 404 35 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T15:47:28.088Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:15:47:30 +0000] \"POST /auth/login HTTP/1.1\" 200 467 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T15:47:30.948Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-08T15:47:51.247Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-08T15:47:51.251Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-08T15:47:51.287Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-08T15:47:51.321Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-08T15:49:11.781Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-08T15:49:11.784Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-08T15:49:11.816Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-08T15:49:11.866Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:15:49:33 +0000] \"OPTIONS /auth/check HTTP/1.1\" 204 0 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T15:49:33.352Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:15:49:33 +0000] \"POST /auth/check HTTP/1.1\" 200 33 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T15:49:33.397Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:15:49:36 +0000] \"POST /auth/check HTTP/1.1\" 200 33 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T15:49:36.061Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:15:49:42 +0000] \"OPTIONS /auth/sendOTP HTTP/1.1\" 204 0 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T15:49:42.726Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:15:49:43 +0000] \"POST /auth/sendOTP HTTP/1.1\" 200 37 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T15:49:43.074Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:15:49:58 +0000] \"OPTIONS /auth/signup HTTP/1.1\" 204 0 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T15:49:58.033Z"}
+{"level":"info","message":"USER ADDED","timestamp":"2024-02-08T15:49:58.070Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:15:49:58 +0000] \"POST /auth/signup HTTP/1.1\" 400 28 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T15:49:58.074Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-08T15:51:23.298Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-08T15:51:23.302Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-08T15:51:23.324Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-08T15:51:23.367Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-08T15:52:46.691Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-08T15:52:46.695Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-08T15:52:46.721Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-08T15:52:46.768Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:15:52:51 +0000] \"OPTIONS /auth/signup HTTP/1.1\" 204 0 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T15:52:51.485Z"}
+{"code":"23505","constraint":"users_email_key","detail":"Key (email)=(eleneami@gmail.com) already exists.","file":"nbtinsert.c","length":210,"level":"error","line":"673","message":"Adding user error: duplicate key value violates unique constraint \"users_email_key\"","name":"error","routine":"_bt_check_unique","schema":"public","severity":"ERROR","stack":"error: duplicate key value violates unique constraint \"users_email_key\"\n    at C:\\Users\\Gega\\Desktop\\GRAK-TWITTER-1\\back\\node_modules\\pg\\lib\\client.js:526:17\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async signup (C:\\Users\\Gega\\Desktop\\GRAK-TWITTER-1\\back\\services\\auth.service.js:58:23)","table":"users","timestamp":"2024-02-08T15:52:51.524Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:15:52:51 +0000] \"POST /auth/signup HTTP/1.1\" 500 50 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T15:52:51.530Z"}
+{"code":"23505","constraint":"users_email_key","detail":"Key (email)=(eleneami@gmail.com) already exists.","file":"nbtinsert.c","length":210,"level":"error","line":"673","message":"Adding user error: duplicate key value violates unique constraint \"users_email_key\"","name":"error","routine":"_bt_check_unique","schema":"public","severity":"ERROR","stack":"error: duplicate key value violates unique constraint \"users_email_key\"\n    at C:\\Users\\Gega\\Desktop\\GRAK-TWITTER-1\\back\\node_modules\\pg\\lib\\client.js:526:17\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async signup (C:\\Users\\Gega\\Desktop\\GRAK-TWITTER-1\\back\\services\\auth.service.js:58:23)","table":"users","timestamp":"2024-02-08T15:52:54.578Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:15:52:54 +0000] \"POST /auth/signup HTTP/1.1\" 500 50 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T15:52:54.581Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:15:53:36 +0000] \"OPTIONS /auth/check HTTP/1.1\" 204 0 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T15:53:36.049Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:15:53:36 +0000] \"POST /auth/check HTTP/1.1\" 200 33 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T15:53:36.056Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:15:53:46 +0000] \"OPTIONS /auth/sendOTP HTTP/1.1\" 204 0 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T15:53:46.409Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:15:53:46 +0000] \"POST /auth/sendOTP HTTP/1.1\" 200 37 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T15:53:46.827Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:15:53:56 +0000] \"OPTIONS /auth/signup HTTP/1.1\" 204 0 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T15:53:56.090Z"}
+{"level":"info","message":"USER ADDED","timestamp":"2024-02-08T15:53:56.127Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:15:53:56 +0000] \"POST /auth/signup HTTP/1.1\" 200 433 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T15:53:56.205Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-08T15:55:15.326Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-08T15:55:15.330Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-08T15:55:15.371Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-08T15:55:15.393Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-08T15:55:28.037Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-08T15:55:28.040Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-08T15:55:28.061Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-08T15:55:28.121Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-08T15:55:31.788Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-08T15:55:31.792Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-08T15:55:31.808Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-08T15:55:31.877Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-08T15:56:13.896Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-08T15:56:13.899Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-08T15:56:13.934Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-08T15:56:13.992Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:15:56:36 +0000] \"OPTIONS /auth/check HTTP/1.1\" 204 0 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T15:56:36.893Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:15:56:36 +0000] \"POST /auth/check HTTP/1.1\" 200 33 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T15:56:36.929Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:15:56:42 +0000] \"OPTIONS /auth/signup HTTP/1.1\" 204 0 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T15:56:42.194Z"}
+{"level":"info","message":"USER ADDED","timestamp":"2024-02-08T15:56:42.214Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:15:56:42 +0000] \"POST /auth/signup HTTP/1.1\" 200 461 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T15:56:42.293Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:15:57:58 +0000] \"OPTIONS /auth/check HTTP/1.1\" 204 0 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T15:57:58.858Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:15:57:58 +0000] \"POST /auth/check HTTP/1.1\" 200 33 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T15:57:58.869Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:15:58:14 +0000] \"OPTIONS /auth/check HTTP/1.1\" 204 0 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T15:58:14.631Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:15:58:14 +0000] \"POST /auth/check HTTP/1.1\" 200 33 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T15:58:14.636Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:15:58:19 +0000] \"OPTIONS /auth/signup HTTP/1.1\" 204 0 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T15:58:19.784Z"}
+{"level":"info","message":"USER ADDED","timestamp":"2024-02-08T15:58:19.828Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:15:58:19 +0000] \"POST /auth/signup HTTP/1.1\" 200 588 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T15:58:19.909Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-08T16:03:59.943Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-08T16:03:59.948Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-08T16:03:59.991Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-08T16:04:00.014Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-08T16:04:05.899Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-08T16:04:05.902Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-08T16:04:05.920Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-08T16:04:05.947Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-08T16:04:47.452Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-08T16:04:47.456Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-08T16:04:47.481Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-08T16:04:47.516Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:16:05:05 +0000] \"OPTIONS /auth/check HTTP/1.1\" 204 0 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T16:05:05.881Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:16:05:05 +0000] \"POST /auth/check HTTP/1.1\" 200 33 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T16:05:05.901Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:16:05:11 +0000] \"OPTIONS /auth/sendOTP HTTP/1.1\" 204 0 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T16:05:11.186Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:16:05:11 +0000] \"POST /auth/sendOTP HTTP/1.1\" 200 37 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T16:05:11.690Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:16:05:25 +0000] \"OPTIONS /auth/signup HTTP/1.1\" 204 0 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T16:05:25.583Z"}
+{"level":"info","message":"USER ADDED","timestamp":"2024-02-08T16:05:25.625Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:16:05:25 +0000] \"POST /auth/signup HTTP/1.1\" 200 443 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T16:05:25.693Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-08T16:05:48.397Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-08T16:05:48.402Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-08T16:05:48.426Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-08T16:05:48.460Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-08T16:06:54.492Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-08T16:06:54.495Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-08T16:06:54.527Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-08T16:06:54.556Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-08T16:07:08.057Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-08T16:07:08.062Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-08T16:07:08.081Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-08T16:07:08.119Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-08T16:09:04.250Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-08T16:09:04.254Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-08T16:09:04.275Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-08T16:09:04.319Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:16:09:16 +0000] \"OPTIONS /auth/check HTTP/1.1\" 204 0 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T16:09:16.523Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:16:09:16 +0000] \"POST /auth/check HTTP/1.1\" 200 33 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T16:09:16.569Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:16:09:23 +0000] \"OPTIONS /auth/sendOTP HTTP/1.1\" 204 0 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T16:09:23.641Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:16:09:24 +0000] \"POST /auth/sendOTP HTTP/1.1\" 200 37 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T16:09:24.205Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:16:10:09 +0000] \"OPTIONS /auth/signup HTTP/1.1\" 204 0 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T16:10:09.407Z"}
+{"level":"info","message":"USER ADDED","timestamp":"2024-02-08T16:10:09.429Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:16:10:09 +0000] \"POST /auth/signup HTTP/1.1\" 200 460 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T16:10:09.504Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:16:24:10 +0000] \"OPTIONS /auth/check HTTP/1.1\" 204 0 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T16:24:10.706Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:16:24:10 +0000] \"POST /auth/check HTTP/1.1\" 200 33 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T16:24:10.710Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:16:24:18 +0000] \"OPTIONS /auth/signup HTTP/1.1\" 204 0 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T16:24:18.045Z"}
+{"level":"info","message":"USER ADDED","timestamp":"2024-02-08T16:24:18.089Z"}
+{"level":"info","message":"::1 - - [08/Feb/2024:16:24:18 +0000] \"POST /auth/signup HTTP/1.1\" 200 588 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-08T16:24:18.268Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-08T16:24:39.174Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-08T16:24:39.178Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-08T16:24:39.219Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-08T16:24:39.239Z"}

@@ -52,37 +52,20 @@ const signup = async (req, res) => {
         isPersonalizedMarked,
       ];
 
-      if (profile_pic != undefined) {
-        queryParams.push(profile_pic);
-      }
+      queryParams.push(
+        profile_pic !== undefined ? profile_pic : defaultProfilePicURL
+      );
+
       const addUser = await client.query(
-        `INSERT INTO users(email,name, username, password,dob,isGetmoreMarked,isConnectMarked,isPersonalizedMarked${
-          profile_pic != undefined ? ", profile_pic" : ""
-        })
-           VALUES ($1,$2,$3, crypt($4, gen_salt('bf')), $5, $6, $7, $8 ${
-             profile_pic != undefined ? ", $9" : ""
-           });`,
+        `INSERT INTO users(email,name, username, password,dob,isGetmoreMarked,isConnectMarked,isPersonalizedMarked,profile_pic)
+           VALUES ($1,$2,$3, crypt($4, gen_salt('bf')), $5, $6, $7, $8, $9);`,
         queryParams
       );
       logger.info("USER ADDED", addUser.rowCount, "email", email);
 
       //   Login the user
-
-      req.session.user = {
-        email: email,
-      };
-
-      const token = jwt.sign(
-        { user: { email: email } },
-        process.env.JWT_SECRET_KEY,
-        {
-          expiresIn: "2h",
-        }
-      );
-
-      res
-        .status(statusCodes.success)
-        .json({ message: "User created", token, username });
+      req.body.userInfo = email;
+      login(req, res);
     } catch (error) {
       logger.error("Adding user error:", error);
       res.status(statusCodes.queryError).json({
@@ -125,7 +108,19 @@ const login = async (req, res) => {
       email: user.rows[0].email,
     };
     const token = jwt.sign(
-      { user: { email: user.rows[0].email } },
+      {
+        user: {
+          id: user.rows[0].id,
+          email: user.rows[0].email,
+          name: user.rows[0].name,
+          username: user.rows[0].username,
+          dob: user.rows[0].dob,
+          isGetmoreMarked: user.rows[0].isgetmoremarked,
+          isConnectMarked: user.rows[0].isconnectmarked,
+          isPersonalizedMarked: user.rows[0].ispersonalizedmarked,
+          profile_pic: user.rows[0].profile_pic,
+        },
+      },
       process.env.JWT_SECRET_KEY,
       {
         expiresIn: "2h",
@@ -158,7 +153,19 @@ const login = async (req, res) => {
       };
 
       const token = jwt.sign(
-        { user: { email: user.rows[0].email } },
+        {
+          user: {
+            id: user.rows[0].id,
+            email: user.rows[0].email,
+            name: user.rows[0].name,
+            username: user.rows[0].username,
+            dob: user.rows[0].dob,
+            isGetmoreMarked: user.rows[0].isgetmoremarked,
+            isConnectMarked: user.rows[0].isconnectmarked,
+            isPersonalizedMarked: user.rows[0].ispersonalizedmarked,
+            profile_pic: user.rows[0].profile_pic,
+          },
+        },
         process.env.JWT_SECRET_KEY,
         {
           expiresIn: "2h",

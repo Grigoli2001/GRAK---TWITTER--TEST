@@ -27,11 +27,13 @@ const Google = ({ user, setUser }) => {
         payload: responseLogin.data,
       });
     } else {
+      console.log(decodedToken);
       setUser({
         ...user,
         email: decodedToken.email,
         name: decodedToken.name,
         dob: `${1950}-${String(1).padStart(2, "0")}-${1}`,
+        profile_pic: decodedToken.picture,
       });
       setIsAddtionalInfoOpen(true);
     }
