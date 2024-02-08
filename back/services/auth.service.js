@@ -19,9 +19,10 @@ const signup = async (req, res) => {
     isGetmoreMarked,
     isConnectMarked,
     isPersonalizedMarked,
+    profile_pic,
   } = req.body;
 
-  if (!email || !name || !password || !dob) {
+  if (!email || !name || !password) {
     res.status(statusCodes.badRequest).json({ message: "Missing fields" });
   } else {
     const client = await pool.connect();
@@ -40,19 +41,28 @@ const signup = async (req, res) => {
         username = makeUsername(name);
       }
 
+      const queryParams = [
+        email,
+        name,
+        username,
+        password,
+        dob,
+        isGetmoreMarked,
+        isConnectMarked,
+        isPersonalizedMarked,
+      ];
+
+      if (profile_pic != undefined) {
+        queryParams.push(profile_pic);
+      }
       const addUser = await client.query(
-        `INSERT INTO users(email,name, username, password,dob,isGetmoreMarked,isConnectMarked,isPersonalizedMarked)
-           VALUES ($1,$2,$3, crypt($4, gen_salt('bf')), $5, $6, $7, $8);`,
-        [
-          email,
-          name,
-          username,
-          password,
-          dob,
-          isGetmoreMarked,
-          isConnectMarked,
-          isPersonalizedMarked,
-        ]
+        `INSERT INTO users(email,name, username, password,dob,isGetmoreMarked,isConnectMarked,isPersonalizedMarked${
+          profile_pic != undefined ? ", profile_pic" : ""
+        })
+           VALUES ($1,$2,$3, crypt($4, gen_salt('bf')), $5, $6, $7, $8 ${
+             profile_pic != undefined ? ", $9" : ""
+           });`,
+        queryParams
       );
       logger.info("USER ADDED", addUser.rowCount, "email", email);
 
@@ -99,8 +109,34 @@ const checkExistingUser = async (req, res) => {
 };
 
 const login = async (req, res) => {
-  const { userInfo, password } = req.body;
+  const { userInfo, password, usingGoogle } = req.body;
 
+  // Check if the user is logging in with google
+  if (usingGoogle) {
+    const user = await pool.query("SELECT * FROM users WHERE email = $1;", [
+      userInfo,
+    ]);
+    if (!user.rowCount) {
+      return res
+        .status(statusCodes.notFound)
+        .json({ message: "User does not exist" });
+    }
+    req.session.user = {
+      email: user.rows[0].email,
+    };
+    const token = jwt.sign(
+      { user: { email: user.rows[0].email } },
+      process.env.JWT_SECRET_KEY,
+      {
+        expiresIn: "2h",
+      }
+    );
+    return res
+      .status(statusCodes.success)
+      .json({ token, username: user.rows[0].username });
+  }
+
+  // Normal login
   if (!userInfo || !password) {
     return res
       .status(statusCodes.badRequest)

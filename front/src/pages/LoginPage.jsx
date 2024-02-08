@@ -10,6 +10,17 @@ const LoginPage = () => {
   const [isRegisterPopupOpen, setIsRegisterPopupOpen] = useState(false);
   const [isLoginPopupOpen, setIsLoginPopupOpen] = useState(false);
   const [blur, setBlur] = useState(false);
+  const [user, setUser] = useState({
+    email: "",
+    name: "",
+    password: "",
+    // formatted for postgre
+    dob: "",
+    isGetmoreMarked: false,
+    isConnectMarked: false,
+    isPersonalizedMarked: false,
+    profile_pic: "",
+  });
   // register popup
   const closeRegisterPopup = () => {
     setIsRegisterPopupOpen(false);
@@ -75,7 +86,7 @@ const LoginPage = () => {
                 <span>Sign Up with Google</span>
               </Button> */}
               <div className="flex justify-center items-center sm:w-[300px] content-center sm:self-center md:self-start mb-4">
-                <Google />
+                <Google user={user} setUser={setUser} />
               </div>
 
               <Button
@@ -119,12 +130,18 @@ const LoginPage = () => {
         <LoginFooter />
       </div>
       <div ref={containerRef}>
-        {isRegisterPopupOpen && <RegisterPopup onClose={closeRegisterPopup} />}
+        {isRegisterPopupOpen && (
+          <RegisterPopup
+            onClose={closeRegisterPopup}
+            user={user}
+            setUser={setUser}
+          />
+        )}
         {isLoginPopupOpen && (
           <LoginPopup
             onClose={closeLoginPopup}
             openSignUpFromLogin={openSignUpFromLogin}
-            Google={<Google />}
+            Google={<Google user={user} setUser={setUser} />}
           />
         )}
       </div>

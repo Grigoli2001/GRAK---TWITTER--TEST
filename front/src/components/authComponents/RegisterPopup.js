@@ -10,7 +10,7 @@ import instance from "../../constants/axios";
 import useAppStateContext from "../../hooks/useAppStateContext";
 import { useNavigate } from "react-router-dom";
 
-const RegisterPopup = ({ onClose }) => {
+const RegisterPopup = ({ onClose, user, setUser }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isNameFocused, setIsNameFocused] = useState(false);
   const [isEmailFocused, setIsEmailFocused] = useState(false);
@@ -33,16 +33,6 @@ const RegisterPopup = ({ onClose }) => {
   const nameInputRef = useRef(null);
   const emailInputRef = useRef(null);
   const monthInputRef = useRef(null);
-  const [user, setUser] = useState({
-    email: "",
-    name: "",
-    password: "",
-    // formatted for postgre
-    dob: "",
-    isGetmoreMarked: false,
-    isConnectMarked: false,
-    isPersonalizedMarked: false,
-  });
 
   const [month, setMonth] = useState("");
   const [day, setDay] = useState("");

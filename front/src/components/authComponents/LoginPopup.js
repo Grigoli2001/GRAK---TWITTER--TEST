@@ -145,7 +145,7 @@ const LoginPopup = ({ onClose, openSignUpFromLogin, Google }) => {
                         Sign in to X
                       </h2>
                     </div>
-                    <div className="mt-8">
+                    <div className="mt-8 mb-2">
                       {/* <Button
                         color="white"
                         className="normal-case flex justify-center items-center gap-3 h-[35px] w-[300px] rounded-full self-start border-gray-300 border-2 shadow-none dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-300"
@@ -158,7 +158,7 @@ const LoginPopup = ({ onClose, openSignUpFromLogin, Google }) => {
                     <div className="">
                       <Button
                         color="white"
-                        className="normal-case flex justify-center items-center gap-3 h-[35px] w-[300px] rounded-full self-start border-gray-300 border-2 shadow-none dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-300"
+                        className="normal-case flex justify-center items-center gap-3 h-[43px] w-[300px] rounded-full self-start border-gray-300 border-2 shadow-none dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-300"
                       >
                         <FaApple className="text-2xl" />
                         <span>Sign in with Apple</span>
