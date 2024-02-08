@@ -198,6 +198,7 @@ const TweetCreate = ({onModal}) => {
       <TextareaAutosize
       maxLength={tweetMaxLength}
       minRows={2}
+      maxRows={5}
       placeholder={textAreaPlaceholder}
       name="tweetText"
       className="resize-none overflow-hidden w-full pt-0 pb-2 pr-3 ml-4 border-none outline-none break-words placeholder:text-slate-600 placeholder:text-xl"
