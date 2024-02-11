@@ -213,6 +213,7 @@ const LoginPopup = ({ onClose, openSignUpFromLogin, Google }) => {
                       <Button
                         variant="outlined"
                         className="normal-case flex justify-center items-center gap-3 h-[35px] w-[300px] rounded-full self-start dark:hover:bg-gray-900 hover:bg-gray-200 border-gray-300 border-2 dark:border-gray-700"
+                        onClick={() => navigate("/forgot-password")}
                       >
                         <span className="dark:text-white text-base">
                           Forgot password?
@@ -316,7 +317,6 @@ const LoginPopup = ({ onClose, openSignUpFromLogin, Google }) => {
             </div>
           </div>
         )}
-        <ToastContainer />
       </div>
     </div>
   );

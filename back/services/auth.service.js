@@ -208,10 +208,36 @@ const sendOTP = async (req, res) => {
   }
 };
 
+// TODO: Add change password
+const changePassword = async (req, res) => {
+  const { email, newPassword } = req.body;
+  const client = await pool.connect();
+  try {
+    const user = await client.query(
+      "UPDATE users SET password = crypt($1, gen_salt('bf')) WHERE email = $2;",
+      [newPassword, email]
+    );
+    if (user.rowCount) {
+      return res
+        .status(statusCodes.success)
+        .json({ message: "Password changed" });
+    }
+    return res.status(statusCodes.notFound).json({ message: "User not found" });
+  } catch (error) {
+    logger.error(error);
+    return res
+      .status(statusCodes.queryError)
+      .json({ message: "Error while changing password" });
+  } finally {
+    client.release();
+  }
+};
+
 module.exports = {
   signup,
   login,
   logout,
   checkExistingUser,
   sendOTP,
+  changePassword,
 };

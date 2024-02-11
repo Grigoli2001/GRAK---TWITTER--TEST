@@ -41,7 +41,7 @@ import PrivateRoute from "./routes/PrivateRoute";
 import PublicRoute from "./routes/PublicRoute";
 
 // test
-
+import ForgotPassword from "./components/authComponents/ForgotPassword";
 function App() {
   const location = useLocation();
   const background = location.state?.background;
@@ -50,6 +50,7 @@ function App() {
       <Routes location={background || location}>
         <Route element={<PublicRoute />}>
           <Route path="/" element={<LoginPage />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
         </Route>
 
         {/* home/base */}
