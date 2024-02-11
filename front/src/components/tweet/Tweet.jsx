@@ -1,4 +1,6 @@
-import { useState, useContext } from "react";
+import { Buffer } from 'buffer';
+
+import { useEffect, useState, useContext } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { UserContext } from "../../context/testUserContext";
 import TweetMedia, { TweetMiniMedia } from "./TweetMedia";
@@ -9,6 +11,11 @@ import {
   PopoverContent,
   PopoverHandler,
 } from "@material-tailwind/react";
+import MiniDialog from "../MiniDialog";
+
+// axios
+import instance from '../../constants/axios';
+import { requests } from '../../constants/requests';
 
 // icons
 import { GoHeart, GoHeartFill, GoUpload } from "react-icons/go";
@@ -87,25 +94,60 @@ const TweetAction = ({
 };
 
 const BaseTweet = ({ tweetUser, post, isLast }) => {
+  // switch with actual current user
+  const currentUser = 123;
   const [postState, setPostState] = useState(post);
   const { user } = useContext(UserContext);
 
+  useEffect(() => {
+    postState.tweet_likes.forEach(element => {
+      if (element.userId === currentUser) {
+        setPostState(prev => ({...prev, liked: true, likes: postState.tweet_likes.length}))
+      } else {
+        setPostState(prev => ({...prev, liked: false, likes: postState.tweet_likes.length}))
+      }
+    });
+
+    postState.tweet_retweets.forEach(element => {
+      if (element.userId === currentUser) {
+        setPostState(prev => ({...prev, retweeted: true, retweets: postState.tweet_retweets.length}))
+      } else {
+        setPostState(prev => ({...prev, retweeted: false, retweets: postState.tweet_retweets.length}))
+      }
+    });
+
+    postState.tweet_bookmarks.forEach(element => {
+      if (element.userId === currentUser) {
+        setPostState(prev => ({...prev, bookmarked: true}))
+      } else {
+        setPostState(prev => ({...prev, bookmarked: false}))
+      }
+    });
+  }, [])
+
   const handleLike = (e) => {
     e.stopPropagation();
-    console.log("liked");
+    // console.log("liked");
     setPostState((prev) => ({
       ...postState,
       liked: !postState.liked,
       likes: postState.liked ? postState.likes - 1 : postState.likes + 1,
     }));
 
-    console.log(postState);
-  };
+    instance.post(requests.likeTweet, {
+      tweetId: postState._id,
+      userId: currentUser
+    })
+    .then((res) => {
+      console.log(res)
+    })
+    .catch((error) => {
+      console.log(error)
+    })
+  }
 
-  const handleRetweet = (e) => {
-    // e.stopPropagation() do not stop propagation let it go to parent div for dialog who will then handle the stop propagation to the tweet
-
-    console.log("retweeted");
+  const handleRetweet = () => {
+    console.log('retweeted')
     setPostState({
       ...postState,
       retweeted: !postState.retweeted,
@@ -113,6 +155,17 @@ const BaseTweet = ({ tweetUser, post, isLast }) => {
         ? postState.retweets - 1
         : postState.retweets + 1,
     });
+
+    instance.post(requests.retweetTweet, {
+      tweetId: postState._id,
+      userId: currentUser
+    })
+    .then((res) => {
+      console.log(res)
+    })
+    .catch((error) => {
+      console.log(error)
+    })
   };
 
   const handleReply = (e) => {
@@ -127,6 +180,16 @@ const BaseTweet = ({ tweetUser, post, isLast }) => {
       ...postState,
       bookmarked: !postState.bookmarked,
     });
+    instance.post(requests.bookmarkTweet, {
+      tweetId: postState._id,
+      userId: currentUser
+    })
+    .then((res) => {
+      console.log(res)
+    })
+    .catch((error) => {
+      console.log(error)
+    })
   };
 
   const handleShare = (e) => {
@@ -135,6 +198,18 @@ const BaseTweet = ({ tweetUser, post, isLast }) => {
   };
 
   const navigate = useNavigate();
+
+  const isValidMediaType = (contentType) => {
+    if (contentType.startsWith('image/')) {
+      return 'image';
+    } else if (contentType.startsWith('video/')) {
+      return 'video';
+    } else {
+      return 'gif'; // Invalid media type
+    }
+  };
+
+  const base64String = Buffer.from(postState?.tweetMedia?.data).toString('base64');
 
   return (
     // tweets for feed page, post is diff for single post view
@@ -214,75 +289,51 @@ const BaseTweet = ({ tweetUser, post, isLast }) => {
           )}
         </div>
 
-        <div className="text-justify break-words">{postState?.caption}</div>
+          <div className="text-justify break-words">
+              { postState?.tweetText }
+          </div>
 
-        {postState?.media && (
-          <TweetMedia
-            mediaType={postState?.media?.mediaType ?? "image"}
-            src={postState?.media?.src}
-            alt=""
-          />
-        )}
+          { 
+          postState?.tweetMedia && 
+            <TweetMedia mediaType={isValidMediaType(postState?.tweetMedia?.contentType)} src={`data:${postState?.tweetMedia?.contentType};base64,${base64String}`} alt="" />
+          }
 
-        <div className="flex items-center justify-between px-4 py-2">
-          <TweetAction
-            Icon={FaRegComment}
-            actionCount={postState.replies}
-            title="Reply"
-            color="blue"
-            onClick={handleReply}
-          />
-
-          <div onClick={(e) => e.stopPropagation()}>
-            <Popover placement="bottom-start" offset={{ mainAxis: -50 }}>
-              <PopoverHandler>
-                <div>
-                  <PopoverContent className="!p-0 !shadow-all-round text-black w-fit bg-white rounded-xl font-bold !outline-none z-10 overflow-hidden">
-                    <ul className="list-none text-sm">
-                      <li
-                        className="hover:bg-slate-200/50 p-3 cursor-pointer flex items-center gap-2 whitespace-nowrap"
-                        onClick={handleRetweet}
-                      >
-                        <FaRetweet />{" "}
-                        {postState.retweeted ? "Undo Repost" : "Repost"}{" "}
-                      </li>
-                      <li className="hover:bg-slate-200/50 p-3 cursor-pointer flex items-center gap-2 whitespace-nowrap">
-                        <CIQuote /> Quote
-                      </li>
+          <div className="flex items-center justify-between p-4">
+            <TweetAction Icon={FaRegComment} actionCount={postState?.tweet_comments} title="Reply" color="blue" onClick={handleReply}/>
+            
+            <MiniDialog>
+              <MiniDialog.Wrapper>
+                <MiniDialog.Dialog className='absolute -left-2 right-0 w-fit bg-white rounded-xl shadow-all-round font-bold !outline-none z-10'>
+                    <ul className='list-none text-sm'>
+                        <li className='hover:bg-slate-200/50 p-3 cursor-pointer flex items-center gap-2 whitespace-nowrap' onClick={handleRetweet}><FaRetweet/> { postState.retweeted ? 'Undo Repost':'Repost' } </li>
+                        <li className='hover:bg-slate-200/50 p-3 cursor-pointer flex items-center gap-2 whitespace-nowrap'><CIQuote/> Quote</li>
                     </ul>
-                  </PopoverContent>
-                  <TweetAction
-                    Icon={FaRetweet}
-                    actionCount={postState.retweets}
-                    title="Retweet"
-                    color="green"
-                    isActive={postState.retweeted}
-                  />
-                </div>
-              </PopoverHandler>
-            </Popover>
-          </div>
+                </MiniDialog.Dialog>
+                <TweetAction Icon={FaRetweet} actionCount={postState?.retweets} title="Retweet" color="green" isActive={postState.retweeted}/>
+              </MiniDialog.Wrapper>
+            </MiniDialog>
+            
 
-          <TweetAction
-            Icon={GoHeart}
-            ActiveIcon={GoHeartFill}
-            actionCount={postState.likes}
-            title="Like"
-            color="red"
-            onClick={handleLike}
-            isActive={postState.liked}
-          />
-
-          <div className="flex">
             <TweetAction
-              Icon={FaRegBookmark}
-              ActiveIcon={FaBookmark}
-              title="Save"
-              onClick={handleBookmark}
-              isActive={postState.bookmarked}
+              Icon={GoHeart}
+              ActiveIcon={GoHeartFill}
+              actionCount={postState.likes}
+              title="Like"
+              color="red"
+              onClick={handleLike}
+              isActive={postState.liked}
             />
-            <TweetAction Icon={GoUpload} title="Share" onClick={handleShare} />
-          </div>
+
+            <div className="flex">
+              <TweetAction
+                Icon={FaRegBookmark}
+                ActiveIcon={FaBookmark}
+                title="Save"
+                onClick={handleBookmark}
+                isActive={postState.bookmarked}
+              />
+              <TweetAction Icon={GoUpload} title="Share" onClick={handleShare} />
+            </div>
         </div>
       </div>
     </div>

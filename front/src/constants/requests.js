@@ -5,4 +5,11 @@ export const requests = {
   logout: "/auth/logout",
   sendOTP: "/auth/sendOTP",
   change_password: "/auth/change_password",
+  createTweets: "/tweets/create",
+  getTweets: "/tweets",
+  getFollowedTweets: "/tweets/followed",
+  likeTweet: "/tweets/like",
+  retweetTweet: "/tweets/retweet",
+  bookmarkTweet: "/tweets/bookmark",
+  replyTweet: "/tweets/reply",
 };

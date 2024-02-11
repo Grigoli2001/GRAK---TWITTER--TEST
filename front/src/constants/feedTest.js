@@ -8,9 +8,14 @@ export const users = [
         "bio": 'my new bio',
         "dob": "2004-03-22T18:07:00.000Z",
         "join_date": "2021-01-26T18:07:00.000Z",
-        location: "Testville, Testland",
-        verified: true,
-        cover:"https://plus.unsplash.com/premium_photo-1673306778968-5aab577a7365?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+        "location": "Testville, Testland",
+        "verified": true,
+        "cover":"https://plus.unsplash.com/premium_photo-1673306778968-5aab577a7365?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+        "fname": "Test",
+        "lname": "User",
+        "bio": "I'm a test user",
+        "followers": 100,
+        "following": ["2","4"]
     }, 
 
     {
@@ -20,10 +25,12 @@ export const users = [
         "name": "Raunak Bhansali",
         "bio": "I'm Raunak the developer",
         "avatar": "https://plus.unsplash.com/premium_photo-1687187499277-e1c59bd3032f?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-        verified: true,
-        join_date: "2021-01-26T18:07:00.000Z",
-        cover:"https://plus.unsplash.com/premium_photo-1676478746894-95d39780d573?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-        likesIsPublic: true,
+        "followers": 100,
+        "following": ["1","3"],
+        "verified": true,
+        "join_date": "2021-01-26T18:07:00.000Z",
+        "cover":"https://plus.unsplash.com/premium_photo-1676478746894-95d39780d573?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+        "likesIsPublic": true,
     
     }, 
 
@@ -34,6 +41,8 @@ export const users = [
         "name": "Amay Sunil Shenoy",
         "bio": "I'm Amay the developer",
         "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjB8fHVzZXJ8ZW58MHx8MHx8fDA%3D",
+        "followers": 100,
+        "following": ["1","2"],
         "join_date": "2021-01-26T18:07:00.000Z",
     }, 
     {

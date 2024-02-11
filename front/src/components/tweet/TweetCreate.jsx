@@ -10,6 +10,10 @@ import { ExtAvatar }  from '../User';
 import TweetMedia from './TweetMedia';
 import { Popover, PopoverContent, PopoverHandler } from '@material-tailwind/react';
 
+// axios
+import instance from "../../constants/axios";
+import { requests } from "../../constants/requests";
+
 // icons
 import { GrImage } from "react-icons/gr";
 import { MdOutlineGifBox } from "react-icons/md";
@@ -27,6 +31,7 @@ import { users } from '../../constants/feedTest';
  * Form for creating a tweet
  * 
  */
+// done
 
 export const TweetContext = createContext(null);
 
@@ -137,7 +142,7 @@ const TweetCreate = ({onModal}) => {
 
       setTweetForm({
         ...tweetForm,
-        tweetMedia: URL.createObjectURL(evt.target.files[0])
+        tweetMedia: evt.target.files[0]
       })
     }
   }
@@ -165,7 +170,31 @@ const TweetCreate = ({onModal}) => {
       // console.log(tweetForm)
       return
     }
-    // axios.post('/api/tweets/create', {tweetText})
+
+    let formData = new FormData();
+    formData.append('tweetMedia', tweetForm.tweetMedia);
+    formData.append('tweetText', tweetForm.tweetText);
+    formData.append('tweetType', 'tweet');
+    // TODO: change to the current user id
+    formData.append('userId', '3');
+    
+    if (tweetForm.tweetSchedule !== null) {
+      formData.append('tweetSchedule', tweetForm.tweetSchedule);
+    }
+
+    instance
+      .post(requests.createTweets, formData, { headers: {
+        'Content-Type': 'multipart/form-data'
+      }}
+      )
+      .then((response) => {
+        formData = new FormData();
+        window.location.reload();
+        console.log('response');
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   }
 
   // const handleEditTweet = () => {
@@ -210,7 +239,7 @@ const TweetCreate = ({onModal}) => {
           openPoll ? 
             <PollCreate removePoll={removePoll}/>
             : tweetForm.tweetMedia ?
-             <TweetMedia mediaType={'image'} src={tweetForm.tweetMedia} as_form={true} removeMedia={removeMedia}/>
+             <TweetMedia mediaType={'image'} src={URL.createObjectURL(tweetForm.tweetMedia)} as_form={true} removeMedia={removeMedia}/>
             : null
         }
     </div>
