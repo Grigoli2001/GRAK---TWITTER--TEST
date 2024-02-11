@@ -11,6 +11,7 @@ import {
   PopoverContent,
   PopoverHandler,
 } from "@material-tailwind/react";
+import MiniDialog from "../MiniDialog";
 
 // axios
 import instance from '../../constants/axios';
@@ -179,8 +180,6 @@ const BaseTweet = ({ tweetUser, post, isLast }) => {
       ...postState,
       bookmarked: !postState.bookmarked,
     });
-  };
-
     instance.post(requests.bookmarkTweet, {
       tweetId: postState._id,
       userId: currentUser
@@ -191,6 +190,7 @@ const BaseTweet = ({ tweetUser, post, isLast }) => {
     .catch((error) => {
       console.log(error)
     })
+  };
 
   const handleShare = (e) => {
     e.stopPropagation();
@@ -313,33 +313,27 @@ const BaseTweet = ({ tweetUser, post, isLast }) => {
               </MiniDialog.Wrapper>
             </MiniDialog>
             
-            <TweetAction Icon={GoHeart} ActiveIcon={GoHeartFill} actionCount={postState?.likes} title="Like" color="red" onClick={handleLike} isActive={postState.liked}/>
 
-            <div className='flex'>
-              <TweetAction Icon={FaRegBookmark} ActiveIcon={FaBookmark} title="Save" onClick={handleBookmark} isActive={postState.bookmarked}/>
-              <TweetAction Icon={GoUpload} title="Share" onClick={handleShare}/>
-            </div>
-
-          <TweetAction
-            Icon={GoHeart}
-            ActiveIcon={GoHeartFill}
-            actionCount={postState.likes}
-            title="Like"
-            color="red"
-            onClick={handleLike}
-            isActive={postState.liked}
-          />
-
-          <div className="flex">
             <TweetAction
-              Icon={FaRegBookmark}
-              ActiveIcon={FaBookmark}
-              title="Save"
-              onClick={handleBookmark}
-              isActive={postState.bookmarked}
+              Icon={GoHeart}
+              ActiveIcon={GoHeartFill}
+              actionCount={postState.likes}
+              title="Like"
+              color="red"
+              onClick={handleLike}
+              isActive={postState.liked}
             />
-            <TweetAction Icon={GoUpload} title="Share" onClick={handleShare} />
-          </div>
+
+            <div className="flex">
+              <TweetAction
+                Icon={FaRegBookmark}
+                ActiveIcon={FaBookmark}
+                title="Save"
+                onClick={handleBookmark}
+                isActive={postState.bookmarked}
+              />
+              <TweetAction Icon={GoUpload} title="Share" onClick={handleShare} />
+            </div>
         </div>
       </div>
     </div>
