@@ -30,15 +30,15 @@ import { UserContext } from "../context/testUserContext";
 import useAppStateContext from "../hooks/useAppStateContext";
 
 const SideNavTab = ({ text, icon, notif, url }) => {
-  return (
-    <li>
-      <NavLink
+    return (
+        <li>
+            <NavLink
         to={url}
-        className={`group w-fit flex items-center justify-start text-xl p-4 bg-white rounded-full hover:bg-slate-200 transition-colors duration-100 cursor-pointer`}
+            className={`group w-fit flex items-center justify-start text-xl p-4 bg-white rounded-full hover:bg-slate-200 transition-colors duration-100 cursor-pointer`}
       >
-        <span className="text-black mx-4 relative group-[.active]:font-bold group-[.actvie]:text-lg">
-          {icon}
-          {notif && notif.value > 0 && (
+                <span className="text-black mx-4 relative group-[.active]:font-bold group-[.actvie]:text-lg"> 
+                    {icon}
+                    {notif && notif.value > 0 && (
             <span
               className={cn(
                 "absolute -top-2 -right-1 bg-twitter-blue rounded-full text-white text-xs px-1",
@@ -48,17 +48,17 @@ const SideNavTab = ({ text, icon, notif, url }) => {
               )}
             >
               {notif.type !== "indicator" && notif.value}
-            </span>
-          )}
+                </span>
+                )}
         </span>
         <span className="pr-4 group-[.active]:font-bold">{text}</span>
-      </NavLink>
-    </li>
-  );
+            </NavLink>
+        </li>
+    );
 };
 
 const ProfileTab = ({ user }) => {
-  // I added logout because I need for testing
+// I added logout because I need for testing
   const { dispatch } = useAppStateContext();
   const navigate = useNavigate();
   const handleLogout = () => {
@@ -67,10 +67,10 @@ const ProfileTab = ({ user }) => {
     });
     navigate("/");
   };
-  return (
-    <Popover>
+    return (
+<Popover>
       <PopoverHandler className="rounded-full text-xl flex items-center text-black gap-x-3 mt-auto hover:bg-slate-200 p-3 cursor-pointer">
-        <div>
+                <div>
           <UserBlock user={user} size="sm" />
           <FaEllipsis className="min-w-4 ml-auto mr-2" />
         </div>
@@ -78,81 +78,81 @@ const ProfileTab = ({ user }) => {
 
       <PopoverContent className="!p-0 !shadow-all-round text-black">
         <div className="speech-bubble !px-0 bg-white rounded-xl font-bold !outline-none text-lg">
-          <ul className="list-none">
-            <li className="hover:bg-slate-200/50 p-2 cursor-pointer">
+                    <ul className="list-none">
+                        <li className="hover:bg-slate-200/50 p-2 cursor-pointer">
               Add an existing account
             </li>
-            <li
+                        <li
               onClick={handleLogout}
               className="hover:bg-slate-200/50 p-2 cursor-pointer"
             >
               Logout {showUsername(user)}
             </li>
-          </ul>
-        </div>
+                    </ul>
+                </div>
       </PopoverContent>
     </Popover>
   );
 };
 
 const SideNav = () => {
-  const { user } = useContext(UserContext);
+const { user } = useContext(UserContext);
 
-  // options for side nav for ui purposes only: TODO: will update to use Tab Nav
-  let options = [
-    {
-      title: "Home",
-      icon: <GoHomeFill />,
-      url: "/home",
+    // options for side nav for ui purposes only: TODO: will update to use Tab Nav
+let options = [
+{
+        title: "Home", 
+        icon: <GoHomeFill />,
+        url: "/home",
       notif: {
         value: 1,
         type: "indicator",
       },
-    },
+    }, 
     {
-      title: "Explore",
-      icon: <GoSearch />,
-      url: "/explore",
+        title: "Explore", 
+        icon: <GoSearch />,
+        url: "/explore",
       notif: {
         value: 2,
-      },
-    },
+      }, 
+    }, 
     {
-      title: "Notifications",
-      icon: <HiMiniBell />,
-      url: "/notifications",
-    },
+        title: "Notifications", 
+        icon: <HiMiniBell />,
+        url: "/notifications",
+    }, 
     {
-      title: "Messages",
-      icon: <FaRegEnvelope />,
-      url: "/messages",
-    },
+        title: "Messages", 
+        icon: <FaRegEnvelope />,
+        url: "/messages",
+    }, 
     {
-      title: "Bookmarks",
-      icon: <FaRegBookmark />,
-      url: "/bookmarks",
-    },
+        title: "Bookmarks", 
+        icon: <FaRegBookmark />,
+        url: "/bookmarks",
+    }, 
     {
-      title: "Profile",
-      icon: <IoPersonOutline />,
-      url: `/${user.username}`,
-    },
-  ];
-  return (
-    <div className="h-screen sticky top-0 border-r border-r-gray-200 p-4 flex flex-1 flex-col max-w-[275px]">
-      <nav>
-        <NavLink to="/home" className="">
+        title: "Profile", 
+        icon: <IoPersonOutline />,
+        url: `/${user.username}`,
+    }, 
+];
+    return (
+        <div className="h-screen sticky top-0 border-r border-r-gray-200 p-4 flex flex-1 flex-col max-w-[275px]">
+            <nav>
+                <NavLink to="/home" className="">
           <Button
             variant="icon"
             className="text-4xl ml-5 p-3 rounded-full hover:bg-slate-200 text-black"
           >
-            <BsTwitterX className="" />
-          </Button>
-        </NavLink>
-        <ul className="list-none">
-          {/* TODO dont use map and use notifs as state */}
-          {options.map((option, index) => {
-            return (
+                    <BsTwitterX className="" />
+</Button>
+                </NavLink>
+                <ul className="list-none">
+                    {/* TODO dont use map and use notifs as state */}
+                    {options.map((option, index) => {
+                            return (
               <SideNavTab
                 key={index}
                 text={option.title}
@@ -160,11 +160,11 @@ const SideNav = () => {
                 notif={option.notif}
                 url={option.url}
               />
-            );
+                        );
           })}
 
-          <li>
-            <Popover
+                    <li>
+<Popover
               placement="top-start"
               offset={{
                 mainAxis: -75,
@@ -174,46 +174,47 @@ const SideNav = () => {
                 unmount: { scale: 0, y: 25 },
               }}
             >
-              <PopoverHandler
+                            <PopoverHandler
                 className={`w-fit flex items-center justify-start text-xl p-4 bg-white rounded-full hover:bg-slate-200 transition-colors duration-100 cursor-pointer`}
               >
                 <div>
-                  <span className="text-black mx-4 relative">
-                    <IoEllipsisHorizontalCircle />
-                  </span>
-                  <span className="pr-4"> More </span>
-                </div>
+                                <span className="text-black mx-4 relative"> 
+                                    <IoEllipsisHorizontalCircle />
+                                </span>
+                                <span className="pr-4"> More </span>
+                                </div>
               </PopoverHandler>
 
               <PopoverContent className="p-0 text-black w-fit border-none bg-white rounded-xl !shadow-all-round font-bold text-lg !outline-none z-10 overflow-hidden">
-                <ul className="list-none">
-                  <li className="hover:bg-slate-200/50 p-4 cursor-pointer flex items-center gap-2 whitespace-nowrap">
+                                    <ul className="list-none">
+                                        <li className="hover:bg-slate-200/50 p-4 cursor-pointer flex items-center gap-2 whitespace-nowrap">
                     <FaPeopleLine /> More About Us
                   </li>
                   <NavLink
                     to={"/settings"}
                     className={"!border-none !outline-none"}
                   >
-                    <li className="hover:bg-slate-200/50 p-4 cursor-pointer flex items-center gap-2 whitespace-nowrap  ">
-                      <FiSettings /> Settings and Privacy
-                    </li>
-                  </NavLink>
+                                        <li className="hover:bg-slate-200/50 p-4 cursor-pointer flex items-center gap-2 whitespace-nowrap  ">
+                                                <FiSettings /> Settings and Privacy
+                                                                </li>
+</NavLink>
                 </ul>
               </PopoverContent>
             </Popover>
           </li>
-        </ul>
-      </nav>
+                </ul>
+            </nav>
 
-      <NavLink to="/compose/tweet" className="my-3 w-full flex">
+            <NavLink to="/compose/tweet" className="my-3 w-full flex">
         <Button size="lg" className="w-full">
           Post
         </Button>
       </NavLink>
 
-      <ProfileTab user={user} />
-    </div>
-  );
+            <ProfileTab user={user} />
+        </div>
+);
 };
-
+        
 export default SideNav;
+        

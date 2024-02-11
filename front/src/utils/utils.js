@@ -34,11 +34,11 @@ export function timeAgo (date) {
 
 export function quantiyFormat (number) {
     // returns a number in a compact format
-   return Intl.NumberFormat('en-US',{
-   notation: "compact",
-   maximumFractionDigits: 1
-   }
-   ).format(number);
+    return Intl.NumberFormat('en-US',{
+    notation: "compact",
+    maximumFractionDigits: 1
+    }
+    ).format(number);
 }
 
 export function parseMedia(media){

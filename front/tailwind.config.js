@@ -10,16 +10,19 @@ module.exports = withMT({
   ],
   darkMode: "media", // or 'media' or 'class'
   theme: {
-    extend: {
+    extend:{
       colors: {
-        "twitter-blue": "rgb(29 155 240 / <alpha-value>)",
+        'twitter-blue': 'rgb(29 155 240 / <alpha-value>)',
         ...colors,
-        customGreen: "#00cc99",
       },
       boxShadow: {
-        "all-round": "2px 2px 20px -5px rgba(0, 0, 0, 0.5)",
+         'all-round': '2px 2px 20px -5px rgba(0, 0, 0, 0.5)'
       },
-    },
+      backgroundColor: {
+        'back-pink': '#f91881',
+      }
+    }
+    
   },
   plugins: [],
 });

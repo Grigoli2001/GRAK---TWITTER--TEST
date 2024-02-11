@@ -1,12 +1,8 @@
 const mongoose = require('mongoose');
 
 const PollSchema = new mongoose.Schema({
-    poll_id: {
-        type: Number,
-        required: [true, "poll_id is required"],
-    },
     tweet_id: {
-        type: Number,
+        type: String,
         required: [true, "tweet_id is required"],
     },
     poll_options: {
@@ -18,14 +14,32 @@ const PollSchema = new mongoose.Schema({
             type: String,
             required: [true, "option2 is required"],
         },
+        option3: {
+            type: String,
+            required: false,
+        },
+        option4: {
+            type: String,
+            required: false,
+        },
     },
     poll_votes: {
         votesForOption1: {
             type: Number,
             min: 0,
-            required: false,
+            required: true,
         },
         votesForOption2: {
+            type: Number,
+            min: 0,
+            required: true,
+        },
+        votesForOption3: {
+            type: Number,
+            min: 0,
+            required: false,
+        },
+        votesForOption4: {
             type: Number,
             min: 0,
             required: false,
@@ -33,6 +47,6 @@ const PollSchema = new mongoose.Schema({
     },
     poll_end: {
         type: Date,
-        required: false,
+        required: true,
     },
 });
