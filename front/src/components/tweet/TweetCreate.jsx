@@ -1,5 +1,4 @@
 import { createContext,  useEffect, useRef, useState } from 'react'
-import { cn } from '../../utils/style';
 
 //  components
 import { TextareaAutosize } from '@mui/base/TextareaAutosize';
@@ -7,8 +6,7 @@ import { PollCreate } from './Poll';
 import { Button } from '../Button';
 import TextCounter from './TextCounter';
 import { ExtAvatar }  from '../User';
-import TweetMedia from './TweetMedia';
-import { Popover, PopoverContent, PopoverHandler } from '@material-tailwind/react';
+import MiniDialog from '../MiniDialog';
 
 // axios
 import instance from "../../constants/axios";
@@ -21,22 +19,21 @@ import { CIPoll, CIAccountYouFollow } from "../customIcons";
 import { IoLocationOutline } from "react-icons/io5";
 import { LuCalendarClock } from "react-icons/lu";
 import { FaGlobeAfrica, FaGlobeAmericas } from "react-icons/fa";
-import { IoCheckmark } from "react-icons/io5";
 import { FiAtSign } from "react-icons/fi";
 
 // test
 import { users } from '../../constants/feedTest';
+import TweetMedia from './TweetMedia';
 
 /**
  * Form for creating a tweet
- * 
+ * TODO use form tag or send with axios?
  */
 // done
 
 export const TweetContext = createContext(null);
 
-// onModal bool
-const TweetCreate = ({onModal}) => {
+const TweetCreate = () => {
   // max length of tweet
   const tweetMaxLength = 300;
   const defaultTweetText = 'What is happening?!';
@@ -103,6 +100,7 @@ const TweetCreate = ({onModal}) => {
 
     // form tweet text
     const [tweetForm, setTweetForm] = useState({
+      tweetType: 'tweet',
       tweetText: '',
       tweetMedia: null,
       tweetPoll: null,
@@ -167,14 +165,14 @@ const TweetCreate = ({onModal}) => {
 
   const handleCreateTweet = () => {
     if (!canPost) {
-      // console.log(tweetForm)
+      console.log(tweetForm)
       return
     }
 
     let formData = new FormData();
     formData.append('tweetMedia', tweetForm.tweetMedia);
     formData.append('tweetText', tweetForm.tweetText);
-    formData.append('tweetType', 'tweet');
+    formData.append('tweetType', tweetForm.tweetType);
     // TODO: change to the current user id
     formData.append('userId', '3');
     
@@ -190,7 +188,6 @@ const TweetCreate = ({onModal}) => {
       .then((response) => {
         formData = new FormData();
         window.location.reload();
-        console.log('response');
       })
       .catch((error) => {
         console.log(error);
@@ -204,30 +201,28 @@ const TweetCreate = ({onModal}) => {
 
 
   // testing
-  const user = users[0];
+  const user = users[1];
 
   return (
     <TweetContext.Provider value={{tweetForm, setTweetForm}}>
       <section
-      className={cn("w-full relative h-fit p-4 pb-0 grid grid-cols-[50px_auto]", {
-        'border-b border-b-solid border-slate-200': !onModal
-      })}
-
+      className="w-full relative h-fit p-4 pb-0 grid grid-cols-[75px_auto] border-b border-b-solid border-gray-200"
       onClick={() => setIsInteracted(true)}
       >
 
         {/* Spinner  for loading rquests TODO: use react loading?  */}
-       
+        <div className="post-spinner hidden absolute bg-gray-200 opacity-50 z-10 w-full h-full items-center justify-center">
+          {/* <span className="loader z-20 opacity-100"></span> */}
+        </div>
 
     <div className="mr-4">
-      <ExtAvatar src = {user?.avatar} size="sm" />
+    <ExtAvatar src = {user?.avatar} size="sm" />
     </div>
 
     <div className="flex flex-col">
       <TextareaAutosize
       maxLength={tweetMaxLength}
       minRows={2}
-      maxRows={5}
       placeholder={textAreaPlaceholder}
       name="tweetText"
       className="resize-none overflow-hidden w-full pt-0 pb-2 pr-3 ml-4 border-none outline-none break-words placeholder:text-slate-600 placeholder:text-xl"
@@ -247,9 +242,9 @@ const TweetCreate = ({onModal}) => {
     { 
       isInteracted &&
 
-        <Popover placement='bottom-start' className='relative z-10' >
-          <PopoverHandler className="flex items-center font-semibold text-twitter-blue ml-2 px-2 hover:bg-twitter-blue/10 cursor-pointer w-fit py-1 rounded-full relative">  
-          <div>
+        <MiniDialog>
+          <MiniDialog.Wrapper className="flex items-center font-semibold text-twitter-blue ml-2 px-2 hover:bg-twitter-blue/10 cursor-pointer w-fit py-1 rounded-full relative">  
+          
           {
 
             canReply === 'everyone' ?
@@ -273,57 +268,44 @@ const TweetCreate = ({onModal}) => {
             : null
           
           }
-            <PopoverContent className="!p-0 z-[1000] !shadow-all-round bg-white rounded-lg text-sm text-black overflow-hidden min-w-[350px]">
+            <MiniDialog.Dialog className="absolute top-[100%] z-10 bg-white rounded-lg text-sm text-black min-w-[250px] shadow-all-round overflow-hidden">
 
-              
-                <div className='p-3'>
+                <div className='p-2'>
                   <h4 className='font-bold'>Who can reply?</h4>
-                  <p className="text-sm text-slate-400 text-wrap">Choose who can reply to this post.<br/> Anyone mentioned can always reply.</p>
+                  <p className="text-xs text-slate-400">Choose who can reply to this post. Anyone mentioned can always reply.</p>
                 </div>
                 <ul className={`list-none`}>
-                  <li className={cn('flex items-center hover:bg-slate-200 p-3 cursor-pointer', {
-                    'font-semibold': canReply === 'everyone'})} onClick={() => updateCanReply('everyone')}>
+                  <li className="flex items-center hover:bg-slate-200 p-2 cursor-pointer font-semibold" onClick={() => updateCanReply('everyone')}>
                     <div className="rounded-full p-2 bg-twitter-blue text-white mr-2">
                       <FaGlobeAmericas/>
                     </div>
                     Everyone
-                    {canReply === 'everyone' && <IoCheckmark className='text-twitter-blue ml-auto text-lg'/>}
                   </li>
 
-                  <li className={cn('flex items-center hover:bg-slate-200 p-3 cursor-pointer', {
-                    'font-semibold': canReply === 'follow'})} onClick={() => updateCanReply('follow')}>
+                  <li className="flex items-center hover:bg-slate-200  p-2 cursor-pointer" onClick={() => updateCanReply('follow')}>
                     <div className="rounded-full p-2 bg-twitter-blue text-white mr-2">
                         <CIAccountYouFollow />
                     </div>
                     Accounts you follow
-                    {canReply === 'follow' && <IoCheckmark className='text-twitter-blue ml-auto text-lg'/>}
                   </li>
 
-                  <li className={cn('flex items-center hover:bg-slate-200 p-3 cursor-pointer', {
-                    'font-semibold': canReply === 'mention'})} onClick={() => updateCanReply('mention')}>
+                  <li className="flex items-center hover:bg-slate-200 p-2 cursor-pointer" onClick={() => updateCanReply('mention')}>
                     <div className="rounded-full p-2 bg-twitter-blue text-white mr-2">
                       <FiAtSign/>
                     </div>
                     Only accounts you mention
-                    {canReply === 'mention' && <IoCheckmark className='text-twitter-blue ml-auto text-lg'/>}
-
                   </li>
 
                 </ul>
-            </PopoverContent>
-            </div>
-          </PopoverHandler>
-        </Popover>
+            </MiniDialog.Dialog>
+          </MiniDialog.Wrapper>
+        </MiniDialog>
     }
-  </div>
-
-  <div className={cn('flex mt-4 w-full gap-x-1 py-3 items-center justify-between col-start-2', {
-      'border-t border-solid border-slate-200': isInteracted || onModal,
-      'col-start-1 col-span-full':onModal
-      })}>
+    
+    <div className={`flex mt-4 w-full gap-x-1 py-3 items-center justify-between ${isInteracted && 'border-t border-solid border-slate-200'}`}>
       <div className="flex items-center gap-x-4 text-twitter-blue">
 
-        <Button variant="icon" size="icon-sm" tooltip="Media" disabled={buttonStates.media} className="pointer-events-auto">
+        <Button variant="icon" size="icon-sm" disabled={buttonStates.media} className="pointer-events-auto">
           <label htmlFor="post_media">
             <GrImage title="Media" />
             <input id="post_media" name="post_media" onChange={handleMediaChange} ref={mediaRef} className="hidden" type="file" accept="image/*, video/*"/>
@@ -331,34 +313,42 @@ const TweetCreate = ({onModal}) => {
         </Button>
 
 
-          <Button variant="icon" size="icon-sm" tooltip="GIF" disabled={buttonStates.gif}>
+          <Button variant="icon" size="icon-sm" disabled={buttonStates.gif}>
             <label htmlFor="post_gif">
               <MdOutlineGifBox title="GIF" />
             </label>
             <input id="post_gif" name="post_gif" onChange={handleMediaChange} ref={gifRef} className="hidden" type="file" accept="image/gif"/>
           </Button>
 
-        <Button onClick={createPoll} tooltip="Poll"  variant="icon" size="icon-sm" disabled={buttonStates.poll}>
+        <Button onClick={createPoll}  variant="icon" size="icon-sm" disabled={buttonStates.poll}>
           <CIPoll />
         </Button>
 
-          <Button variant="icon" size="icon-sm" tooltip="Schedule" disabled={true} >
+          <Button variant="icon" size="icon-sm" disabled={buttonStates.schedule} >
             <LuCalendarClock />
           </Button>
 
-          <Button variant="icon" size="icon-sm" tooltip="Location" disabled={buttonStates.location}>
+          <Button variant="icon" size="icon-sm"disabled={buttonStates.location}>
             <IoLocationOutline />
           </Button>
 
       </div>
 
       <div className="flex gap-x-4 items-center">
-        
-          <TextCounter textCount={tweetForm.tweetText?.length} maxLength={tweetMaxLength} />
+        {/* {{ textCount(none, 280) }} {% if form.post %} */}
+
+
+      {/* TODO check if editing or creating */}
+
+          {/* <Button onClick={() => console.log("cancel Edit")} variant="filled" color="gray" className='text-black rounded-full'>Cancel</Button>
+          <Button onClick={handleEditTweet} variant="filled" className='rounded-full bg-twitter-blue'>Edit</Button> */}
+          
+          <TextCounter textCount={tweetForm.tweetText?.length} maxLength={tweetMaxLength} ></TextCounter>
           <Button onClick={handleCreateTweet} disabled={!canPost}>Post</Button>
           
       </div>
     </div>
+  </div>
 </section>
 </TweetContext.Provider>
 

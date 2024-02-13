@@ -7,6 +7,7 @@ import { TabPanel  } from '@mui/base/TabPanel';
 import { Button } from '../components/Button'
 import { Outlet } from 'react-router-dom';
 import FollowingFallBack from '../components/FollowingFallBack';
+import TweetFallBack from '../components/TweetFallBack';
 
 // icons
 import { FiSettings } from "react-icons/fi";
@@ -31,11 +32,11 @@ const Feed = () => {
         <TweetCreate />
         
         <TabPanel>
-          <Tweets api="for-you"/>
+          <Tweets api={"for-you"} FallBackComponent={TweetFallBack()}/>
         </TabPanel>
 
         <TabPanel >
-          <Tweets api={'following'} FallBackComponent={FollowingFallBack} />
+          <Tweets api={'following'} FallBackComponent={FollowingFallBack()} />
         </TabPanel>
       </section>
 

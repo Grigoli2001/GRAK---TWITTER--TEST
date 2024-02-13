@@ -39,42 +39,32 @@ const getTweetById = async (req, res) => {
 
 const createTweet = async (req, res) => {
     try {
-        const tweetMediaData = {
-            data: req.file.buffer,
-            contentType: req.file.mimetype,
+
+        const newTweetData = {
+            tweetType: req.body.tweetType,
+            tweetText: req.body.tweetText,
+            userId: req.body.userId,
         };
 
-        if( req.body.tweetSchedule ) {
-            const newTweet = await tweetModel.create({
-                tweetType: req.body.tweetType,
-                userId: req.body.userId,
-                tweetText: req.body.tweetText,
-                tweetSchedule: req.body.tweetSchedule,
-                tweetMedia: tweetMediaData,
-            });
-
-            res.status(statusCode.success).json({
-                status: "success",
-                data: {
-                    "tweet": newTweet,
-                },
-            });
-        } else {
-
-            const newTweet = await tweetModel.create({
-                tweetType: req.body.tweetType,
-                userId: req.body.userId,
-                tweetText: req.body.tweetText,
-                tweetMedia: tweetMediaData,
-            });
-            
-            res.status(statusCode.success).json({
-                status: "success",
-                data: {
-                    "tweet": newTweet,
-                },
-            });
+        if (req.file) {
+            newTweetData.tweetMedia = {
+                data: req.file.buffer,
+                contentType: req.file.mimetype,
+            };
         }
+
+        if (req.data?.tweetSchedule) {
+            newTweetData.tweetSchedule = req.data.tweetSchedule;
+        }
+
+        const tweet = await tweetModel.create(newTweetData);
+
+        res.status(statusCode.success).json({
+            status: "success",
+            data: {
+                tweet,
+            },
+        });
 
     } catch (err) {
         if (err.name === 'ValidationError') {

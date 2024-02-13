@@ -100,7 +100,7 @@ const BaseTweet = ({ tweetUser, post, isLast }) => {
   const { user } = useContext(UserContext);
 
   useEffect(() => {
-    postState.tweet_likes.forEach(element => {
+    postState?.tweet_likes.forEach(element => {
       if (element.userId === currentUser) {
         setPostState(prev => ({...prev, liked: true, likes: postState.tweet_likes.length}))
       } else {
@@ -108,7 +108,7 @@ const BaseTweet = ({ tweetUser, post, isLast }) => {
       }
     });
 
-    postState.tweet_retweets.forEach(element => {
+    postState?.tweet_retweets.forEach(element => {
       if (element.userId === currentUser) {
         setPostState(prev => ({...prev, retweeted: true, retweets: postState.tweet_retweets.length}))
       } else {
@@ -116,7 +116,7 @@ const BaseTweet = ({ tweetUser, post, isLast }) => {
       }
     });
 
-    postState.tweet_bookmarks.forEach(element => {
+    postState?.tweet_bookmarks.forEach(element => {
       if (element.userId === currentUser) {
         setPostState(prev => ({...prev, bookmarked: true}))
       } else {
@@ -209,7 +209,10 @@ const BaseTweet = ({ tweetUser, post, isLast }) => {
     }
   };
 
-  const base64String = Buffer.from(postState?.tweetMedia?.data).toString('base64');
+  let base64String = '';
+  if (postState.tweetMedia) {
+    base64String = Buffer.from(postState?.tweetMedia?.data).toString('base64');
+  }
 
   return (
     // tweets for feed page, post is diff for single post view
@@ -227,7 +230,7 @@ const BaseTweet = ({ tweetUser, post, isLast }) => {
         to={`/${tweetUser.username}`}
         className="mr-4 mt-3 self-start"
       >
-        <ExtAvatar src={user?.avatar} size="sm" />
+        <ExtAvatar src={tweetUser?.avatar} size="sm" />
       </NavLink>
 
       <div className="grid gap-y-2">
