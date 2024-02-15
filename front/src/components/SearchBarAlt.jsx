@@ -102,7 +102,7 @@ const SearchBar = ({fetchResults, resultComponent, className}) => {
                         return(
 
                         result.type === 'user' ?
-                            <UserBlock key={index} user={result.value} withNav={true}/>
+                            <UserBlock key={index} user={result.value} withNavTo={'/'}/>
                         :
                              <div key={index} className={`flex  items-center gap-4 p-4 text-black border-gray-200 border-solid font-bold hover:bg-slate-200/50 cursor-pointer ${result?.isLast && 'border-b'}`}>
                                 <FaSearch className="text-2xl" />

@@ -6,7 +6,6 @@ import { TabsList  } from '@mui/base/TabsList';
 import { TabPanel  } from '@mui/base/TabPanel';
 import { UserDisplayer } from '../components/User'
 
-// TODO: Fix tab after
 // icons
 import { FaArrowLeftLong} from "react-icons/fa6";
 import { FiSettings } from "react-icons/fi";
@@ -50,12 +49,12 @@ const Connect = () => {
               <section>
                 <TabPanel>
                     <h2 className="text-xl font-bold p-3" >Suggested for you</h2>
-                    <UserDisplayer />
+                    <UserDisplayer withCard withFollow />
                 </TabPanel>
       
                 <TabPanel>
                     <h2 className="text-xl font-bold p-3" >Creators for you</h2>
-                    <UserDisplayer limit={null} />
+                    <UserDisplayer limit={null} withCard withFollow />
                 </TabPanel>
               
             </section>

@@ -5,14 +5,16 @@ import { Button } from '../Button';
 import  TextCounter from './TextCounter';
 import { TweetContext } from './TweetCreate'
 import CustomInput from '../CustomInput';
+import { dayOptions, hourOptions, minuteOptions } from '../../utils/utils'
 /**
  * Input For Poll 
  * TODO: clean this up
  */
-const Choice = forwardRef(({choice, choices,setChoices, handleAddChoice, handleRemoveChoice}, ref) => {
+const Choice = ({choice, choices, setChoices, handleAddChoice, handleRemoveChoice}) => {
   const choiceMaxLength = 25
 
   const placeholderText = `Choice ${choice.id} ${choice.id > 2  ? '(optional)' : ''}`
+
 
   const handleChoiceText = (e) => {
     // maintain max length of choice text
@@ -23,7 +25,7 @@ const Choice = forwardRef(({choice, choices,setChoices, handleAddChoice, handleR
 
     // set text of a choice
     setChoices(choices.map((choice) => {
-      if (choice.id === e.target.dataset.id) {
+      if (`choice-${choice.id}` === e.target.name) {
         choice.text = e.target.value
       }
       return choice
@@ -36,24 +38,10 @@ const Choice = forwardRef(({choice, choices,setChoices, handleAddChoice, handleR
     <>
 
     <CustomInput name={`choice-${choice.id}`} handleUpdate={handleChoiceText} maxLength={choiceMaxLength} value={choice.text} placeholder={placeholderText} withTextCount={true} asTextArea={false} />
-      {/* <div className='focus-within:border-twitter-blue border border-slate-300 relative flex items-center gap-2 rounded-md'>
-        
-        <input type='text' data-id={choice.id} onChange={handleChoiceText} maxLength={choiceMaxLength} required className="peer rounded-md outline-none border-none w-full h-full px-2 py-4 overflow-hidden"/>
-        
-        <span className='text-slate-600 text-base absolute pointer-events-none left-2
-        peer-focus:scale-75 peer-focus:-translate-x-1 peer-focus:-translate-y-4 peer-focus:text-twitter-blue peer-focus:font-bold origin-top-left
-        peer-valid:scale-75 peer-valid:-translate-x-1 peer-valid:-translate-y-4 peer-valid:text-twitter-blue peer-valid:font-bold 
-        transition-all duration-200'>
-          {placeholderText}
-        </span>
-
-        <TextCounter textCount={choice.text.length} maxLength={choiceMaxLength} className={'absolute top-2 right-4'} />
-        
-      </div> */}
 
       <div className='flex items-center justify-start gap-2 px-4'>
           { ( choice.id > 1) && 
-            <Button variant="icon" size="icon-sm" tooltip="Add Choice" onClick={() => handleAddChoice()} disabled={choices.length >= 4}>
+            <Button variant="icon" size="icon-sm" tooltip="Add Choice" onClick={handleAddChoice} disabled={choices.length >= 4 }>
               <FaPlus className="text-twitter-blue"/> 
             </Button>
 
@@ -70,7 +58,7 @@ const Choice = forwardRef(({choice, choices,setChoices, handleAddChoice, handleR
       
     </>
   )
-})
+}
 
 /**
  * Create a new poll component
@@ -81,10 +69,6 @@ const Choice = forwardRef(({choice, choices,setChoices, handleAddChoice, handleR
 export const PollCreate = ({removePoll}) => {
 
   const TC = useContext(TweetContext)
-
-  const dayOptions = Array.from(Array(7), (_, i) => i+1)
-  const hourOptions = Array.from(Array(23), (_, i) => i+1)
-  const minuteOptions = Array.from(Array(59), (_, i) => i+1)
   const [choices, setChoices] = useState([
         {
           id: 1,
@@ -132,7 +116,7 @@ export const PollCreate = ({removePoll}) => {
           <div className="grid grid-cols-[1fr_auto] gap-y-2">
               {
                 choices.map((choice, index) => {
-                  return <Choice key={index} choice={choice} choices={choices} setChoices={setChoices}  handleAddChoice={handleAddChoice} handleRemoveChoice={handleRemoveChoice} />
+                  return <Choice key={index} choice={choice} choices={choices} setChoices={setChoices} handleAddChoice={handleAddChoice} handleRemoveChoice={handleRemoveChoice} />
                 })
               }
           </div>

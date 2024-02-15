@@ -15,8 +15,6 @@ import { cn } from '../../utils/style'
 import OptionSelector from '../OptionSelector'
 import { months, getDaysInMonth, getYears } from '../../utils/utils'
 
-
-
 const PhotoModal = ({ type, backTo}) => { 
 
     // code to get a user since it is routable & reject if user does not exist
@@ -25,8 +23,6 @@ const PhotoModal = ({ type, backTo}) => {
     const { username } = useParams()
     const user = users.find(otherUser => otherUser.username === username)
     const navigate = useNavigate()
-
-
     
     return (
 
@@ -233,22 +229,19 @@ const EditProfileModal = ({ backTo }) => {
     )
 }
 
-
 export const ProfileModalRoutes = (backTo) => {
 
     return (
-        <>
-            <Route path=':username'>
-                <Route path='cover' element={ <PhotoModal type={'cover'} backTo={backTo} /> } />
-                <Route path='photo' element={ <PhotoModal type={'photo'} backTo={backTo} /> } />
-            </Route>
-        </>
+        <Route path=':username'>
+            <Route path='cover' element={ <PhotoModal type={'cover'} backTo={backTo} /> } />
+            <Route path='photo' element={ <PhotoModal type={'photo'} backTo={backTo} /> } />
+        </Route>
     )
 }
 
 export const ProfileEditRoutes = (backTo) => {
 
     return (
-            <Route path='/settings/profile' element={ <EditProfileModal backTo={backTo} />} />
+        <Route path='/settings/profile' element={ <EditProfileModal backTo={backTo} />} />
     )
 }

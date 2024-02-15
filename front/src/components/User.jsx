@@ -1,9 +1,8 @@
 import { useState, useEffect, useContext, useLayoutEffect, useRef, Fragment } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Avatar } from '@material-tailwind/react'
-import { defaultAvatar } from '../utils/utils'
 import { MdVerified } from 'react-icons/md'
-import { showUsername } from '../utils/utils'
+import { showUsername, defaultAvatar } from '../utils/utils'
 import { NavLink } from 'react-router-dom'
 import { FollowButton } from './FollowButton'
 import { UserContext } from '../context/testUserContext'
@@ -28,7 +27,7 @@ const textSizes = {
       lg: 'text-lg',
   }
 
-export const UserBlock = ({user, children, withNav, avatarSize="md", textSize="sm", withCard}) => {
+export const UserBlock = ({user, children, withNavTo, avatarSize="md", textSize="sm", withCard}) => {
 
   // TODO: add as variant ?
   const [test, setTest] = useState(textSizes[textSize] ?? textSizes.md)
@@ -41,9 +40,8 @@ export const UserBlock = ({user, children, withNav, avatarSize="md", textSize="s
     setPrevTest(textSizes[keys[index - 1]] ?? 'text-xs')
   }, [textSize])
 
-  const BaseBlock = withNav ? NavLink : 'div'
-  const navProps = withNav ? { to: `/${user.username}` } : {}
-
+  const BaseBlock = withNavTo ? NavLink : 'div'
+  const navProps = withNavTo ? { to: `${withNavTo}${user.username}` } : {}
   const CardBlock = withCard ? UserCard : Fragment
 
 
@@ -116,7 +114,7 @@ export const UserCard = ({user, children}) => {
   )
 }
 
-export const UserDisplayer = ({api, limit,withCard, FallbackComponent}) => {
+export const UserDisplayer = ({api, limit,withCard, withNavTo, withFollow,  FallbackComponent}) => {
 
   const { user } = useContext(UserContext)
   const [userBlocks, setUserBlocks] = useState([])
@@ -137,10 +135,12 @@ export const UserDisplayer = ({api, limit,withCard, FallbackComponent}) => {
              userBlocks.length ? 
                 userBlocks.map((user) => {
                     return (
-                          <UserBlock key={user.id} user={user} avatarSize='sm' textSize='lg' withNav={true} withCard={withCard}>
+                          <UserBlock key={user.id} user={user} avatarSize='sm' textSize='lg' withNavTo={withNavTo} withCard={withCard} >
+                              
+                              {withFollow &&
                               <div className='ml-auto'>
                                     <FollowButton followed={false} size='sm' />
-                              </div>
+                              </div>}
                           </UserBlock>)
                })  
              : 

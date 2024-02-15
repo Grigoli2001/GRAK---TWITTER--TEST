@@ -372,3 +372,60 @@ export const trends = [
         tweets: 60,
     }, 
 ]
+
+
+export const defaultMessages = ( user ) => {
+    
+    return (
+        [
+        {
+            message: 'Hello',
+            sender: user.id
+        },
+        {
+            message: 'Hi',
+            sender: 2,
+        }, 
+        {
+            message: 'How are you?',
+            sender: user.id
+        },
+        {
+            message: 'I am fine',
+            sender: 2,
+        },
+        {
+            message: 'And you?',
+            sender: 2,
+        },
+        {
+            message: 'I am fine too',
+            sender: user.id
+        },
+        {
+            message: 'What are you doing?',
+            sender: user.id
+        },
+        {
+            message: 'Nothing much, just chilling',
+            sender: 2,
+        },
+        {
+            message: 'Okay',
+            sender: user.id
+        },
+        {
+            message: 'I am going to sleep now',
+            sender: user.id
+        },
+        {
+            message: 'Goodnight',
+            sender: user.id
+        },
+        {
+            message: 'Goodnight',
+            sender: 2,
+        },
+    ]
+    )
+}

@@ -4,7 +4,6 @@ import { Button } from '../components/Button'
 import Tweets from '../components/tweet/Tweets'
 import { UserContext } from '../context/testUserContext'
 
-// TODO: Fix tab after
 // icons
 import { FaArrowLeftLong} from "react-icons/fa6";
 import { showUsername } from '../utils/utils'

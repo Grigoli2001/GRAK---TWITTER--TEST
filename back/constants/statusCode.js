@@ -5,6 +5,7 @@ const success = 200;
 const unauthorized = 401;
 const badRequest = 400;
 const userAlreadyExists = 409;
+const notModified = 304;
 
 module.exports = {
   queryError,
@@ -14,4 +15,5 @@ module.exports = {
   unauthorized,
   badRequest,
   userAlreadyExists,
+  notModified
 };

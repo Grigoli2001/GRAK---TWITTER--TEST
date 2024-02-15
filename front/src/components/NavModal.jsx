@@ -3,6 +3,22 @@ import { Modal } from '@mui/base/Modal';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '../utils/style'
 
+export const DefaultModal = ({ children, handleBackClick, open}) => {
+
+  return (
+      <Modal
+        open={open} // set open to true since route is already navigated to, and will handle the closing of the modal
+        onClose={handleBackClick}
+        slots={{ backdrop: Backdrop }}
+        className='fixed z-[1000] inset-0 flex items-center justify-center'
+      >
+        <>
+          {children}
+          </>
+      </Modal>
+   
+  );
+}
 
 export default function NavModal({backTo, children}) {
   const navigate = useNavigate()

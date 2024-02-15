@@ -12,7 +12,6 @@ import { TabsList  } from '@mui/base/TabsList';
 import { TabPanel  } from '@mui/base/TabPanel';
 import Tweets from '../../components/tweet/Tweets'
 
-// TODO: Fix tab after
 // icons
 import { FaRegCalendarAlt } from "react-icons/fa";
 import { FaArrowLeftLong} from "react-icons/fa6";
@@ -93,7 +92,7 @@ const OtherPostRepliesFallBack = ({user, isUser, isSetUp}) => {
 
     
       <h3 className='font-bold text-xl  px-4 py-2'>Who To Follow</h3>
-      <UserDisplayer  limit={3} />
+      <UserDisplayer  limit={3} withCard withFollow withNavTo={'/'} />
     </>
     :
     <div className="flex flex-col  mx-auto max-w-[300px] gap-y-6 p-4">
@@ -282,8 +281,8 @@ const Profile = () => {
               }
               
               <div className="flex gap-x-4">
-                <NavLink to={`/${user.username}/followers`} className="hover:underline"><b>{ quantiyFormat(followerCount) }</b> Follower{ followerCount !== 1 && 's'}</NavLink>
-                <NavLink to={`/${user.username}/following`} className="hover:underline"><b>{ quantiyFormat(followingCount) }</b> Following</NavLink>
+                <NavLink to={`/${userProfile.username}/followers`} className="hover:underline"><b>{ quantiyFormat(followerCount) }</b> Follower{ followerCount !== 1 && 's'}</NavLink>
+                <NavLink to={`/${userProfile.username}/following`} className="hover:underline"><b>{ quantiyFormat(followingCount) }</b> Following</NavLink>
               </div>
             </div>
           </div>

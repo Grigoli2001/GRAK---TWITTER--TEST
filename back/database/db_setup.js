@@ -20,6 +20,7 @@ function startConnection() {
     if (!err) {
       logger.info("PostgreSQL Connected");
     } else {
+      console.log(err)
       logger.error("PostgreSQL Connection Failed");
       startConnection();
     }

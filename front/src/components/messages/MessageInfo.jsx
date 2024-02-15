@@ -1,33 +1,15 @@
-import React, { useState } from 'react'
-import { Button } from './Button'
-import { AiOutlineInfoCircle } from "react-icons/ai";
-import { GrImage } from "react-icons/gr";
-import { MdOutlineGifBox } from "react-icons/md";
-import { BsEmojiSmile } from "react-icons/bs";
-import { AiOutlineSend } from "react-icons/ai";
+import { useParams } from 'react-router-dom';
+import { Button } from '../Button'
 import { IoMdArrowBack } from "react-icons/io";
-import { Picker } from 'emoji-mart';
-import SendMessage from './SendMessage';
-import ReceiveMessage from './ReceiveMessage';
-import { NavLink, useParams } from 'react-router-dom';
-
-import '../styles/messages.css'
-import { UserBlock } from './User';
-import { users } from '../constants/feedTest';
-import { FollowButton } from './FollowButton';
+import { NavLink } from 'react-router-dom';
+import { UserBlock } from '../User';
+import { users } from '../../constants/feedTest';
+import { FollowButton } from '../FollowButton';
 import { Switch } from '@material-tailwind/react';
 
 const MessageInfo = () => {
-    const [message, setMessage] = useState('')
+
     const params = useParams()
-
-    const autoResize = (e) => {
-        const textarea = e.target;
-
-        textarea.style.height = 'auto';
-        textarea.style.height = Math.min(textarea.scrollHeight, 150) + 'px';
-    }
-
 
     return (
         <div className='h-screen sticky top-0 border-r border-l border-r-gray-200  flex flex-col w-[250px] flex-[2]'>
