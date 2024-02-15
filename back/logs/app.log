@@ -908,3 +908,229 @@
 {"level":"info","message":"::1 - - [03/Feb/2024:01:51:30 +0000] \"OPTIONS /auth/sendOTP HTTP/1.1\" 204 0 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-03T01:51:30.085Z"}
 {"level":"info","message":"::1 - - [03/Feb/2024:01:51:30 +0000] \"POST /auth/check HTTP/1.1\" 200 33 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-03T01:51:30.089Z"}
 {"level":"info","message":"::1 - - [03/Feb/2024:01:51:30 +0000] \"POST /auth/sendOTP HTTP/1.1\" 200 37 \"http://localhost:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36\"\n","timestamp":"2024-02-03T01:51:30.318Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-10T17:33:47.282Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-10T17:33:47.287Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-10T17:33:47.356Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-10T17:33:47.359Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-10T17:34:00.435Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-10T17:34:00.440Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-10T17:34:00.479Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-10T17:34:00.520Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-10T17:39:26.882Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-10T17:39:26.886Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-10T17:39:26.915Z"}
+{"level":"error","message":"PostgreSQL Connection Failed","timestamp":"2024-02-10T17:39:26.967Z"}
+{"level":"error","message":"PostgreSQL Connection Failed","timestamp":"2024-02-10T17:39:27.006Z"}
+{"level":"error","message":"PostgreSQL Connection Failed","timestamp":"2024-02-10T17:39:27.147Z"}
+{"level":"error","message":"PostgreSQL Connection Failed","timestamp":"2024-02-10T17:39:27.188Z"}
+{"level":"error","message":"PostgreSQL Connection Failed","timestamp":"2024-02-10T17:39:27.229Z"}
+{"level":"error","message":"PostgreSQL Connection Failed","timestamp":"2024-02-10T17:39:27.270Z"}
+{"level":"error","message":"PostgreSQL Connection Failed","timestamp":"2024-02-10T17:39:27.317Z"}
+{"level":"error","message":"PostgreSQL Connection Failed","timestamp":"2024-02-10T17:39:27.355Z"}
+{"level":"error","message":"PostgreSQL Connection Failed","timestamp":"2024-02-10T17:39:27.399Z"}
+{"level":"error","message":"PostgreSQL Connection Failed","timestamp":"2024-02-10T17:39:27.444Z"}
+{"level":"error","message":"PostgreSQL Connection Failed","timestamp":"2024-02-10T17:39:27.484Z"}
+{"level":"error","message":"PostgreSQL Connection Failed","timestamp":"2024-02-10T17:39:27.540Z"}
+{"level":"error","message":"PostgreSQL Connection Failed","timestamp":"2024-02-10T17:39:27.585Z"}
+{"level":"error","message":"PostgreSQL Connection Failed","timestamp":"2024-02-10T17:39:27.629Z"}
+{"level":"error","message":"PostgreSQL Connection Failed","timestamp":"2024-02-10T17:39:27.668Z"}
+{"level":"error","message":"PostgreSQL Connection Failed","timestamp":"2024-02-10T17:39:27.707Z"}
+{"level":"error","message":"PostgreSQL Connection Failed","timestamp":"2024-02-10T17:39:27.752Z"}
+{"level":"error","message":"PostgreSQL Connection Failed","timestamp":"2024-02-10T17:39:27.790Z"}
+{"level":"error","message":"PostgreSQL Connection Failed","timestamp":"2024-02-10T17:39:27.862Z"}
+{"level":"error","message":"PostgreSQL Connection Failed","timestamp":"2024-02-10T17:39:27.906Z"}
+{"level":"error","message":"PostgreSQL Connection Failed","timestamp":"2024-02-10T17:39:27.954Z"}
+{"level":"error","message":"PostgreSQL Connection Failed","timestamp":"2024-02-10T17:39:28.012Z"}
+{"level":"error","message":"PostgreSQL Connection Failed","timestamp":"2024-02-10T17:39:28.065Z"}
+{"level":"error","message":"PostgreSQL Connection Failed","timestamp":"2024-02-10T17:39:28.099Z"}
+{"level":"error","message":"PostgreSQL Connection Failed","timestamp":"2024-02-10T17:39:28.131Z"}
+{"level":"error","message":"PostgreSQL Connection Failed","timestamp":"2024-02-10T17:39:28.166Z"}
+{"level":"error","message":"PostgreSQL Connection Failed","timestamp":"2024-02-10T17:39:28.206Z"}
+{"level":"error","message":"PostgreSQL Connection Failed","timestamp":"2024-02-10T17:39:28.243Z"}
+{"level":"error","message":"PostgreSQL Connection Failed","timestamp":"2024-02-10T17:39:28.278Z"}
+{"level":"error","message":"PostgreSQL Connection Failed","timestamp":"2024-02-10T17:39:28.315Z"}
+{"level":"error","message":"PostgreSQL Connection Failed","timestamp":"2024-02-10T17:39:28.354Z"}
+{"level":"error","message":"PostgreSQL Connection Failed","timestamp":"2024-02-10T17:39:28.400Z"}
+{"level":"error","message":"PostgreSQL Connection Failed","timestamp":"2024-02-10T17:39:28.445Z"}
+{"level":"error","message":"PostgreSQL Connection Failed","timestamp":"2024-02-10T17:39:28.598Z"}
+{"level":"error","message":"PostgreSQL Connection Failed","timestamp":"2024-02-10T17:39:28.745Z"}
+{"level":"error","message":"PostgreSQL Connection Failed","timestamp":"2024-02-10T17:39:28.780Z"}
+{"level":"error","message":"PostgreSQL Connection Failed","timestamp":"2024-02-10T17:39:28.815Z"}
+{"level":"error","message":"PostgreSQL Connection Failed","timestamp":"2024-02-10T17:39:28.849Z"}
+{"level":"error","message":"PostgreSQL Connection Failed","timestamp":"2024-02-10T17:39:28.884Z"}
+{"level":"error","message":"PostgreSQL Connection Failed","timestamp":"2024-02-10T17:39:28.917Z"}
+{"level":"error","message":"PostgreSQL Connection Failed","timestamp":"2024-02-10T17:39:28.953Z"}
+{"level":"error","message":"PostgreSQL Connection Failed","timestamp":"2024-02-10T17:39:28.992Z"}
+{"level":"error","message":"PostgreSQL Connection Failed","timestamp":"2024-02-10T17:39:29.028Z"}
+{"level":"error","message":"PostgreSQL Connection Failed","timestamp":"2024-02-10T17:39:29.062Z"}
+{"level":"error","message":"PostgreSQL Connection Failed","timestamp":"2024-02-10T17:39:29.100Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-10T17:39:48.665Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-10T17:39:48.668Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-10T17:39:48.704Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-10T17:39:48.795Z"}
+{"date":"Sat Feb 10 2024 18:47:55 GMT+0100 (Central European Standard Time)","error":{},"exception":true,"level":"error","message":"uncaughtException: Unexpected identifier 'INTO'\nC:\\Users\\sheno\\OneDrive\\Coding Projects\\adv web\\FINAL PROJECT\\GRAK-TWITTER\\back\\services\\auth.service.js:176\nINSERT INTO users (email, name, username, password, dob, isGetmoreMarked, isConnectMarked, isPersonalizedMarked, profile_pic)\n       ^^^^\n\nSyntaxError: Unexpected identifier 'INTO'\n    at internalCompileFunction (node:internal/vm:77:18)\n    at wrapSafe (node:internal/modules/cjs/loader:1287:20)\n    at Module._compile (node:internal/modules/cjs/loader:1339:27)\n    at Module._extensions..js (node:internal/modules/cjs/loader:1434:10)\n    at Module.load (node:internal/modules/cjs/loader:1206:32)\n    at Module._load (node:internal/modules/cjs/loader:1022:12)\n    at Module.require (node:internal/modules/cjs/loader:1234:19)\n    at require (node:internal/modules/helpers:176:18)\n    at Object.<anonymous> (C:\\Users\\sheno\\OneDrive\\Coding Projects\\adv web\\FINAL PROJECT\\GRAK-TWITTER\\back\\routes\\auth.routes.js:4:22)\n    at Module._compile (node:internal/modules/cjs/loader:1375:14)","os":{"loadavg":[0,0,0],"uptime":116352.203},"process":{"argv":["C:\\Program Files\\nodejs\\node.exe","C:\\Users\\sheno\\OneDrive\\Coding Projects\\adv web\\FINAL PROJECT\\GRAK-TWITTER\\back\\server.js"],"cwd":"C:\\Users\\sheno\\OneDrive\\Coding Projects\\adv web\\FINAL PROJECT\\GRAK-TWITTER\\back","execPath":"C:\\Program Files\\nodejs\\node.exe","gid":null,"memoryUsage":{"arrayBuffers":18262455,"external":20650702,"heapTotal":36388864,"heapUsed":22585776,"rss":72847360},"pid":26492,"uid":null,"version":"v21.5.0"},"stack":"C:\\Users\\sheno\\OneDrive\\Coding Projects\\adv web\\FINAL PROJECT\\GRAK-TWITTER\\back\\services\\auth.service.js:176\nINSERT INTO users (email, name, username, password, dob, isGetmoreMarked, isConnectMarked, isPersonalizedMarked, profile_pic)\n       ^^^^\n\nSyntaxError: Unexpected identifier 'INTO'\n    at internalCompileFunction (node:internal/vm:77:18)\n    at wrapSafe (node:internal/modules/cjs/loader:1287:20)\n    at Module._compile (node:internal/modules/cjs/loader:1339:27)\n    at Module._extensions..js (node:internal/modules/cjs/loader:1434:10)\n    at Module.load (node:internal/modules/cjs/loader:1206:32)\n    at Module._load (node:internal/modules/cjs/loader:1022:12)\n    at Module.require (node:internal/modules/cjs/loader:1234:19)\n    at require (node:internal/modules/helpers:176:18)\n    at Object.<anonymous> (C:\\Users\\sheno\\OneDrive\\Coding Projects\\adv web\\FINAL PROJECT\\GRAK-TWITTER\\back\\routes\\auth.routes.js:4:22)\n    at Module._compile (node:internal/modules/cjs/loader:1375:14)","timestamp":"2024-02-10T17:47:55.218Z","trace":[{"column":18,"file":"node:internal/vm","function":"internalCompileFunction","line":77,"method":null,"native":false},{"column":20,"file":"node:internal/modules/cjs/loader","function":"wrapSafe","line":1287,"method":null,"native":false},{"column":27,"file":"node:internal/modules/cjs/loader","function":"Module._compile","line":1339,"method":"_compile","native":false},{"column":10,"file":"node:internal/modules/cjs/loader","function":"Module._extensions..js","line":1434,"method":".js","native":false},{"column":32,"file":"node:internal/modules/cjs/loader","function":"Module.load","line":1206,"method":"load","native":false},{"column":12,"file":"node:internal/modules/cjs/loader","function":"Module._load","line":1022,"method":"_load","native":false},{"column":19,"file":"node:internal/modules/cjs/loader","function":"Module.require","line":1234,"method":"require","native":false},{"column":18,"file":"node:internal/modules/helpers","function":"require","line":176,"method":null,"native":false},{"column":22,"file":"C:\\Users\\sheno\\OneDrive\\Coding Projects\\adv web\\FINAL PROJECT\\GRAK-TWITTER\\back\\routes\\auth.routes.js","function":null,"line":4,"method":null,"native":false},{"column":14,"file":"node:internal/modules/cjs/loader","function":"Module._compile","line":1375,"method":"_compile","native":false}]}
+{"date":"Sat Feb 10 2024 18:49:06 GMT+0100 (Central European Standard Time)","error":{},"exception":true,"level":"error","message":"uncaughtException: Unexpected identifier 'INTO'\nC:\\Users\\sheno\\OneDrive\\Coding Projects\\adv web\\FINAL PROJECT\\GRAK-TWITTER\\back\\services\\auth.service.js:176\nINSERT INTO users (email, name, username, password, dob, isGetmoreMarked, isConnectMarked, isPersonalizedMarked, profile_pic)\n       ^^^^\n\nSyntaxError: Unexpected identifier 'INTO'\n    at internalCompileFunction (node:internal/vm:77:18)\n    at wrapSafe (node:internal/modules/cjs/loader:1287:20)\n    at Module._compile (node:internal/modules/cjs/loader:1339:27)\n    at Module._extensions..js (node:internal/modules/cjs/loader:1434:10)\n    at Module.load (node:internal/modules/cjs/loader:1206:32)\n    at Module._load (node:internal/modules/cjs/loader:1022:12)\n    at Module.require (node:internal/modules/cjs/loader:1234:19)\n    at require (node:internal/modules/helpers:176:18)\n    at Object.<anonymous> (C:\\Users\\sheno\\OneDrive\\Coding Projects\\adv web\\FINAL PROJECT\\GRAK-TWITTER\\back\\routes\\auth.routes.js:4:22)\n    at Module._compile (node:internal/modules/cjs/loader:1375:14)","os":{"loadavg":[0,0,0],"uptime":116423.359},"process":{"argv":["C:\\Program Files\\nodejs\\node.exe","C:\\Users\\sheno\\OneDrive\\Coding Projects\\adv web\\FINAL PROJECT\\GRAK-TWITTER\\back\\server.js"],"cwd":"C:\\Users\\sheno\\OneDrive\\Coding Projects\\adv web\\FINAL PROJECT\\GRAK-TWITTER\\back","execPath":"C:\\Program Files\\nodejs\\node.exe","gid":null,"memoryUsage":{"arrayBuffers":18262455,"external":20650702,"heapTotal":36917248,"heapUsed":22947648,"rss":73146368},"pid":18144,"uid":null,"version":"v21.5.0"},"stack":"C:\\Users\\sheno\\OneDrive\\Coding Projects\\adv web\\FINAL PROJECT\\GRAK-TWITTER\\back\\services\\auth.service.js:176\nINSERT INTO users (email, name, username, password, dob, isGetmoreMarked, isConnectMarked, isPersonalizedMarked, profile_pic)\n       ^^^^\n\nSyntaxError: Unexpected identifier 'INTO'\n    at internalCompileFunction (node:internal/vm:77:18)\n    at wrapSafe (node:internal/modules/cjs/loader:1287:20)\n    at Module._compile (node:internal/modules/cjs/loader:1339:27)\n    at Module._extensions..js (node:internal/modules/cjs/loader:1434:10)\n    at Module.load (node:internal/modules/cjs/loader:1206:32)\n    at Module._load (node:internal/modules/cjs/loader:1022:12)\n    at Module.require (node:internal/modules/cjs/loader:1234:19)\n    at require (node:internal/modules/helpers:176:18)\n    at Object.<anonymous> (C:\\Users\\sheno\\OneDrive\\Coding Projects\\adv web\\FINAL PROJECT\\GRAK-TWITTER\\back\\routes\\auth.routes.js:4:22)\n    at Module._compile (node:internal/modules/cjs/loader:1375:14)","timestamp":"2024-02-10T17:49:06.381Z","trace":[{"column":18,"file":"node:internal/vm","function":"internalCompileFunction","line":77,"method":null,"native":false},{"column":20,"file":"node:internal/modules/cjs/loader","function":"wrapSafe","line":1287,"method":null,"native":false},{"column":27,"file":"node:internal/modules/cjs/loader","function":"Module._compile","line":1339,"method":"_compile","native":false},{"column":10,"file":"node:internal/modules/cjs/loader","function":"Module._extensions..js","line":1434,"method":".js","native":false},{"column":32,"file":"node:internal/modules/cjs/loader","function":"Module.load","line":1206,"method":"load","native":false},{"column":12,"file":"node:internal/modules/cjs/loader","function":"Module._load","line":1022,"method":"_load","native":false},{"column":19,"file":"node:internal/modules/cjs/loader","function":"Module.require","line":1234,"method":"require","native":false},{"column":18,"file":"node:internal/modules/helpers","function":"require","line":176,"method":null,"native":false},{"column":22,"file":"C:\\Users\\sheno\\OneDrive\\Coding Projects\\adv web\\FINAL PROJECT\\GRAK-TWITTER\\back\\routes\\auth.routes.js","function":null,"line":4,"method":null,"native":false},{"column":14,"file":"node:internal/modules/cjs/loader","function":"Module._compile","line":1375,"method":"_compile","native":false}]}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-10T17:52:30.970Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-10T17:52:30.977Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-10T17:52:31.011Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-10T17:52:31.042Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-10T17:54:21.007Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-10T17:54:21.010Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-10T17:54:21.037Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-10T17:54:21.062Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-10T17:55:17.458Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-10T17:55:17.464Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-10T17:55:17.486Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-10T17:55:17.524Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-10T18:02:00.731Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-10T18:02:00.734Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-10T18:02:00.762Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-10T18:02:00.818Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-10T18:02:13.165Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-10T18:02:13.169Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-10T18:02:13.202Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-10T18:02:13.234Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-10T18:02:14.923Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-10T18:02:14.926Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-10T18:02:14.951Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-10T18:02:15.082Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-10T18:02:29.853Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-10T18:02:29.860Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-10T18:02:29.889Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-10T18:02:29.928Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-10T18:03:02.748Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-10T18:03:02.751Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-10T18:03:02.777Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-10T18:03:02.807Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-10T18:05:33.112Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-10T18:05:33.117Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-10T18:05:33.154Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-10T18:05:33.227Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-10T18:05:39.803Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-10T18:05:39.808Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-10T18:05:39.837Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-10T18:05:39.868Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-10T18:06:11.927Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-10T18:06:11.931Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-10T18:06:11.958Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-10T18:06:11.987Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-10T18:08:25.935Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-10T18:08:25.938Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-10T18:08:25.956Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-10T18:08:25.987Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-10T18:10:52.698Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-10T18:10:52.701Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-10T18:10:52.720Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-10T18:10:52.752Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-10T18:12:19.966Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-10T18:12:19.970Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-10T18:12:20.000Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-10T18:12:20.065Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-10T18:13:43.188Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-10T18:13:43.192Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-10T18:13:43.226Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-10T18:13:43.261Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-10T18:19:19.211Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-10T18:19:19.214Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-10T18:19:19.238Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-10T18:19:19.264Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-10T18:20:16.825Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-10T18:20:16.828Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-10T18:20:16.884Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-10T18:20:16.913Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-10T18:21:23.849Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-10T18:21:23.852Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-10T18:21:23.881Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-10T18:21:23.904Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-10T18:21:30.413Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-10T18:21:30.417Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-10T18:21:30.445Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-10T18:21:30.468Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-10T18:23:33.167Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-10T18:23:33.172Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-10T18:23:33.214Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-10T18:23:33.252Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-10T18:25:39.229Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-10T18:25:39.232Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-10T18:25:39.261Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-10T18:25:39.288Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-10T18:27:53.674Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-10T18:27:53.679Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-10T18:27:53.704Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-10T18:27:53.729Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-10T18:28:02.913Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-10T18:28:02.916Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-10T18:28:02.944Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-10T18:28:02.969Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-10T18:28:16.016Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-10T18:28:16.021Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-10T18:28:16.045Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-10T18:28:16.085Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-10T18:29:23.440Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-10T18:29:23.443Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-10T18:29:23.472Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-10T18:29:23.602Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-10T18:34:04.609Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-10T18:34:04.613Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-10T18:34:04.727Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-10T18:34:04.797Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-10T18:36:50.523Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-10T18:36:50.531Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-10T18:36:50.637Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-10T18:36:50.766Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-10T18:36:57.867Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-10T18:36:57.874Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-10T18:36:57.907Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-10T18:36:57.954Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-10T18:38:30.164Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-10T18:38:30.167Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-10T18:38:30.197Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-10T18:38:30.230Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-10T18:42:18.307Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-10T18:42:18.312Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-10T18:42:18.347Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-10T18:42:18.380Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-10T18:42:30.748Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-10T18:42:30.754Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-10T18:42:30.778Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-10T18:42:30.809Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-10T18:46:12.794Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-10T18:46:12.797Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-10T18:46:12.824Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-10T18:46:12.849Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-10T18:46:23.973Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-10T18:46:23.976Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-10T18:46:24.005Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-10T18:46:24.035Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-10T18:47:03.496Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-10T18:47:03.499Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-10T18:47:03.532Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-10T18:47:03.668Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-10T18:47:14.778Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-10T18:47:14.781Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-10T18:47:14.802Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-10T18:47:14.833Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-10T18:47:17.999Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-10T18:47:18.003Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-10T18:47:18.025Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-10T18:47:18.061Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-10T18:47:19.987Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-10T18:47:19.992Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-10T18:47:20.023Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-10T18:47:20.052Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-10T18:49:22.639Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-10T18:49:22.643Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-10T18:49:22.664Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-10T18:49:22.696Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-10T18:51:53.085Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-10T18:51:53.088Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-10T18:51:53.111Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-10T18:51:53.143Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-10T18:55:52.934Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-10T18:55:52.939Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-10T18:55:52.978Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-10T18:55:53.009Z"}
+{"level":"info","message":"Application started successfully","timestamp":"2024-02-10T18:55:57.042Z"}
+{"level":"info","message":"Listening on 127.0.0.1:8080","timestamp":"2024-02-10T18:55:57.046Z"}
+{"level":"info","message":"MongoDB connected successfully","timestamp":"2024-02-10T18:55:57.066Z"}
+{"level":"info","message":"PostgreSQL Connected","timestamp":"2024-02-10T18:55:57.099Z"}

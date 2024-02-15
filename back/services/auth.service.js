@@ -59,6 +59,7 @@ const signup = async (req, res) => {
       //   Login the user
 
       req.session.user = {
+        id: addUser.rows[0].id,
         email: email,
       };
 
@@ -172,3 +173,4 @@ module.exports = {
   checkExistingUser,
   sendOTP,
 };
+
