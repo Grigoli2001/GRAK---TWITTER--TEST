@@ -57,7 +57,7 @@ const TweetMedia = ({mediaType, src, alt, as_form, removeMedia}) => {
                 }
                 {
                     (mediaType === 'image' || mediaType === 'gif')  && 
-                    <img className="h-full max-w-5/6 bg-black object-cover" src={src} alt={alt} />
+                    <img className="h-full w-full bg-black object-cover" src={src} alt={alt} />
                 }
 
                 { 

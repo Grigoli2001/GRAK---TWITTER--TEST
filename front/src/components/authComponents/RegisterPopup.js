@@ -10,7 +10,7 @@ import instance from "../../constants/axios";
 import useAppStateContext from "../../hooks/useAppStateContext";
 import { useNavigate } from "react-router-dom";
 
-const RegisterPopup = ({ onClose }) => {
+const RegisterPopup = ({ onClose, user, setUser }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isNameFocused, setIsNameFocused] = useState(false);
   const [isEmailFocused, setIsEmailFocused] = useState(false);
@@ -33,16 +33,6 @@ const RegisterPopup = ({ onClose }) => {
   const nameInputRef = useRef(null);
   const emailInputRef = useRef(null);
   const monthInputRef = useRef(null);
-  const [user, setUser] = useState({
-    email: "",
-    name: "",
-    password: "",
-    // formatted for postgre
-    dob: "",
-    isGetmoreMarked: false,
-    isConnectMarked: false,
-    isPersonalizedMarked: false,
-  });
 
   const [month, setMonth] = useState("");
   const [day, setDay] = useState("");
@@ -229,7 +219,7 @@ const RegisterPopup = ({ onClose }) => {
 
   return (
     <div>
-      <div className=" w-[600px] min-h-[300px] h-[650px] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black rounded-xl pb-6 ">
+      <div className=" w-[600px] min-h-[300px] h-[650px] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-black rounded-xl pb-6 ">
         {loading ? (
           <ReactLoading
             type={"spin"}
@@ -245,11 +235,11 @@ const RegisterPopup = ({ onClose }) => {
                     ? onClose
                     : () => setCurrentPage(currentPage - 1)
                 }
-                className=" hover:bg-blue-gray-900 rounded-full text-white font-bold m-2 p-2"
+                className="hover:bg-blue-gray-100 dark:hover:bg-blue-gray-900 rounded-full dark:text-white font-bold m-2 p-2"
               >
                 {currentPage === 1 ? <IoMdClose /> : <IoMdArrowBack />}
               </button>
-              <h3 className="text-white font-bold m-2">
+              <h3 className="dark:text-white font-bold m-2">
                 Step {currentPage} of 5
               </h3>
             </div>
@@ -258,7 +248,7 @@ const RegisterPopup = ({ onClose }) => {
                 {/* start of the content by page */}
                 {currentPage === 1 && (
                   <>
-                    <h2 className="text-white font-bold my-6 text-2xl">
+                    <h2 className="dark:text-white font-bold my-6 text-2xl">
                       Create your account
                     </h2>
                     {/* name input container */}
@@ -267,7 +257,7 @@ const RegisterPopup = ({ onClose }) => {
                       <input
                         onFocus={() => setIsNameFocused(true)}
                         onBlur={() => setIsNameFocused(false)}
-                        className={`text-white h-14 w-full flex items-center bg-black border-gray-600 border-2 rounded-md p-3 pt-8 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all`}
+                        className={`dark:text-white h-14 w-full flex items-center dark:bg-black border-gray-300 dark:border-gray-600 border-2 rounded-md p-3 pt-8 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all`}
                         value={user.name}
                         onChange={(e) =>
                           setUser({
@@ -278,7 +268,7 @@ const RegisterPopup = ({ onClose }) => {
                         ref={nameInputRef}
                       />
                       <label
-                        className={`absolute left-3 top-4 m-0 p-0 bg-black ${
+                        className={`absolute left-3 top-4 m-0 p-0 dark:bg-black ${
                           isNameFocused ? "text-blue-600" : "text-gray-600"
                         } transition-all ${
                           isNameFocused || user.name
@@ -310,8 +300,10 @@ const RegisterPopup = ({ onClose }) => {
                           isEmailValid(user.email);
                         }}
                         type="email"
-                        className={`text-white h-14 w-full flex items-center bg-black ${
-                          error ? "border-red-600" : "border-gray-600"
+                        className={`dark:text-white h-14 w-full flex items-center dark:bg-black ${
+                          error
+                            ? "border-red-600"
+                            : "border-gray-300 dark:border-gray-600"
                         } border-2  rounded-md p-3 pt-8 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all`}
                         value={user.email}
                         onChange={(e) =>
@@ -320,7 +312,7 @@ const RegisterPopup = ({ onClose }) => {
                         ref={emailInputRef}
                       />
                       <label
-                        className={`absolute left-3 top-4 m-0 p-0 bg-black ${
+                        className={`absolute left-3 top-4 m-0 p-0 dark:bg-black ${
                           isEmailFocused
                             ? "text-blue-600"
                             : error
@@ -350,7 +342,7 @@ const RegisterPopup = ({ onClose }) => {
                     </div>
 
                     <div>
-                      <h4 className="text-white font-semibold text-sm mb-2">
+                      <h4 className="dark:text-white font-semibold text-sm mb-2">
                         Date of Birth
                       </h4>
                       <p className="text-gray-700 text-xs">
@@ -366,10 +358,10 @@ const RegisterPopup = ({ onClose }) => {
                         <select
                           onFocus={() => setIsMonthFocused(true)}
                           onBlur={() => setIsMonthFocused(false)}
-                          className={`text-white h-16 bg-black  ${
+                          className={`dark:text-white h-16 dark:bg-black  ${
                             isMonthFocused
                               ? "border-blue-600"
-                              : "border-gray-600"
+                              : "border-gray-300 dark:border-gray-600"
                           } border-2 rounded-md w-full text-bottom pt-4 pl-1`}
                           value={month}
                           onChange={(e) => setMonth(e.target.value)}
@@ -395,8 +387,10 @@ const RegisterPopup = ({ onClose }) => {
                         <select
                           onFocus={() => setIsDayFocused(true)}
                           onBlur={() => setIsDayFocused(false)}
-                          className={`text-white h-16 bg-black ${
-                            isDayFocused ? "border-blue-600" : "border-gray-600"
+                          className={`dark:text-white h-16 dark:bg-black ${
+                            isDayFocused
+                              ? "border-blue-600"
+                              : "border-gray-300 dark:border-gray-600"
                           } border-2 rounded-md w-full pt-4 pl-1`}
                           value={day}
                           onChange={(e) => setDay(e.target.value)}
@@ -421,10 +415,10 @@ const RegisterPopup = ({ onClose }) => {
                         <select
                           onFocus={() => setIsYearFocused(true)}
                           onBlur={() => setIsYearFocused(false)}
-                          className={`text-white h-16 bg-black ${
+                          className={`dark:text-white h-16 dark:bg-black ${
                             isYearFocused
                               ? "border-blue-600"
-                              : "border-gray-600"
+                              : "border-gray-300 dark:border-gray-600"
                           } border-2 rounded-md w-full text-bottom pt-4`}
                           value={year}
                           onChange={(e) => setYear(e.target.value)}
@@ -449,7 +443,7 @@ const RegisterPopup = ({ onClose }) => {
                     <div className="w-full mt-[68px]">
                       <button
                         onClick={() => handleNextClick.bind(this, 1)()}
-                        className={`bg-white hover:bg-gray-200  font-semibold py-2 px-4 rounded-full w-full h-12 disabled:opacity-50 transition-all`}
+                        className={`bg-gray-900 text-white dark:text-black dark:bg-white dark:hover:bg-gray-200  font-semibold py-2 px-4 rounded-full w-full h-12 disabled:opacity-50 transition-all`}
                         disabled={
                           user.name.length < 4 ||
                           user.email.length < 4 ||
@@ -469,16 +463,16 @@ const RegisterPopup = ({ onClose }) => {
 
                 {currentPage === 2 && (
                   <>
-                    <h2 className="text-white font-extrabold my-6 text-[29px]">
+                    <h2 className="dark:text-white font-extrabold my-6 text-[29px]">
                       Customize your experience
                     </h2>
                     <div className="overflow-scroll overflow-x-hidden h-[420px]">
                       {/* Blokc */}
                       <div className="relative h-20 mb-5">
-                        <h3 className="text-white text-lg font-bold mb-3">
+                        <h3 className="dark:text-white text-lg font-bold mb-3">
                           Get more out of X
                         </h3>
-                        <p className="text-gray-300 text-sm pr-12 font-thin">
+                        <p className="dark:text-gray-300 text-sm pr-12 font-thin">
                           Receive email about your X activity and
                           recommendations.
                         </p>
@@ -499,10 +493,10 @@ const RegisterPopup = ({ onClose }) => {
                       </div>
                       {/* Blokc */}
                       <div className="relative h-20 mb-5">
-                        <h3 className="text-white text-lg font-bold mb-3">
+                        <h3 className="dark:text-white text-lg font-bold mb-3">
                           Connect with people you know
                         </h3>
-                        <p className="text-gray-300 text-sm pr-12 font-thin">
+                        <p className="dark:text-gray-300 text-sm pr-12 font-thin">
                           Let others find your X account by your email address.
                         </p>
                         <div className="absolute right-0 top-7">
@@ -522,10 +516,10 @@ const RegisterPopup = ({ onClose }) => {
                       </div>
                       {/* Blokc */}
                       <div className="relative h-30 mb-5">
-                        <h3 className="text-white text-lg font-bold mb-3">
+                        <h3 className="dark:text-white text-lg font-bold mb-3">
                           Personalized ads
                         </h3>
-                        <p className="text-gray-300 text-sm pr-12 font-thin">
+                        <p className="dark:text-gray-300 text-sm pr-12 font-thin">
                           You will always see ads on X based on your X activity.
                           When this setting is enabled, X may further
                           personalize ads from X advertisers, on and off X, by
@@ -562,7 +556,7 @@ const RegisterPopup = ({ onClose }) => {
                     <div className="w-full mt-6">
                       <button
                         onClick={() => handleNextClick.bind(this, 2)()}
-                        className={`bg-white hover:bg-gray-200  font-semibold py-2 px-4 rounded-full w-full h-12 disabled:opacity-50 transition-all`}
+                        className={`bg-black text-white hover:bg-gray-800 dark:text-black dark:bg-white dark:hover:bg-gray-200  font-semibold py-2 px-4 rounded-full w-full h-12 disabled:opacity-50 transition-all`}
                       >
                         Next
                       </button>
@@ -572,14 +566,14 @@ const RegisterPopup = ({ onClose }) => {
 
                 {currentPage === 3 && (
                   <>
-                    <h2 className="text-white font-bold my-6 text-2xl">
+                    <h2 className="dark:text-white font-bold my-6 text-2xl">
                       Create your account
                     </h2>
                     <div className="relative h-14">
                       <input
                         onFocus={handle3rdPageInputClick.bind(this, "name")}
                         onBlur={() => setIsNameFocused(false)}
-                        className={`text-white h-14 w-full flex items-center bg-black border-gray-600 border-2  rounded-md p-3 pt-8 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all`}
+                        className={`dark:text-white h-14 w-full flex items-center dark:bg-black border-gtay-300 dark:border-gray-600 border-2  rounded-md p-3 pt-8 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all`}
                         value={user.name}
                         onChange={(e) =>
                           setUser({
@@ -589,7 +583,7 @@ const RegisterPopup = ({ onClose }) => {
                         }
                       />
                       <label
-                        className={`absolute left-3 top-4 m-0 p-0 bg-black ${
+                        className={`absolute left-3 top-4 m-0 p-0 dark:bg-black ${
                           isNameFocused ? "text-blue-600" : "text-gray-600"
                         } text-sm transition-all ${
                           isNameFocused || user.name
@@ -609,14 +603,14 @@ const RegisterPopup = ({ onClose }) => {
                         onFocus={handle3rdPageInputClick.bind(this, "email")}
                         onBlur={() => setIsEmailFocused(false)}
                         type="email"
-                        className={`text-white h-14 w-full flex items-center bg-black border-gray-600 border-2  rounded-md p-3 pt-8 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all`}
+                        className={`dark:text-white h-14 w-full flex items-center dark:bg-black border-gray-300 dark:border-gray-600 border-2  rounded-md p-3 pt-8 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all`}
                         value={user.email}
                         onChange={(e) =>
                           setUser({ ...user, email: e.target.value })
                         }
                       />
                       <label
-                        className={`absolute left-3 top-4 m-0 p-0 bg-black ${
+                        className={`absolute left-3 top-4 m-0 p-0 dark:bg-black ${
                           isEmailFocused ? "text-blue-600" : "text-gray-600"
                         }  transition-all ${
                           isEmailFocused || user.email
@@ -634,11 +628,11 @@ const RegisterPopup = ({ onClose }) => {
                       <input
                         onFocus={handle3rdPageInputClick.bind(this, "DOB")}
                         type="text"
-                        className={`text-white h-14 w-full flex items-center bg-black border-gray-600 border-2  rounded-md p-3 pt-8 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all`}
+                        className={`dark:text-white h-14 w-full flex items-center dark:bg-black border-gray-300 dark:border-gray-600 border-2  rounded-md p-3 pt-8 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all`}
                         value={formattedDOB}
                       />
                       <label
-                        className={`absolute left-3 top-4 m-0 p-0 bg-black ${
+                        className={`absolute left-3 top-4 m-0 p-0 dark:bg-black ${
                           isEmailFocused ? "text-blue-600" : "text-gray-600"
                         }  transition-all ${
                           isEmailFocused || user.email
@@ -673,7 +667,7 @@ const RegisterPopup = ({ onClose }) => {
 
                 {currentPage === 4 && (
                   <>
-                    <h2 className="text-white font-bold mt-6 text-2xl">
+                    <h2 className="dark:text-white font-bold mt-6 text-2xl">
                       We sent you a code
                     </h2>
                     <p className="text-gray-600 text-sm mt-2">
@@ -683,7 +677,7 @@ const RegisterPopup = ({ onClose }) => {
                       <input
                         onFocus={() => setIsNameFocused(true)}
                         onBlur={() => setIsNameFocused(false)}
-                        className={`text-white h-14 w-full flex items-center bg-black border-gray-600 border-2  rounded-md p-3 pt-8 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all`}
+                        className={`dark:text-white h-14 w-full flex items-center dark:bg-black border-gray-300 dark:border-gray-600 border-2  rounded-md p-3 pt-8 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all`}
                         value={verificationInput}
                         onChange={(e) =>
                           setverificationInput(e.target.value.slice(0, 6))
@@ -697,7 +691,7 @@ const RegisterPopup = ({ onClose }) => {
                         }}
                       />
                       <label
-                        className={`absolute left-3 top-4 m-0 p-0 bg-black ${
+                        className={`absolute left-3 top-4 m-0 p-0 dark:bg-black ${
                           isNameFocused ? "text-blue-600" : "text-gray-600"
                         } transition-all ${
                           isNameFocused || VerificationCode
@@ -720,7 +714,7 @@ const RegisterPopup = ({ onClose }) => {
                     <div className="w-full mt-[320px]">
                       <button
                         onClick={handleNextClick.bind(this, 4)}
-                        className={`bg-white hover:bg-gray-200 text-black text-base font-semibold py-2 px-4 rounded-full w-full h-12 disabled:opacity-50 transition-all`}
+                        className={`bg-black dark:bg-white dark:hover:bg-gray-200 hover:bg-gray-800 text-white dark:text-black text-base font-semibold py-2 px-4 rounded-full w-full h-12 disabled:opacity-50 transition-all`}
                         disabled={VerificationCode.length < 6}
                       >
                         Next
@@ -731,7 +725,7 @@ const RegisterPopup = ({ onClose }) => {
 
                 {currentPage === 5 && (
                   <>
-                    <h2 className="text-white font-bold mt-6 text-2xl">
+                    <h2 className="dark:text-white font-bold mt-6 text-2xl">
                       You'll need a password
                     </h2>
                     <p className="text-gray-600 text-sm mt-2">
@@ -746,7 +740,7 @@ const RegisterPopup = ({ onClose }) => {
                         onChange={(e) =>
                           setUser({ ...user, password: e.target.value })
                         }
-                        className="bg-black text-white w-full h-[60px] rounded-md p-4 pt-7 pr-14 border-gray-900 border-2 focus:outline-none focus:border-blue-600 transition-all "
+                        className="dark:bg-black dark:text-white w-full h-[60px] rounded-md p-4 pt-7 pr-14 border-gray-300 dark:border-gray-900 border-2 focus:outline-none focus:border-blue-600 transition-all "
                       />
                       <label
                         htmlFor="email"
@@ -765,9 +759,9 @@ const RegisterPopup = ({ onClose }) => {
                           onClick={() => setTogglePassword(!togglePassword)}
                         >
                           {togglePassword ? (
-                            <FaEyeSlash className="text-gray-100 text-2xl" />
+                            <FaEyeSlash className="dark:text-gray-100 text-2xl" />
                           ) : (
-                            <FaRegEye className="text-gray-100 text-2xl" />
+                            <FaRegEye className="dark:text-gray-100 text-2xl" />
                           )}
                         </button>
                       </div>
@@ -777,7 +771,7 @@ const RegisterPopup = ({ onClose }) => {
                     <div className="w-full mt-[370px]">
                       <button
                         onClick={handleNextClick.bind(this, 5)}
-                        className={`bg-white hover:bg-gray-200 text-black text-base font-semibold py-2 px-4 rounded-full w-full h-12 disabled:opacity-50 transition-all`}
+                        className={`dark:bg-white dark:hover:bg-gray-200 bg-black text-white hover:bg-gray-800 dark:text-black text-base font-semibold py-2 px-4 rounded-full w-full h-12 disabled:opacity-50 transition-all`}
                         disabled={user.password.length < 8}
                       >
                         Next

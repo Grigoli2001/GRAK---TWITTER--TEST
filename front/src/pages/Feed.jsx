@@ -6,23 +6,12 @@ import { TabsList  } from '@mui/base/TabsList';
 import { TabPanel  } from '@mui/base/TabPanel';
 import { Button } from '../components/Button'
 import { Outlet } from 'react-router-dom';
+import FollowingFallBack from '../components/FollowingFallBack';
+import TweetFallBack from '../components/TweetFallBack';
 
 // icons
 import { FiSettings } from "react-icons/fi";
 
-
-const FollowingFallBack = () => { 
-  return (
-  
-      <div className="flex flex-col  mx-auto max-w-[300px] gap-y-6 p-4 text-justify">
-          <h4 className='text-4xl font-bold'>Welcome to X</h4>
-          <p className='text-slate-500 '>This is the best place to see what's happening in your world. Find some people and topics to follow now.</p>
-          <Button className='mt-4 '>Let's go</Button>
-      </div>
-      
-    
-  )
-}
 
 const Feed = () => {
    
@@ -43,11 +32,11 @@ const Feed = () => {
         <TweetCreate />
         
         <TabPanel>
-          <Tweets api={'for-you'} />
+          <Tweets api={"for-you"} FallBackComponent={TweetFallBack()}/>
         </TabPanel>
 
         <TabPanel >
-          <Tweets api={'following'} FallBackComponent={FollowingFallBack} />
+          <Tweets api={'following'} FallBackComponent={FollowingFallBack()} />
         </TabPanel>
       </section>
 
