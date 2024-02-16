@@ -275,18 +275,16 @@ const EditProfileModal = ({ backTo }) => {
 
 export const ProfileModalRoutes = (backTo) => {
   return (
-    <>
-      <Route path=":username">
-        <Route
-          path="cover"
-          element={<PhotoModal type={"cover"} backTo={backTo} />}
-        />
-        <Route
-          path="photo"
-          element={<PhotoModal type={"photo"} backTo={backTo} />}
-        />
-      </Route>
-    </>
+    <Route path=":username">
+      <Route
+        path="cover"
+        element={<PhotoModal type={"cover"} backTo={backTo} />}
+      />
+      <Route
+        path="photo"
+        element={<PhotoModal type={"photo"} backTo={backTo} />}
+      />
+    </Route>
   );
 };
 

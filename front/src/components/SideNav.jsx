@@ -1,7 +1,7 @@
 // React Imports
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import { showUsername } from "../utils/utils";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 // icons
 import { GoHomeFill, GoSearch } from "react-icons/go";
 import { HiMiniBell } from "react-icons/hi2";
@@ -28,6 +28,7 @@ import { UserContext } from "../context/testUserContext";
 
 // context
 import useAppStateContext from "../hooks/useAppStateContext";
+import { SocketContext } from "../context/socketContext";
 
 const SideNavTab = ({ text, icon, notif, url }) => {
     return (
@@ -36,20 +37,19 @@ const SideNavTab = ({ text, icon, notif, url }) => {
         to={url}
             className={`group w-fit flex items-center justify-start text-xl p-4 bg-white rounded-full hover:bg-slate-200 transition-colors duration-100 cursor-pointer`}
       >
-                <span className="text-black mx-4 relative group-[.active]:font-bold group-[.actvie]:text-lg"> 
-                    {icon}
-                    {notif && notif.value > 0 && (
-            <span
-              className={cn(
-                "absolute -top-2 -right-1 bg-twitter-blue rounded-full text-white text-xs px-1",
-                {
-                  "animate-pulse py-1": notif.type === "indicator",
-                }
-              )}
-            >
-              {notif.type !== "indicator" && notif.value}
-                </span>
-                )}
+        <span className="text-black mx-4 relative group-[.active]:font-bold group-[.actvie]:text-lg">
+          {icon}
+          {
+          (notif && notif.value > 0) && 
+            <span 
+            className={cn('absolute -top-2 left-[50%] bg-twitter-blue rounded-full text-white text-xs px-1',{
+              'animate-pulse py-1': notif.type ==='indicator'
+            })}>
+              { notif.type !== "indicator" && 
+                notif.value > 99 ? '99+' : notif.value 
+              }
+            </span> 
+          }
         </span>
         <span className="pr-4 group-[.active]:font-bold">{text}</span>
             </NavLink>
@@ -96,63 +96,105 @@ const ProfileTab = ({ user }) => {
 };
 
 const SideNav = () => {
-const { user } = useContext(UserContext);
+  const { user } = useContext(UserContext);
+  const { socket } = useContext(SocketContext)
+  const location = useLocation();
+  const [ options, setOptions ] = useState([
+    {
+      title: "Home",
+      icon: <GoHomeFill />,
+      url: "/home",
+      notif: {
+        type: 'indicator',
+        value: 0
+      }
+    },
+    {
+      title: "Explore",
+      icon: <GoSearch />,
+      url: "/explore",
+      notif: {
+        type: 'count',
+        value: 0
+      }
+    },
+    {
+      title: "Notifications",
+      icon: <HiMiniBell />,
+      url: "/notifications",
+      notif: {
+        type: 'count',
+        value: 0
+      }
+    },
+    {
+      title: "Messages",
+      icon: <FaRegEnvelope />,
+      url: "/messages",
+      notif: {
+        type: 'count',
+        value: 0
+      }
+    },
+    {
+      title: "Bookmarks",
+      icon: <FaRegBookmark />,
+      url: "/bookmarks",
+      notif: {
+        type: 'count',
+        value: 0
+      }
+    },
+    {
+      title: "Profile",
+      icon: <IoPersonOutline />,
+      url: `/${user.username}`,
+      notif: {
+        type: 'count',
+        value: 0
+      }
+    },
+  ])
 
-    // options for side nav for ui purposes only: TODO: will update to use Tab Nav
-let options = [
-{
-        title: "Home", 
-        icon: <GoHomeFill />,
-        url: "/home",
-      notif: {
-        value: 1,
-        type: "indicator",
-      },
-    }, 
-    {
-        title: "Explore", 
-        icon: <GoSearch />,
-        url: "/explore",
-      notif: {
-        value: 2,
-      }, 
-    }, 
-    {
-        title: "Notifications", 
-        icon: <HiMiniBell />,
-        url: "/notifications",
-    }, 
-    {
-        title: "Messages", 
-        icon: <FaRegEnvelope />,
-        url: "/messages",
-    }, 
-    {
-        title: "Bookmarks", 
-        icon: <FaRegBookmark />,
-        url: "/bookmarks",
-    }, 
-    {
-        title: "Profile", 
-        icon: <IoPersonOutline />,
-        url: `/${user.username}`,
-    }, 
-];
-    return (
-        <div className="h-screen sticky top-0 border-r border-r-gray-200 p-4 flex flex-1 flex-col max-w-[275px]">
-            <nav>
-                <NavLink to="/home" className="">
-          <Button
-            variant="icon"
-            className="text-4xl ml-5 p-3 rounded-full hover:bg-slate-200 text-black"
-          >
-                    <BsTwitterX className="" />
-</Button>
-                </NavLink>
-                <ul className="list-none">
-                    {/* TODO dont use map and use notifs as state */}
-                    {options.map((option, index) => {
-                            return (
+  useEffect(() => {
+    
+
+    const handleNewNotification = (notif) => {
+      
+       console.log('new notification', notif)
+      const newOptions = options.map(option => {
+        if (option.title === notif.title) {
+          return {
+            ...option,
+            notif: {
+              ...option.notif,
+              value: option.notif.value += 1
+            }
+          }
+        }
+        return option
+      })
+      setOptions(newOptions)
+    }
+    socket?.on('notification:new', handleNewNotification)
+
+    return () => {
+      socket?.off('notification:new', handleNewNotification)
+    }
+  }, [socket]);
+
+  return (
+    <div className="h-screen sticky top-0 border-r border-r-gray-200 p-4 flex flex-1 flex-col max-w-[275px]">
+      <nav>
+        <NavLink to="/home" className="">
+          <Button variant="icon" className="text-4xl ml-5 p-3 rounded-full hover:bg-slate-200 text-black">
+            <BsTwitterX className="" />
+          </Button>
+        </NavLink>
+        <ul className="list-none">
+          {/* TODO dont use map and use notifs as state */}
+          {options.map((option, index) => {
+            return (
               <SideNavTab
                 key={index}
                 text={option.title}
@@ -164,7 +206,7 @@ let options = [
           })}
 
                     <li>
-<Popover
+              <Popover
               placement="top-start"
               offset={{
                 mainAxis: -75,
@@ -197,7 +239,7 @@ let options = [
                                         <li className="hover:bg-slate-200/50 p-4 cursor-pointer flex items-center gap-2 whitespace-nowrap  ">
                                                 <FiSettings /> Settings and Privacy
                                                                 </li>
-</NavLink>
+              </NavLink>
                 </ul>
               </PopoverContent>
             </Popover>
@@ -205,11 +247,9 @@ let options = [
                 </ul>
             </nav>
 
-            <NavLink to="/compose/tweet" className="my-3 w-full flex">
-        <Button size="lg" className="w-full">
-          Post
-        </Button>
-      </NavLink>
+            <NavLink to="/compose/tweet" state={{ background: location }} className="my-3 w-full flex">
+             <Button size="lg" className="w-full">Post</Button>
+            </NavLink>
 
             <ProfileTab user={user} />
         </div>

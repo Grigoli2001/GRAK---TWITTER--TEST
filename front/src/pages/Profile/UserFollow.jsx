@@ -67,15 +67,15 @@ const UserFollow = ({api}) => {
       
               <section>
                 <TabPanel value={`/${username}/verified-followers`}>
-                  <UserDisplayer api={api} limit={4}  withCard={true}/>
+                  <UserDisplayer api={api} limit={4}  withCard withFollow withNavTo={'/'} />
                 </TabPanel>
       
                 <TabPanel value={`/${username}/followers`}>
-                    <UserDisplayer api={api} limit={3} withCard={true} />
+                    <UserDisplayer api={api} limit={3} withCard withFollow withNavTo={'/'} />
                 </TabPanel>
 
                 <TabPanel value={`/${username}/following`}>
-                    <UserDisplayer api={api} limit={2} withCard={true} />
+                    <UserDisplayer api={api} limit={2} withCard withFollow withNavTo={'/'} />
                 </TabPanel>
               
             </section>

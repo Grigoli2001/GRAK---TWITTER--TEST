@@ -47,7 +47,7 @@ const RightNav = ({includeRenderWidgets=[]}) => {
 
                 {includeRenderWidgets?.includes('WhoToFollow') &&
                 <Widget title={location.pathname.includes(`/${user.username}`) ?  " You might Like ": " Who to follow " }>
-                        <UserDisplayer limit={3} withCard={true}/>
+                        <UserDisplayer limit={3} withCard withFollow withNavTo="/" />
                         <NavLink to={`/i/connect-people`} >
                             <div className='p-4 hover:bg-slate-200/50 cursor-pointer text-twitter-blue hover:underline text-sm'>
                                 <span>Show more</span>

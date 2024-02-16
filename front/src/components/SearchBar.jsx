@@ -13,7 +13,7 @@ import { tags, users } from '../constants/feedTest';
  * TODO: add search results component
  */
 
-const SearchBar = ({fetchResults, resultComponent, className}) => {
+const SearchBar = ({fetchResults, resultComponent, className, ...props}) => {
 
     const [search, setSearch] = useState('')
     const [results, setResults] = useState([])
@@ -66,10 +66,6 @@ const SearchBar = ({fetchResults, resultComponent, className}) => {
             return 
         }
 
-        // test
-       
-
-// Usage
         searchResults(users, tags, value);
 
         // show results
@@ -85,7 +81,7 @@ const SearchBar = ({fetchResults, resultComponent, className}) => {
         onChange={handleSearch}
         autoComplete="off"
         name="search"
-        placeholder="Search"
+        placeholder={props.placeholder ?? 'Search'}
         className="border-none outline-none bg-transparent w-full pl-4 pr-2 placeholder:text-gray-600"
         />
     
@@ -102,7 +98,7 @@ const SearchBar = ({fetchResults, resultComponent, className}) => {
                         return(
 
                         result.type === 'user' ?
-                            <UserBlock key={index} user={result.value} withNav={true}/>
+                            <UserBlock key={index} user={result.value} withNav={'/'}/>
                         :
                              <div key={index} 
                              className={cn('flex  items-center gap-4 p-4 text-black border-gray-200 border-solid font-bold hover:bg-slate-200/50 cursor-pointer',{

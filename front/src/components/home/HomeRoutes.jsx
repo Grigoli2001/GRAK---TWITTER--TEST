@@ -12,10 +12,9 @@ const TweetCreateModal = ({backTo}) =>{
     return (
         <NavModal backTo={backTo}>
             <div className='bg-white p-6 rounded-2xl mb-auto mt-12 relative w-fit'>
-                
-            <Button onClick={() => navigate(backTo || -1) } variant="icon" tooltip={'Close'} size="icon-sm" className="top-4 left-4 text-black bg-transparent hover:bg-gray-200/75 transition-colors duration-300">
-                        <FaXmark  />
-                    </Button>
+                <Button onClick={() => navigate(backTo || -1) } variant="icon" tooltip={'Close'} size="icon-sm" className="top-4 left-4 text-black bg-transparent hover:bg-gray-200/75 transition-colors duration-300">
+                    <FaXmark />
+                </Button>
                 <TweetCreate onModal={true}/>
             </div>
         </NavModal>

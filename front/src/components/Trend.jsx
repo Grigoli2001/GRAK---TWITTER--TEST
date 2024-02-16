@@ -25,7 +25,6 @@ const Trend = ({index, category, title, numTweets, isWidget}) => {
               <span className={`${textSize} text-slate-500`}>{quantiyFormat(numTweets)} posts</span>
           </div>
 
-            {/*TODO: add transiton to dialog */}
           <Popover placement='left' offset={{ crossAxis: 20 }}>
             <PopoverHandler className='text-slate-800 p-2 self-start cursor-pointer rounded-full hover:bg-twitter-blue/15 hover:text-twitter-blue'>
               <div>

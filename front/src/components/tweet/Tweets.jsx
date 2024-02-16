@@ -18,6 +18,7 @@ const Tweets = ({api, FallBackComponent, asMedia}) => {
   
     const [tweets, setTweets] = useState([])
     const [loading, setLoading] = useState(true)
+    // dummy followCollection
     const followCollection = users[0].following
 
       // api will determine the user for now use the context
@@ -47,18 +48,17 @@ const Tweets = ({api, FallBackComponent, asMedia}) => {
               break;
             case 'for-you':
               setTweets(allTweets)
-              // setTweets(forYouTweets)
               break;
             case 'bookmarks':
-              let bookmarked = ([...forYouTweets, ...followedTweets]).filter((tweet) => tweet.bookmarked)
+              let bookmarked = ([...forYouTweets]).filter((tweet) => tweet.bookmarked)
               setTweets(bookmarked)
               break;
             case 'myposts':
-              let myPosts = ([...forYouTweets, ...followedTweets]).filter((tweet) => tweet.userId === user.id)
+              let myPosts = ([...forYouTweets]).filter((tweet) => tweet.userId === user.id)
               setTweets(myPosts)
               break;
             case 'media':
-              let media = ([...forYouTweets, ...followedTweets]).filter((tweet) => tweet.media)
+              let media = ([...forYouTweets]).filter((tweet) => tweet.media)
               setTweets(media)
               break;
 

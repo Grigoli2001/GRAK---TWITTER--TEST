@@ -1,17 +1,9 @@
-import TextCounter from "./tweet/TextCounter";
-import { cn } from "../utils/style";
-import { TextareaAutosize } from "@mui/base/TextareaAutosize";
+import TextCounter from './tweet/TextCounter'
+import { cn } from '../utils/style'
+import { TextareaAutosize } from '@mui/base/TextareaAutosize';
 
-const CustomInput = ({
-  name,
-  handleUpdate,
-  maxLength,
-  value,
-  placeholder,
-  withTextCount,
-  asTextArea,
-}) => {
-  const InputComponent = asTextArea ? TextareaAutosize : "input";
+const CustomInput = ({name, handleUpdate, value, maxLength, placeholder, withTextCount, asTextArea}) => {
+ const InputComponent = asTextArea ? TextareaAutosize : 'input'
   return (
     <div className="focus-within:border-twitter-blue border border-slate-300 relative flex items-center gap-2 rounded-md">
       <InputComponent

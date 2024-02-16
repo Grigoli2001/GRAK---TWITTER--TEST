@@ -8,9 +8,8 @@ import {
 } from "react";
 import { useNavigate } from "react-router-dom";
 import { Avatar } from "@material-tailwind/react";
-import { defaultAvatar } from "../utils/utils";
 import { MdVerified } from "react-icons/md";
-import { showUsername } from "../utils/utils";
+import { showUsername, defaultAvatar } from "../utils/utils";
 import { NavLink } from "react-router-dom";
 import { FollowButton } from "./FollowButton";
 import { UserContext } from "../context/testUserContext";
@@ -48,7 +47,7 @@ const textSizes = {
 export const UserBlock = ({
   user,
   children,
-  withNav,
+  withNavTo,
   avatarSize = "md",
   textSize = "sm",
   withCard,
@@ -64,9 +63,8 @@ export const UserBlock = ({
     setPrevTest(textSizes[keys[index - 1]] ?? "text-xs");
   }, [textSize]);
 
-  const BaseBlock = withNav ? NavLink : "div";
-  const navProps = withNav ? { to: `/${user.username}` } : {};
-
+  const BaseBlock = withNavTo ? NavLink : "div";
+  const navProps = withNavTo ? { to: `${withNavTo}${user.username}` } : {};
   const CardBlock = withCard ? UserCard : Fragment;
 
   return (
@@ -159,7 +157,14 @@ export const UserCard = ({ user, children }) => {
   );
 };
 
-export const UserDisplayer = ({ api, limit, withCard, FallbackComponent }) => {
+export const UserDisplayer = ({
+  api,
+  limit,
+  withCard,
+  withNavTo,
+  withFollow,
+  FallbackComponent,
+}) => {
   const { user } = useContext(UserContext);
   const [userBlocks, setUserBlocks] = useState([]);
 
@@ -182,12 +187,14 @@ export const UserDisplayer = ({ api, limit, withCard, FallbackComponent }) => {
                 user={user}
                 avatarSize="sm"
                 textSize="lg"
-                withNav={true}
+                withNavTo={withNavTo}
                 withCard={withCard}
               >
-                <div className="ml-auto">
-                  <FollowButton followed={false} size="sm" />
-                </div>
+                {withFollow && (
+                  <div className="ml-auto">
+                    <FollowButton followed={false} size="sm" />
+                  </div>
+                )}
               </UserBlock>
             );
           })

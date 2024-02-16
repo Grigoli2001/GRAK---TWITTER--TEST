@@ -11,11 +11,11 @@ import { Tooltip } from '@material-tailwind/react'
  */
 
 export const buttonVariants = cva(
-      'capitalize text-white font-bold rounded-full [&>*]:cursor-pointer',
+      'capitalize text-white font-bold rounded-full [&>*]:cursor-pointer [&>*]:disabled:cursor-not-allowed disabled:cursor-not-allowed',
       {
       variants:{
           variant:{
-            default: 'bg-twitter-blue hover:bg-twitter-blue/80 border  text-white font-bold rounded-full disabled:bg-trasnparent disabled:text-twitter-blue/50',
+            default: 'bg-twitter-blue hover:bg-twitter-blue/80 border  text-white font-bold rounded-full disabled:bg-twitter-blue/50',
             outlined: 'border border-slate-300 text-black hover:bg-slate-200 disabled:bg-slate-200 disabled:text-slate-100',
             dark: 'bg-black border border-transparent hover:bg-slate-800/75', // switch to border transparent to avoid resizing between states when swapping buttons from outlined to dark and vice versa & fixed 2 hover colors to one
             text: 'hover:bg-slate-200', 
@@ -35,14 +35,12 @@ export const buttonVariants = cva(
     }  
 )
 
+export const Button = forwardRef(({className, size, variant, ripple,elevate,  ...props}, ref) => {
 
-
-export const Button = forwardRef(({className, size, variant, ripple,elevate,disabled,  ...props}, ref) => {
-
-  const Parent = (props.tooltip && !disabled) ? Tooltip : React.Fragment
+  const Parent = (props.tooltip && !props.disabled) ? Tooltip : React.Fragment
 
   return (
-    <Parent { ...((props.tooltip && !disabled) &&  { content:props.tooltip, placement:"bottom", color:"light", className:"z-[1000] !text-sm" })}>
+    <Parent { ...((props.tooltip && !props.disabled) &&  { content:props.tooltip, placement:"bottom", color:"light", className:"z-[1000] !text-xs" })}>
       <BaseButton className={cn(buttonVariants({size, variant, className}))} {...props} ref={ref}>
         {props.children}
       </BaseButton>

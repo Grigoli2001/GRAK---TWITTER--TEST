@@ -1,12 +1,7 @@
-.message-history div:last-child {
-  margin-bottom: 15px;
-}
-
 .msgtaskbar {
     background-color: rgba(255, 255, 255, 0.7); 
     backdrop-filter: blur(12px);
 }
-
 
 .user.active{
     background-color: #e6e6e6;
@@ -14,14 +9,32 @@
     width: 100%;
 }
 
-.last-message p{
-    display: block;
-}
 
-.last-message .msgSend{
-    border-bottom-right-radius: 4px;
-}
-
-.last-message .msgReceive{
-    border-bottom-left-radius: 4px;
-}
+/* typing animation */
+  .tdot {
+    animation: loadingFade 1.3s infinite;
+  }
+  
+  .tdot:nth-child(1) {
+    animation-delay: 0s;
+  }
+  
+  .tdot:nth-child(2) {
+    animation-delay: 0.3s;
+  }
+  
+  .tdot:nth-child(3) {
+    animation-delay: 0.6s;
+  }
+  
+  @keyframes loadingFade {
+    0% {
+      opacity: 0;
+    }
+    50% {
+      opacity: 0.8;
+    }
+    100% {
+      opacity: 0;
+    }
+  }

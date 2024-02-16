@@ -3,7 +3,8 @@ export function showUsername(user) {
     return `@${user?.username}`;
 }
 
-export const defaultAvatar = "https://pbs.twimg.com/profile_images/1707730440331673600/oZeLdbKN_bigger.png"
+// export const defaultAvatar = "https://pbs.twimg.com/profile_images/1707730440331673600/oZeLdbKN_bigger.png"
+export const defaultAvatar = "https://abs.twimg.com/sticky/default_profile_images/default_profile_bigger.png"
 
 export function timeAgo (date) {
     // returns a date in a time ago format
@@ -27,7 +28,7 @@ export function timeAgo (date) {
     if (interval >= 1) return interval + "h";
 
     interval = Math.floor(seconds / 60);
-    if (interval > 1) return interval + "m ";
+    if (interval > 1) return interval + "min";
 
     return Math.floor(seconds) + "s";
 }
@@ -94,3 +95,12 @@ export function getDaysInMonth(year, month) {
   
     return daysInMonth;
   }
+
+  export const evalRoom = (user, otherUser) => {
+    if (!user || !otherUser) return null
+    return [ user?.id, otherUser?.id ].sort().join('-')
+}
+
+  export const dayOptions = Array.from(Array(7), (_, i) => i+1)
+  export const hourOptions = Array.from(Array(23), (_, i) => i+1)
+  export const minuteOptions = Array.from(Array(59), (_, i) => i+1)
