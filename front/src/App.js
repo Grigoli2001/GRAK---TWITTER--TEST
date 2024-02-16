@@ -42,6 +42,7 @@ import PublicRoute from "./routes/PublicRoute";
 
 // test
 import ForgotPassword from "./components/authComponents/ForgotPassword";
+import AfterRegistrationPopup from "./components/authComponents/AfterRegistrationPopup";
 function App() {
   const location = useLocation();
   const background = location.state?.background;
@@ -62,6 +63,10 @@ function App() {
             />
           }
         >
+          <Route
+            path="/AfterRegistration"
+            element={<AfterRegistrationPopup />}
+          />
           <Route path="/home" element={<Feed />} />
 
           {/* settings modal route that defaults to feed if routing directly */}

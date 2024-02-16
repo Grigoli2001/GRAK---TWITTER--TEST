@@ -11,7 +11,7 @@ import instance from "../../constants/axios";
 import useAppStateContext from "../../hooks/useAppStateContext";
 import { useNavigate } from "react-router-dom";
 
-const ForgotPassword = ({ onClose, openSignUpFromLogin, Google }) => {
+const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -163,7 +163,7 @@ const ForgotPassword = ({ onClose, openSignUpFromLogin, Google }) => {
           <div>
             <div className="flex flex-row items-center justify-left">
               <button
-                onClick={onClose}
+                onClick={() => navigate("/")}
                 className=" hover:bg-blue-gray-100 dark:hover:bg-blue-gray-900 rounded-full dark:text-white font-bold m-2 p-2"
               >
                 <IoMdClose />

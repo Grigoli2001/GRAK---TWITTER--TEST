@@ -8,18 +8,13 @@ const TestLayout = (props) => {
   return (
     <UserProvider>
       <div className="main-container flex h-full w-full max-w-[1300px] mx-auto">
-
         <SideNav />
 
-        <main className={!props.excludeRightNav ? 'max-w-[650px]' : 'w-full'}>
+        <main className={!props.excludeRightNav ? "max-w-[650px]" : "w-full"}>
           <Outlet />
         </main>
 
-        {
-          !props.excludeRightNav && 
-            <RightNav {...props} />
-
-        }
+        {!props.excludeRightNav && <RightNav {...props} />}
       </div>
     </UserProvider>
   );

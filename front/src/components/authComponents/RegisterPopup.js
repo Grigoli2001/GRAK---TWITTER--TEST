@@ -783,7 +783,6 @@ const RegisterPopup = ({ onClose, user, setUser }) => {
             </div>
           </div>
         )}
-        <ToastContainer />
       </div>
     </div>
   );
