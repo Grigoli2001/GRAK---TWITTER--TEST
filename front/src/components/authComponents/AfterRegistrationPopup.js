@@ -1,6 +1,6 @@
 import ReactLoading from "react-loading";
 import { IoMdClose } from "react-icons/io";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Checkbox } from "@material-tailwind/react";
 import { IoMdArrowBack, IoMdCheckmark } from "react-icons/io";
 import { FiBell } from "react-icons/fi";
@@ -12,6 +12,7 @@ import { useNavigate } from "react-router-dom";
 import { topics } from "../../constants/feedTest";
 import { UserDisplayer } from "../User";
 import { jwtDecode } from "jwt-decode";
+import { UserContext } from "../../context/testUserContext";
 
 const AfterRegistrationPopup = ({ onClose }) => {
   const [loading, setLoading] = useState(false);
@@ -26,8 +27,7 @@ const AfterRegistrationPopup = ({ onClose }) => {
   const token = localStorage.getItem("user")
     ? JSON.parse(localStorage.getItem("user")).token
     : null;
-  const decodedToken = token ? jwtDecode(token) : null;
-  const user = decodedToken.user;
+  const { user, setUser } = useContext(UserContext);
   const [userName, setUserName] = useState(user.username);
   const [profilePic, setProfilePic] = useState(null);
   const [display, setDisplay] = useState("/uploads/default_profile_pic.jpg");
@@ -74,6 +74,7 @@ const AfterRegistrationPopup = ({ onClose }) => {
               if (res.status === 200) {
                 setLoading(false);
                 setCurrentPage(7);
+                setUser({ ...user, username: userName });
               } else {
                 setLoading(false);
                 setIsUsernameAvailable(false);

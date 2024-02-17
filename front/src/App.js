@@ -58,6 +58,7 @@ function App() {
   const justRegistered = localStorage.getItem("justRegistered");
   return (
     <SocketProvider>
+      <UserProvider>
       <Routes>
         <Route element={<PublicRoute />}>
           <Route path="/" element={<LoginPage />} />
@@ -71,7 +72,6 @@ function App() {
         )}
       </Routes>
 
-      <UserProvider>
         <div className="main-container flex h-full w-full max-w-[1300px] mx-auto">
           <SideNav />
 
