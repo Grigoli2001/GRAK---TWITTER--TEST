@@ -1,19 +1,16 @@
 import { io } from 'socket.io-client';
 import { createContext} from 'react';
+import { toast } from 'react-toastify';
 // TODO connect socket when logged in
-const socket = io('http://localhost:4000', 
-                // { autoConnect: false }
-                )
-  // register token 
-  // socket.on('connect', () => {
-  //   console.log('connected')
-  //   socket.emit('authenticate', { token: '123' })
-  // })
-
-  socket.on("connect_error", (err) => {
-    console.log(`connect_error due to ${err.message}`);
+const socket = io('http://localhost:4000', {
+  auth: {
+    token: localStorage.getItem('user')  ? JSON.parse(localStorage.getItem('user')).token : null,
   }
-  )
+});
+
+socket.on("connect_error", (err) => {
+  toast.error(`Your session has expired. Please login again`);
+});
 
 export const SocketContext = createContext({ socket })
 const SocketProvider = ({ children }) => { 
