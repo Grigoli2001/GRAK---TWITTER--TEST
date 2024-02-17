@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { IoMdClose } from "react-icons/io";
 import { FcGoogle } from "react-icons/fc";
 import { FaApple, FaRegEye, FaEyeSlash } from "react-icons/fa";
@@ -11,6 +11,7 @@ import instance from "../../constants/axios";
 import useAppStateContext from "../../hooks/useAppStateContext";
 import { useNavigate } from "react-router-dom";
 import { createToast } from "../../hooks/createToast";
+import { SocketContext } from "../../context/socketContext";
 
 const LoginPopup = ({ onClose, openSignUpFromLogin, Google }) => {
   const [user, setuser] = useState({
@@ -22,6 +23,7 @@ const LoginPopup = ({ onClose, openSignUpFromLogin, Google }) => {
   const [isEmailFocused, setIsEmailFocused] = useState(false);
   const [isPasswordFocused, setIsPasswordFocused] = useState(false);
   const [togglePassword, setTogglePassword] = useState(false);
+  const {socket} = useContext(SocketContext);
 
   const { dispatch } = useAppStateContext();
 
@@ -61,6 +63,9 @@ const LoginPopup = ({ onClose, openSignUpFromLogin, Google }) => {
         if (response.data.token) {
           dispatch({ type: "Login", payload: response.data });
           setLoading(false);
+          socket.on('connect', () => {
+            console.log('connected');
+          });
           navigate("/home");
         }
       })

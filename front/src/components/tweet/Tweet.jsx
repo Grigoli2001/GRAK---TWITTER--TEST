@@ -93,13 +93,14 @@ const TweetAction = ({
   );
 };
 
-const BaseTweet = ({ tweetUser, post, isLast }) => {
+export const BaseTweet = ({ tweetUser, post, isLast, reply }) => {
   // switch with actual current user
   const currentUser = 123;
   const [postState, setPostState] = useState(post);
   const { user } = useContext(UserContext);
 
   useEffect(() => {
+
     postState?.tweet_likes.forEach(element => {
       if (element.userId === currentUser) {
         setPostState(prev => ({...prev, liked: true, likes: postState.tweet_likes.length}))
@@ -108,21 +109,21 @@ const BaseTweet = ({ tweetUser, post, isLast }) => {
       }
     });
 
-    postState?.tweet_retweets.forEach(element => {
-      if (element.userId === currentUser) {
-        setPostState(prev => ({...prev, retweeted: true, retweets: postState.tweet_retweets.length}))
-      } else {
-        setPostState(prev => ({...prev, retweeted: false, retweets: postState.tweet_retweets.length}))
-      }
-    });
+    // postState?.tweet_retweets.forEach(element => {
+    //   if (element.userId === currentUser) {
+    //     setPostState(prev => ({...prev, retweeted: true, retweets: postState.tweet_retweets.length}))
+    //   } else {
+    //     setPostState(prev => ({...prev, retweeted: false, retweets: postState.tweet_retweets.length}))
+    //   }
+    // });
 
-    postState?.tweet_bookmarks.forEach(element => {
-      if (element.userId === currentUser) {
-        setPostState(prev => ({...prev, bookmarked: true}))
-      } else {
-        setPostState(prev => ({...prev, bookmarked: false}))
-      }
-    });
+    // postState?.tweet_bookmarks.forEach(element => {
+    //   if (element.userId === currentUser) {
+    //     setPostState(prev => ({...prev, bookmarked: true}))
+    //   } else {
+    //     setPostState(prev => ({...prev, bookmarked: false}))
+    //   }
+    // });
   }, [])
 
   const handleLike = (e) => {
@@ -145,28 +146,6 @@ const BaseTweet = ({ tweetUser, post, isLast }) => {
       console.log(error)
     })
   }
-
-  const handleRetweet = () => {
-    console.log('retweeted')
-    setPostState({
-      ...postState,
-      retweeted: !postState.retweeted,
-      retweets: postState.retweeted
-        ? postState.retweets - 1
-        : postState.retweets + 1,
-    });
-
-    instance.post(requests.retweetTweet, {
-      tweetId: postState._id,
-      userId: currentUser
-    })
-    .then((res) => {
-      console.log(res)
-    })
-    .catch((error) => {
-      console.log(error)
-    })
-  };
 
   const handleReply = (e) => {
     e.stopPropagation();
@@ -217,7 +196,7 @@ const BaseTweet = ({ tweetUser, post, isLast }) => {
   return (
     // tweets for feed page, post is diff for single post view
     <div
-      onClick={() => navigate(`/${tweetUser.username}/status/${post.id}`)}
+      onClick={() => navigate(`/${tweetUser.username}/status/${post._id}`)}
       className={cn(
         "tweet w-full h-fit p-4 pb-0 grid grid-cols-[auto_1fr] hover:bg-gray-100 cursor-pointer",
         {
@@ -231,9 +210,15 @@ const BaseTweet = ({ tweetUser, post, isLast }) => {
         className="mr-4 mt-3 self-start"
       >
         <ExtAvatar src={tweetUser?.avatar} size="sm" />
+
+        
       </NavLink>
 
-      <div className="grid gap-y-2">
+      <div className="grid gap-y-2 relative">
+      {reply && (
+          <span className="absolute top-14 bg-slate-400 -left-9  h-[90%] w-[1px] ">
+          </span>
+        )}
         <div
           onClick={(e) => {
             e.stopPropagation();
@@ -264,9 +249,9 @@ const BaseTweet = ({ tweetUser, post, isLast }) => {
           </UserCard>
 
           <span className="text-nowrap">
-            · {timeAgo(postState?.createdAt)}{" "}
+            · {timeAgo(post?.createdAt)}{" "}
           </span>
-          {postState?.updatedAt && (
+          {post?.updatedAt && (
             <span className="text-sm font-medium italic">edited</span>
           )}
 
@@ -293,28 +278,28 @@ const BaseTweet = ({ tweetUser, post, isLast }) => {
         </div>
 
           <div className="text-justify break-words">
-              { postState?.tweetText }
+              { post?.tweetText }
           </div>
 
           { 
-          postState?.tweetMedia && 
-            <TweetMedia mediaType={isValidMediaType(postState?.tweetMedia?.contentType)} src={`data:${postState?.tweetMedia?.contentType};base64,${base64String}`} alt="" />
+          post?.tweetMedia && 
+            <TweetMedia mediaType={isValidMediaType(post?.tweetMedia?.contentType)} src={`data:${post?.tweetMedia?.contentType};base64,${base64String}`} alt="" />
           }
 
           <div className="flex items-center justify-between p-4">
-            <TweetAction Icon={FaRegComment} actionCount={postState?.tweet_comments} title="Reply" color="blue" onClick={handleReply}/>
+            <TweetAction Icon={FaRegComment} actionCount={post?.tweet_comments} title="Reply" color="blue" onClick={handleReply}/>
             
-            <MiniDialog>
+            {/* <MiniDialog>
               <MiniDialog.Wrapper>
                 <MiniDialog.Dialog className='absolute -left-2 right-0 w-fit bg-white rounded-xl shadow-all-round font-bold !outline-none z-10'>
                     <ul className='list-none text-sm'>
-                        <li className='hover:bg-slate-200/50 p-3 cursor-pointer flex items-center gap-2 whitespace-nowrap' onClick={handleRetweet}><FaRetweet/> { postState.retweeted ? 'Undo Repost':'Repost' } </li>
+                        <li className='hover:bg-slate-200/50 p-3 cursor-pointer flex items-center gap-2 whitespace-nowrap' ><FaRetweet/> { postState.retweeted ? 'Undo Repost':'Repost' } </li>
                         <li className='hover:bg-slate-200/50 p-3 cursor-pointer flex items-center gap-2 whitespace-nowrap'><CIQuote/> Quote</li>
                     </ul>
                 </MiniDialog.Dialog>
                 <TweetAction Icon={FaRetweet} actionCount={postState?.retweets} title="Retweet" color="green" isActive={postState.retweeted}/>
               </MiniDialog.Wrapper>
-            </MiniDialog>
+            </MiniDialog> */}
             
 
             <TweetAction
@@ -344,11 +329,12 @@ const BaseTweet = ({ tweetUser, post, isLast }) => {
 };
 
 // todo change naming to currentUser to avoid confusion
-const Tweet = ({ user, post, isLast, asMedia }) => {
+const Tweet = ({ user, post, isLast, asMedia, complete }) => {
+  
   return asMedia ? (
-    <TweetMiniMedia user={user} post={post} />
+    <TweetMiniMedia user={user} post={post} complete={complete}/>
   ) : (
-    <BaseTweet tweetUser={user} post={post} isLast={isLast} />
+    <BaseTweet tweetUser={user} post={post} isLast={isLast} complete={complete}/>
   );
 };
 

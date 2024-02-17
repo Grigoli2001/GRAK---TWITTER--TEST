@@ -101,6 +101,23 @@ export function getDaysInMonth(year, month) {
     return [ user?.id, otherUser?.id ].sort().join('-')
 }
 
+export function TweetTime(date) {
+    const options = {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+    };
+
+    const formattedDate = new Date(date).toLocaleDateString('en-US', options);
+
+    const hours = new Date(date).getHours();
+    const minutes = new Date(date).getMinutes();
+    const format = hours >= 12 ? 'PM' : 'AM';
+    const formattedTime = `${(hours % 12) || 12}:${minutes < 10 ? '0' : ''}${minutes} ${format}`;
+
+    return `· ${formattedTime} · ${formattedDate} ·`;
+}
+
   export const dayOptions = Array.from(Array(7), (_, i) => i+1)
   export const hourOptions = Array.from(Array(23), (_, i) => i+1)
   export const minuteOptions = Array.from(Array(59), (_, i) => i+1)
