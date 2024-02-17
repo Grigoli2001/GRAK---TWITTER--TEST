@@ -20,6 +20,16 @@ import NotificationSettings from "./pages/Settings/NotificationSettings";
 import AccessibilitySettings from "./pages/Settings/AccessibilitySettings";
 import MonetizationSettings from "./pages/Settings/MonetizationSettings";
 import CreatorSettings from "./pages/Settings/CreatorSettings";
+import AccountInfo from "./pages/Settings/AccountInfo";
+import AccountChangePassword from "./pages/Settings/AccountChangePassword";
+import ArchiveInfo from "./pages/Settings/ArchiveInfo";
+import SecurityInfo from "./pages/Settings/SecurityInfo";
+import DeactivateAccount from "./pages/Settings/DeactivateAccount";
+import TwoFactorAuth from "./pages/Settings/TwoFactorAuth";
+import ConnectedAccounts from "./pages/Settings/ConnectedAccounts";
+import DelegateInfo from "./pages/Settings/DelegateInfo";
+import FilterInformation from "./pages/Settings/FilterInformation";
+import Preferences from "./pages/Settings/Preferences";
 
 // layouts
 import MainLayout from "./components/layouts/MainLayout";
@@ -174,16 +184,20 @@ function App() {
                 <Route path="account" element={<AccountSettings />} />
                 <Route path="security" element={<SecuritySettings />} />
                 <Route path="privacy" element={<PrivacySettings />} />
-                <Route
-                  path="notifications"
-                  element={<NotificationSettings />}
-                />
-                <Route
-                  path="accessibility"
-                  element={<AccessibilitySettings />}
-                />
+                <Route path="notifications" element={<NotificationSettings />} />
+                <Route path="accessibility" element={<AccessibilitySettings />} />
                 <Route path="monetization" element={<MonetizationSettings />} />
                 <Route path="creator" element={<CreatorSettings />} />
+                <Route path="account/info" element={<AccountInfo name="Account information"/>} />
+                <Route path="account/change" element={<AccountChangePassword name="Change your password"/>} />
+                <Route path="account/archive" element={<ArchiveInfo name="Archive Details"/>} />
+                <Route path="account/deactivate" element={<DeactivateAccount />} />
+                <Route path="security/security" element={<SecurityInfo />} />
+                <Route path="security/2fa" element={<TwoFactorAuth />} />
+                <Route path="security/connected" element={<ConnectedAccounts />} />
+                <Route path="security/delegate" element={<DelegateInfo />} />
+                <Route path="notifications/filters" element={<FilterInformation />} />
+                <Route path="notifications/preferences" element={<Preferences />} />
               </Route>
             </Route>
 

@@ -1,4 +1,6 @@
-import { createContext,  useEffect, useRef, useState } from 'react'
+import { createContext,  useEffect, useRef, useState, useContext } from 'react'
+import { UserContext } from "../../context/testUserContext";
+
 
 //  components
 import { TextareaAutosize } from '@mui/base/TextareaAutosize';
@@ -34,6 +36,7 @@ import TweetMedia from './TweetMedia';
 export const TweetContext = createContext(null);
 
 const TweetCreate = ({type = 'Post', reference_id = null}) => {
+  const { user } = useContext(UserContext);
   // max length of tweet
   const tweetMaxLength = 300;
   const defaultTweetText = type === 'Post' ? 'What is happening?!' : 'Post your reply';
@@ -159,7 +162,6 @@ const TweetCreate = ({type = 'Post', reference_id = null}) => {
       }
       return false
   }
-
     setCanPost(evalCanPost());
   }, [tweetForm])
 
@@ -173,8 +175,7 @@ const TweetCreate = ({type = 'Post', reference_id = null}) => {
     formData.append('tweetMedia', tweetForm.tweetMedia);
     formData.append('tweetText', tweetForm.tweetText);
     formData.append('tweetType', tweetForm.tweetType);
-    // TODO: change to the current user id
-    formData.append('userId', '3');
+    formData.append('userId', user.id);
     if(type === 'Reply' && reference_id !== null) {
     formData.append('reference_type', 'reply');
     formData.append('reference_id', reference_id);
@@ -205,7 +206,7 @@ const TweetCreate = ({type = 'Post', reference_id = null}) => {
 
 
   // testing
-  const user = users[1];
+  // const user = users[1];
 
   return (
     <TweetContext.Provider value={{tweetForm, setTweetForm}}>

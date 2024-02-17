@@ -180,11 +180,11 @@ export const UserDisplayer = ({
   return (
     <div className="flex flex-col gap-y-4 pb-4">
       {userBlocks.length
-        ? userBlocks.map((user) => {
+        ? userBlocks.map((blockUser) => {
             return (
               <UserBlock
-                key={user.id}
-                user={user}
+                key={blockUser.id}
+                user={blockUser}
                 avatarSize="sm"
                 textSize="lg"
                 withNavTo={withNavTo}
@@ -192,7 +192,7 @@ export const UserDisplayer = ({
               >
                 {withFollow && (
                   <div className="ml-auto">
-                    <FollowButton followed={false} size="sm" />
+                    <FollowButton followerid={blockUser.id} userid={user.id} followed={false} size="sm" />
                   </div>
                 )}
               </UserBlock>
@@ -202,3 +202,5 @@ export const UserDisplayer = ({
     </div>
   );
 };
+
+

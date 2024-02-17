@@ -18,6 +18,9 @@ import { FaArrowLeftLong} from "react-icons/fa6";
 import { IoLocationOutline } from "react-icons/io5";
 import { UserDisplayer } from '../../components/User'
 
+import instance from '../../constants/axios'
+import { followRequests } from '../../constants/requests'
+
 
 const MediaFallBack = ({user, isUser}) => { 
   return (
@@ -120,6 +123,7 @@ const Profile = () => {
   const [ postCount, setPostCount ] = useState(null)
   const [followerCount, setFollowerCount] = useState(null)
   const [followingCount, setFollowingCount] = useState(null)
+  const [ following, setFollowing ] = useState([])
 
   const [ isSetUp, setIsSetUp ] = useState(false)
   // get from user settings
@@ -153,11 +157,23 @@ const Profile = () => {
       setIsSetUp(true)
     }
     
-    setFollowerCount(10)
-    setFollowingCount(10)
-    setPostCount(10)
+    instance
+    .get(followRequests.followers, {params: {followerId: userProfile.id}})
+    .then(res => {
+      setFollowerCount(res.data.length)
+    })
+    .catch(err => console.error(err))
 
-  }, [])
+    instance
+    .get(followRequests.following, {params: {userId: userProfile.id}})
+    .then(res => {
+      setFollowingCount(res.data.length)
+      setFollowing(res.data ? res.data.map(following => following.following) : [])
+    })
+    .catch(err => console.error(err))
+
+    setPostCount(10)
+  }, [userProfile])
 
   const location = useLocation() // used to pass previous location to the router for the cover and profile
   const navigate = useNavigate()
@@ -244,15 +260,20 @@ const Profile = () => {
 
             <div className="ml-auto mr-4 self-end">
 
-            { isUser ?
-
-                  <NavLink to="/settings/profile" state={{ background : location}}>
-                    <Button variant="outlined">
-                      { isSetUp ? 'Edit Profile' : 'Set Up Profile'}
-                    </Button>
-                  </NavLink>
-              :
-                 <FollowButton user={user} size='md' />
+            {
+              isUser ? (
+                <NavLink to="/settings/profile" state={{ background : location}}>
+                  <Button variant="outlined">
+                    { isSetUp ? 'Edit Profile' : 'Set Up Profile'}
+                  </Button>
+                </NavLink>
+              ) : (
+                following.includes(userProfile.id) ? (
+                  <FollowButton followed={true} userid={user.id} followerid={userProfile.id} size='md' />
+                ) : (
+                  <FollowButton followed={false} userid={user.id} followerid={userProfile.id} size='md' />
+                )
+              )
             }
             </div>
 

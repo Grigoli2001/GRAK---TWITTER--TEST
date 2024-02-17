@@ -20,3 +20,10 @@ export const requests = {
   changeUsername: "/profile/changeUsername",
   userPreferences: "/auth/user_preferences",
 };
+
+export const followRequests = {
+  follow: "/user/follow",
+  unfollow: "/user/unfollow",
+  followers: "/user/followers",
+  following: "/user/following",
+};

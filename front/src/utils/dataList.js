@@ -35,26 +35,26 @@ let AccountOptions = [
         title: 'Account Information',
         text: 'See your account information like your phone number and email address.', 
         icon: <CiUser/>,
-        url: '#'
+        url: 'info'
 
     }, 
     {
         title: 'Change your password',
         text: 'Change your password at any time.', 
         icon: <GoKey/>,
-        url: '#', 
+        url: 'change', 
     }, 
     {
         title: 'Download an archive of your data',
         text: 'Get insights into the type of information stored for your account.', 
         icon: <FiDownload/>,
-        url: '#'
+        url: 'archive'
     }, 
     {
         title: 'Deactivate your account',
         text: 'Find out how you can deactivate your account.', 
         icon: <LiaHeartBrokenSolid/>,
-        url: '#'
+        url: 'deactivate'
     }, 
 ]
 
@@ -65,7 +65,7 @@ let SecurityOptions = [
         title: 'Security',
         text: "Manage your account's security.", 
         icon: <PiLockKey/>,
-        url: '#'
+        url: 'security'
 
     }, 
     {
@@ -78,13 +78,13 @@ let SecurityOptions = [
         title: 'Connected accounts',
         text: 'Manage Google or Apple accounts connected to X to log in.', 
         icon: <HiArrowsRightLeft/>,
-        url: '#'
+        url: 'connected'
     }, 
     {
         title: 'Delegate',
         text: 'Manage your shared accounts.', 
         icon: <IoPeopleOutline/>,
-        url: '#'
+        url: 'delegate'
     }, 
 ]
 
@@ -173,13 +173,13 @@ let NotificationOptions = [
         title: 'Filters',
         text: 'Choose the notifications you’d like to see — and those you don’t.',
         icon: <CiSliderHorizontal/>,
-        url: '#'
+        url: 'filters'
     },
     {
         title: 'Preferences',
         text: 'Select your preferences by notification type.',
         icon: <MdOutlineSpeakerPhone/>,
-        url: '#'
+        url: 'preferences'
     },
 ]
 
