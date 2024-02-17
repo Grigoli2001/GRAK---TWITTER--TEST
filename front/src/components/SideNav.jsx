@@ -57,7 +57,7 @@ const SideNavTab = ({ text, icon, notif, url }) => {
     );
 };
 
-const ProfileTab = ({ user }) => {
+export const ProfileTab = ({ user }) => {
 // I added logout because I need for testing
   const { dispatch } = useAppStateContext();
   const navigate = useNavigate();

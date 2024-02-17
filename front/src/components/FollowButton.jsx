@@ -1,6 +1,10 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button } from './Button'
 import { cn } from '../utils/style'
+
+import instance from '../constants/axios'
+import { followRequests } from '../constants/requests'
+
 
 /**
  * Follow button component which takes followed prop
@@ -9,14 +13,19 @@ import { cn } from '../utils/style'
  */
 export const FollowButton = ({followed, ...props}) => {
 
-    const [isFollowed, setIsFollowed] = useState(followed)
+    const { followerid, userid } = props
+    const [isFollowed, setIsFollowed] = useState(followed || false)
     const [isHovered, setIsHovered] = useState(false)
     
     const handleFollow = (evt) => {
         evt.stopPropagation()
         evt.preventDefault()
         setIsFollowed(true)
-        
+    
+        instance
+        .post(followRequests.follow, {userId: userid, followerId: followerid})
+        .then(res => console.log(res))
+        .catch(err => console.error(err))
     }
 
     const handleUnFollow = (evt) => {
@@ -24,7 +33,22 @@ export const FollowButton = ({followed, ...props}) => {
         evt.stopPropagation()
         evt.preventDefault()
         setIsFollowed(false)
+
+        instance
+        .post(followRequests.unfollow, {userId: userid, followerId: followerid})
+        .then(res => console.log(res))
+        .catch(err => console.error(err))
     }
+
+    useEffect(() => {
+        instance
+            .get(followRequests.following, { params: { userId: userid } })
+            .then(res => {
+                const following = res.data.map(follower => follower.following)
+                setIsFollowed(following.includes(followerid))
+            })
+            .catch(err => console.error(err))
+        }, []);
 
     return (
          

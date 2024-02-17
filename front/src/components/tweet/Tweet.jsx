@@ -93,37 +93,36 @@ const TweetAction = ({
   );
 };
 
+
 export const BaseTweet = ({ tweetUser, post, isLast, reply }) => {
-  // switch with actual current user
-  const currentUser = 123;
   const [postState, setPostState] = useState(post);
   const { user } = useContext(UserContext);
 
   useEffect(() => {
 
     postState?.tweet_likes.forEach(element => {
-      if (element.userId === currentUser) {
+      if (element.userId === user.id) {
         setPostState(prev => ({...prev, liked: true, likes: postState.tweet_likes.length}))
       } else {
         setPostState(prev => ({...prev, liked: false, likes: postState.tweet_likes.length}))
       }
     });
 
-    // postState?.tweet_retweets.forEach(element => {
-    //   if (element.userId === currentUser) {
-    //     setPostState(prev => ({...prev, retweeted: true, retweets: postState.tweet_retweets.length}))
-    //   } else {
-    //     setPostState(prev => ({...prev, retweeted: false, retweets: postState.tweet_retweets.length}))
-    //   }
-    // });
+    postState?.tweet_retweets.forEach(element => {
+      if (element.userId === user.id) {
+        setPostState(prev => ({...prev, retweeted: true, retweets: postState.tweet_retweets.length}))
+      } else {
+        setPostState(prev => ({...prev, retweeted: false, retweets: postState.tweet_retweets.length}))
+      }
+    });
 
-    // postState?.tweet_bookmarks.forEach(element => {
-    //   if (element.userId === currentUser) {
-    //     setPostState(prev => ({...prev, bookmarked: true}))
-    //   } else {
-    //     setPostState(prev => ({...prev, bookmarked: false}))
-    //   }
-    // });
+    postState?.tweet_bookmarks.forEach(element => {
+      if (element.userId === user.id) {
+        setPostState(prev => ({...prev, bookmarked: true}))
+      } else {
+        setPostState(prev => ({...prev, bookmarked: false}))
+      }
+    });
   }, [])
 
   const handleLike = (e) => {
@@ -137,7 +136,7 @@ export const BaseTweet = ({ tweetUser, post, isLast, reply }) => {
 
     instance.post(requests.likeTweet, {
       tweetId: postState._id,
-      userId: currentUser
+      userId: user.id
     })
     .then((res) => {
       console.log(res)
@@ -146,6 +145,28 @@ export const BaseTweet = ({ tweetUser, post, isLast, reply }) => {
       console.log(error)
     })
   }
+
+  const handleRetweet = () => {
+    console.log('retweeted')
+    setPostState({
+      ...postState,
+      retweeted: !postState.retweeted,
+      retweets: postState.retweeted
+        ? postState.retweets - 1
+        : postState.retweets + 1,
+    });
+
+    instance.post(requests.retweetTweet, {
+      tweetId: postState._id,
+      userId: user.id
+    })
+    .then((res) => {
+      console.log(res)
+    })
+    .catch((error) => {
+      console.log(error)
+    })
+  };
 
   const handleReply = (e) => {
     e.stopPropagation();
@@ -161,7 +182,7 @@ export const BaseTweet = ({ tweetUser, post, isLast, reply }) => {
     });
     instance.post(requests.bookmarkTweet, {
       tweetId: postState._id,
-      userId: currentUser
+      userId: user.id
     })
     .then((res) => {
       console.log(res)

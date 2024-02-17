@@ -18,6 +18,7 @@ const profileRoutes = require("../routes/profile.routes");
 
 const app = express();
 const PORT = process.env.PORT;
+const followRoutes = require("../routes/follow.routes");
 
 // connect to the database
 const connectToDB = async () => {
@@ -50,7 +51,8 @@ const registerCoreMiddleWare = async () => {
     app.use("/auth", authRoutes);
     app.use(veridyToken);
     app.use("/messages", messageRoutes);
-    app.use("/profile", profileRoutes);
+    app.use("/profile", profileRoutes);    
+    app.use("/user", followRoutes);
     app.use(notFound);
   } catch (err) {
     logger.error("Error thrown while executing registerCoreMiddleWare", err);
