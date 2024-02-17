@@ -264,7 +264,7 @@ const AfterRegistrationPopup = ({ onClose }) => {
   };
 
   return (
-    <div>
+    <div className="w-screen h-screen bg-gray-500/55 overflow-hidden z-[99999]">
       <div className=" w-[600px] min-h-[300px] h-[650px] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-black rounded-xl pb-6 z-50">
         {loading ? (
           <ReactLoading
@@ -520,7 +520,7 @@ const AfterRegistrationPopup = ({ onClose }) => {
                         </button>
                       ) : (
                         <button
-                          onClick={(e) => e.preventDefault() && handleNext(7)}
+                          onClick={(e) => handleNext(7)}
                           className="font-medium text-white p-2 border-2 border-gray-500 hover:bg-gray-800 rounded-full w-full h-12"
                         >
                           skip for now

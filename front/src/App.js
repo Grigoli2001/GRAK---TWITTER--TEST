@@ -61,7 +61,14 @@ function App() {
       <Routes>
         <Route element={<PublicRoute />}>
           <Route path="/" element={<LoginPage />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
         </Route>
+        {justRegistered && (
+          <Route
+            path="after-registration"
+            element={<AfterRegistrationPopup />}
+          />
+        )}
       </Routes>
 
       <UserProvider>
