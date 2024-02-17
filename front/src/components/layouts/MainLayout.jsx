@@ -4,18 +4,13 @@ import { Outlet } from "react-router-dom";
 
 const MainLayout = (props) => {
   return (
-   <>
+    <>
+      <main className={!props.excludeRightNav ? "max-w-[650px]" : "w-full"}>
+        <Outlet />
+      </main>
 
-        <main className={!props.excludeRightNav ? 'max-w-[650px]' : 'w-full'}>
-          <Outlet />
-        </main>
-
-        {
-          !props.excludeRightNav && 
-            <RightNav {...props} />
-
-        }
-     </>
+      {!props.excludeRightNav && <RightNav {...props} />}
+    </>
   );
 };
 

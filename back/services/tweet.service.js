@@ -6,11 +6,11 @@ const pool = require("../database/db_setup");
 
 const getAllTweets = async (req, res) => {
     try {
-        const tweets = await tweetModel.find();
+        const tweets = await tweetModel.find({referencing_by: { $exists: false }}, null, { sort: { createdAt: -1 }});
 
         for (let i = 0; i < tweets.length; i++) {
-            const user = await pool.query(`SELECT * FROM users WHERE id = ${tweets[i].userId}`);
-            tweets[i].user = user;
+            const user = await pool.query(`SELECT id, username, name FROM users WHERE id = ${tweets[i].userId}`);
+            tweets[i].user = user.rows[0];
         }
 
         res.status(statusCode.success).json({
@@ -37,12 +37,8 @@ const getTweetById = async (req, res) => {
         });
     }
 
-    console.log(tweet)
-
     const user = await pool.query(`SELECT id, username, name FROM users WHERE id = ${tweet.userId}`);
     tweet.user = user.rows[0];
-
-    console.log(tweet);
 
     if (!tweet) {
         return res.status(statusCode.badRequest).json({
@@ -75,6 +71,15 @@ const createTweet = async (req, res) => {
             userId: req.body.userId,
         };
 
+
+        if(req.body.reference_type && req.body.reference_id) {
+            console.log('found reference')
+            newTweetData.referencing_by = {
+                reference_type: req.body.reference_type,
+                reference_id: req.body.reference_id,
+            };
+        }
+
         if (req.file) {
             newTweetData.tweetMedia = {
                 data: req.file.buffer,
@@ -86,6 +91,7 @@ const createTweet = async (req, res) => {
             newTweetData.tweetSchedule = req.data.tweetSchedule;
         }
 
+        console.log(newTweetData);
         const tweet = await tweetModel.create(newTweetData);
 
         res.status(statusCode.success).json({
@@ -154,6 +160,44 @@ const deleteTweet = async (req, res) => {
         });
     }
 };
+
+const getReplies = async (req, res) => {
+    console.log(req.params.id);
+    try {
+        const replies = await tweetModel.find({'referencing_by.reference_type' : "reply", 'referencing_by.reference_id' : req.params.id});
+        if (!replies) {
+            return (
+                res.status(404).json({
+                    status: "fail",
+                    message: "No tweet found with that ID",
+                })
+            );
+        }
+
+        for (let i = 0; i < replies.length; i++) {
+            const user = await pool.query(`SELECT id, username, name FROM users WHERE id = ${replies[i].userId}`);
+            replies[i].user = user.rows[0];
+        }
+
+        console.log(replies);
+        return res.status(statusCode.success).json({
+            status: "success",
+            data: {
+                replies,
+            },
+        });
+
+    } catch (err) {
+        res.status(404).json({
+            status: "fail",
+            message: "error finding the tweet", err,
+        });
+    }
+}
+
+
+
+
 
 const likeTweet = async (req, res) => {
     try {
@@ -304,31 +348,6 @@ const bookmarkTweet = async (req, res) => {
     }
 }
 
-const replyTweet = async (req, res) => {
-    try {
-        const tweet = await tweetModel.findById(req.body.tweetId);
-
-        if (!tweet) {
-            return (
-                res.status(404).json({
-                    status: "fail",
-                    message: "No tweet found with that ID",
-                })
-            );
-        }
-
-        tweet.tweet_comments.push({ user_id: Number(req.body.userId), comment_text: req.body.commentText });
-        await tweet.save();
-        res.status(204).send();
-
-    } catch (err) {
-        res.status(404).json({
-            status: "fail",
-            message: "error finding the tweet", err,
-        });
-    }
-}
-
 
 
 module.exports = {
@@ -340,6 +359,6 @@ module.exports = {
     likeTweet,
     retweetTweet,
     bookmarkTweet,
-    replyTweet,
+    getReplies,
 };
 

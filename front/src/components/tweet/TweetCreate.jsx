@@ -1,4 +1,6 @@
-import { createContext,  useEffect, useRef, useState } from 'react'
+import { createContext,  useEffect, useRef, useState, useContext } from 'react'
+import { UserContext } from "../../context/testUserContext";
+
 
 //  components
 import { TextareaAutosize } from '@mui/base/TextareaAutosize';
@@ -33,10 +35,11 @@ import TweetMedia from './TweetMedia';
 
 export const TweetContext = createContext(null);
 
-const TweetCreate = () => {
+const TweetCreate = ({type = 'Post', reference_id = null}) => {
+  const { user } = useContext(UserContext);
   // max length of tweet
   const tweetMaxLength = 300;
-  const defaultTweetText = 'What is happening?!';
+  const defaultTweetText = type === 'Post' ? 'What is happening?!' : 'Post your reply';
 
   // media refs
   const mediaRef = useRef();
@@ -159,7 +162,6 @@ const TweetCreate = () => {
       }
       return false
   }
-
     setCanPost(evalCanPost());
   }, [tweetForm])
 
@@ -173,8 +175,11 @@ const TweetCreate = () => {
     formData.append('tweetMedia', tweetForm.tweetMedia);
     formData.append('tweetText', tweetForm.tweetText);
     formData.append('tweetType', tweetForm.tweetType);
-    // TODO: change to the current user id
-    formData.append('userId', '3');
+    formData.append('userId', user.id);
+    if(type === 'Reply' && reference_id !== null) {
+    formData.append('reference_type', 'reply');
+    formData.append('reference_id', reference_id);
+    }
     
     if (tweetForm.tweetSchedule !== null) {
       formData.append('tweetSchedule', tweetForm.tweetSchedule);
@@ -201,7 +206,7 @@ const TweetCreate = () => {
 
 
   // testing
-  const user = users[1];
+  // const user = users[1];
 
   return (
     <TweetContext.Provider value={{tweetForm, setTweetForm}}>
@@ -240,7 +245,7 @@ const TweetCreate = () => {
     </div>
 
     { 
-      isInteracted &&
+      isInteracted && type !== 'Reply' &&
 
         <MiniDialog>
           <MiniDialog.Wrapper className="flex items-center font-semibold text-twitter-blue ml-2 px-2 hover:bg-twitter-blue/10 cursor-pointer w-fit py-1 rounded-full relative">  
@@ -344,7 +349,7 @@ const TweetCreate = () => {
           <Button onClick={handleEditTweet} variant="filled" className='rounded-full bg-twitter-blue'>Edit</Button> */}
           
           <TextCounter textCount={tweetForm.tweetText?.length} maxLength={tweetMaxLength} ></TextCounter>
-          <Button onClick={handleCreateTweet} disabled={!canPost}>Post</Button>
+          <Button onClick={handleCreateTweet} disabled={!canPost}>{type}</Button>
           
       </div>
     </div>

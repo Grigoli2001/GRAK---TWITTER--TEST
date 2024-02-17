@@ -34,6 +34,8 @@ const AdditionalInfo = ({ onClose, user, setUser }) => {
               type: "Login",
               payload: response.data,
             });
+            localStorage.setItem("justRegistered", "true");
+            navigate("/after-registration");
             setLoading(false);
           })
           .catch((error) => {

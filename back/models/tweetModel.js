@@ -26,8 +26,10 @@ const TweetSchema = new mongoose.Schema({
     },
     referencing_by: {
         reference_type: String,
-        reference_id: { type: Types.ObjectId, ref: 'Tweet' }
+        reference_id: Types.ObjectId
     },
+
+    // So that user data can be populated when fetching tweets
     user: {
         type: Object,
     }

@@ -44,17 +44,18 @@ const generateOTP = () => {
 
 const sendEmail = async (to, subject, text) => {
   const transporter = nodemailer.createTransport({
-    host: process.env.EMAIL_SERVICE,
-    port: process.env.EMAIL_PORT,
-    secure: false,
+    service: 'gmail',
     auth: {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASSWORD,
     },
+    tls: {
+      rejectUnauthorized: false,
+    },
   });
 
   const mailOptions = {
-    from: process.env.EMAIL,
+    from: process.env.SMTP_USER,
     to: to,
     subject: subject,
     text: text,

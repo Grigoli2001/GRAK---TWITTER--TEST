@@ -1,6 +1,8 @@
 const Message = require('../models/messageModel')
+const { registerSocketMiddleware } = require('./socket-middleware')
 
 module.exports = (io, socket) =>  {
+    registerSocketMiddleware(io)
     
     // joining room
     socket.on('message:join_room', (data) => {

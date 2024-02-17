@@ -134,19 +134,19 @@ const RegisterPopup = ({ onClose, user, setUser }) => {
         } else {
           createToast("Verification code is not correct", "warn");
           // toast.warn("Verification code is not correct", {
-            // position: "bottom-center",
-            // autoClose: 2000,
-            // hideProgressBar: true,
-            // closeOnClick: true,
-            // pauseOnHover: false,
-            // draggable: false,
-            // progress: undefined,
-            // style: {
-            //   backgroundColor: "#1da1f2",
-            //   color: "white",
-            // },
-            // I tried to change toastify entreance animation but it does not work
-            // transition: "spin",
+          // position: "bottom-center",
+          // autoClose: 2000,
+          // hideProgressBar: true,
+          // closeOnClick: true,
+          // pauseOnHover: false,
+          // draggable: false,
+          // progress: undefined,
+          // style: {
+          //   backgroundColor: "#1da1f2",
+          //   color: "white",
+          // },
+          // I tried to change toastify entreance animation but it does not work
+          // transition: "spin",
           // });
         }
         break;
@@ -201,6 +201,7 @@ const RegisterPopup = ({ onClose, user, setUser }) => {
   };
 
   const finishRegistration = () => {
+    console.log("Finishing registration");
     instance
       .post(requests.signup, user)
       .then((response) => {
@@ -212,7 +213,8 @@ const RegisterPopup = ({ onClose, user, setUser }) => {
             username: user.username,
           },
         });
-        navigate("/home");
+        localStorage.setItem("justRegistered", "true");
+        navigate("/after-registration");
       })
       .catch((error) => {
         console.log(error);
@@ -785,7 +787,6 @@ const RegisterPopup = ({ onClose, user, setUser }) => {
             </div>
           </div>
         )}
-        <ToastContainer />
       </div>
     </div>
   );

@@ -8,7 +8,7 @@ const registerMessageHandlers = require('./messageHandlers')
 const httpPort = 4000
 const initSockets = (app) => {
 
-  const  http = createServer(app);
+  const http = createServer(app);
 
   const io = new Server(http, {
     cors: {

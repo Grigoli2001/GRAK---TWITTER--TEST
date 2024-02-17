@@ -8,15 +8,17 @@ const mongoose = require("mongoose");
 const logger = require("../middleware/winston");
 const notFound = require("../middleware/notFound");
 const initSockets = require("../sockets/sockets");
+const veridyToken = require("../middleware/verifyToken");
 
 // routes
 const tweetRoutes = require("../routes/tweet.routes");
 const authRoutes = require("../routes/auth.routes");
 const messageRoutes = require("../routes/messages.routes");
+const profileRoutes = require("../routes/profile.routes");
 
 const app = express();
 const PORT = process.env.PORT;
-
+const followRoutes = require("../routes/follow.routes");
 
 // connect to the database
 const connectToDB = async () => {
@@ -47,7 +49,10 @@ const registerCoreMiddleWare = async () => {
 
     app.use("/tweets", tweetRoutes);
     app.use("/auth", authRoutes);
-    app.use("/messages", messageRoutes)
+    app.use(veridyToken);
+    app.use("/messages", messageRoutes);
+    app.use("/profile", profileRoutes);    
+    app.use("/user", followRoutes);
     app.use(notFound);
   } catch (err) {
     logger.error("Error thrown while executing registerCoreMiddleWare", err);
@@ -67,7 +72,7 @@ const startApp = async () => {
   try {
     await registerCoreMiddleWare();
     await connectToDB();
-    initSockets(app)
+    initSockets(app);
 
     app.listen(PORT, () => {
       logger.info("Listening on 127.0.0.1:" + PORT);

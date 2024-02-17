@@ -3,7 +3,7 @@ import { UserContext } from '../../context/testUserContext'
 import  Tweet  from './Tweet'
 import { users, followedTweets, forYouTweets } from '../../constants/feedTest'
 import instance from '../../constants/axios';
-import { requests } from '../../constants/requests';
+import { requests, followRequests } from '../../constants/requests';
 
 import ReactLoading from "react-loading";
 
@@ -18,11 +18,21 @@ const Tweets = ({api, FallBackComponent, asMedia}) => {
   
     const [tweets, setTweets] = useState([])
     const [loading, setLoading] = useState(true)
-    // dummy followCollection
-    const followCollection = users[0].following
-
-      // api will determine the user for now use the context
     let { user } = useContext(UserContext)
+
+
+    const followingCollection = async () => {
+      try {
+        const response = await instance.get(followRequests.following, { params: { userId: user.id } });
+        // return response.data.data.following;
+        return response.data.map(follower => follower.following)
+      } catch (error) {
+        console.error(error);
+        throw error;
+      }
+    }
+
+    // api will determine the user for now use the context
 
     const getAllTweets = async () => {
       try {
@@ -40,11 +50,10 @@ const Tweets = ({api, FallBackComponent, asMedia}) => {
       const fetchData = async () => {
         try {
           const allTweets = await getAllTweets();
-          console.log(allTweets);
           switch (api) {
             case 'following':
-              setTweets(allTweets.filter((tweet) => followCollection.includes(String(tweet.userId))))
-              // setTweets(followedTweets)
+              const followCollection = await followingCollection();
+              setTweets(allTweets.filter((tweet) => followCollection.includes(String(tweet.userId))));
               break;
             case 'for-you':
               setTweets(allTweets)
@@ -71,6 +80,7 @@ const Tweets = ({api, FallBackComponent, asMedia}) => {
         } 
       }
 
+      
       fetchData();
     }, [api])
   
