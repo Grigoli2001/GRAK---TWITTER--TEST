@@ -34,6 +34,7 @@ const AdditionalInfo = ({ onClose, user, setUser }) => {
               type: "Login",
               payload: response.data,
             });
+            navigate("/after-registration");
             setLoading(false);
           })
           .catch((error) => {

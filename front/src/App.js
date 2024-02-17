@@ -52,11 +52,13 @@ import AfterRegistrationPopup from "./components/authComponents/AfterRegistratio
 function App() {
   const location = useLocation();
   const background = location.state?.background;
+  const justRegistered = localStorage.getItem("justRegistered");
   return (
     <SocketProvider>
       <Routes location={background || location}>
         <Route element={<PublicRoute />}>
           <Route path="/" element={<LoginPage />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
         </Route>
 
         {/* <Route element={<PrivateRoute />}> */}
@@ -68,6 +70,12 @@ function App() {
               />
             }
           >
+            <Route
+              path="/after-registration"
+              element={
+                justRegistered ? <AfterRegistrationPopup /> : <NotFound />
+              }
+            />
             <Route path="/home" element={<Feed />} />
 
             {/* settings modal route that defaults to feed if routing directly */}

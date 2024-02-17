@@ -15,7 +15,7 @@ import { jwtDecode } from "jwt-decode";
 
 const AfterRegistrationPopup = ({ onClose }) => {
   const [loading, setLoading] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(2);
   const [selectedTopics, setSelectedTopics] = useState([]);
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [languages, setLanguages] = useState(["English", "French"]);
@@ -29,7 +29,17 @@ const AfterRegistrationPopup = ({ onClose }) => {
   const decodedToken = token ? jwtDecode(token) : null;
   const user = decodedToken.user;
   const [userName, setUserName] = useState(user.username);
-  const [profile_pic, setProfilePic] = useState(user.profile_pic);
+  const [profilePic, setProfilePic] = useState(null);
+  const [display, setDisplay] = useState("/uploads/default_profile_pic.jpg");
+  const justRegistered = localStorage.getItem("justRegistered");
+  const Navigate = useNavigate();
+  useEffect(() => {
+    if (!justRegistered) {
+      Navigate("/home");
+    }
+  }, []);
+  console.log(display);
+
   const handleNext = (page) => {
     switch (page) {
       case 1:
@@ -80,6 +90,35 @@ const AfterRegistrationPopup = ({ onClose }) => {
         setLoading(false);
         setCurrentPage(7);
         break;
+
+      case 7:
+        setLoading(true);
+        console.log("profilePic", profilePic);
+        const data = new FormData();
+        data.append("userId", user.id);
+        data.append("selectedTopics", selectedTopics);
+        data.append("selectedCategories", selectedCategories);
+        data.append("selectedLanguages", selectedLanguages);
+        data.append("userName", userName);
+        data.append("profile_pic", profilePic);
+
+        instance
+          .post(requests.userPreferences, data, {
+            headers: { Authorization: `Bearer ${token}` },
+          })
+          .then((res) => {
+            if (res.status === 200) {
+              setLoading(false);
+              localStorage.removeItem("justRegistered");
+              Navigate("/home");
+            }
+            setLoading(false);
+          })
+          .catch((err) => {
+            console.log(err);
+            setLoading(false);
+          });
+        setLoading(false);
       default:
         break;
     }
@@ -223,9 +262,6 @@ const AfterRegistrationPopup = ({ onClose }) => {
         console.log(err);
       });
   };
-  useEffect(() => {
-    console.log("profile_pic", profile_pic);
-  }, [profile_pic]);
 
   return (
     <div>
@@ -263,37 +299,6 @@ const AfterRegistrationPopup = ({ onClose }) => {
             </div>
             <div className="flex justify-center">
               <div className="flex flex-col w-9/12 relative mt-6">
-                {/* start of the content by page */}
-                {currentPage === 1 && (
-                  <>
-                    <h1 className="text-white text-[28px] font-semibold leading-tight">
-                      Don't miss out on
-                    </h1>
-                    <p className="text-gray-500 text-[16px] leading-none">
-                      When you follow someone, you'll see their Tweets in your
-                      Timeline. You'll also get more relevant recommendations
-                    </p>
-
-                    {/* Account list to follow */}
-
-                    <div className="m-5">
-                      <h1 className="text-white">Follow 1 or more</h1>
-                      <div className=" max-h-[360px] overflow-y-scroll scrollbar-thin scrollbar-thumb-blue-gray-500 scrollbar-track-black  ">
-                        {/* Pages to follow */}
-                        <UserDisplayer limit={10} withCard={true} />
-                      </div>
-                    </div>
-                    <div className="flex justify-center">
-                      <button
-                        onClick={() => handleNext(1)}
-                        className="font-medium bg-blue-gray-400 p-2 rounded-full w-full h-12"
-                      >
-                        Next
-                      </button>
-                    </div>
-                  </>
-                )}
-
                 {currentPage === 2 && (
                   <>
                     <h1 className="text-white text-[33px] font-medium leading-tight">
@@ -481,9 +486,9 @@ const AfterRegistrationPopup = ({ onClose }) => {
                       <label className="text-white rounded-full cursor-pointer flex align-middle justify-center items-center">
                         <div className="h-52 w-52  rounded-full border-2 flex align-middle items-center justify-center relative">
                           <img
-                            src={profile_pic}
+                            src={display}
                             alt="profile"
-                            className="h-[200px] w-[200px] rounded-full"
+                            className="h-[200px] w-[200px] rounded-full object-cover"
                           />
                           <input
                             type="file"
@@ -491,13 +496,10 @@ const AfterRegistrationPopup = ({ onClose }) => {
                             accept="image/*"
                             id="profilePic"
                             onChange={(e) => {
-                              setProfilePic(
+                              setDisplay(
                                 URL.createObjectURL(e.target.files[0])
                               );
-                              console.log(e.target.files[0]);
-                              console.log(
-                                URL.createObjectURL(e.target.files[0])
-                              );
+                              setProfilePic(e.target.files[0]);
                             }}
                           />
                           <div className="bg-gray-500/60 h-[200px] w-[200px] rounded-full absolute top-0 right-0 align-middle justify-center items-center hidden group-hover:flex">
@@ -509,12 +511,21 @@ const AfterRegistrationPopup = ({ onClose }) => {
                       </label>
                     </div>
                     <div className="flex justify-center mt-40">
-                      <button
-                        onClick={() => handleNext(7)}
-                        className="font-medium bg-twitter-blue p-2 rounded-full w-full h-12"
-                      >
-                        Next
-                      </button>
+                      {profilePic ? (
+                        <button
+                          onClick={() => handleNext(7)}
+                          className="font-medium bg-twitter-blue p-2 rounded-full w-full h-12"
+                        >
+                          finish
+                        </button>
+                      ) : (
+                        <button
+                          onClick={(e) => e.preventDefault() && handleNext(7)}
+                          className="font-medium text-white p-2 border-2 border-gray-500 hover:bg-gray-800 rounded-full w-full h-12"
+                        >
+                          skip for now
+                        </button>
+                      )}
                     </div>
                   </>
                 )}

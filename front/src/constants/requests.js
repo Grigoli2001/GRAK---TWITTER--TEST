@@ -13,4 +13,5 @@ export const requests = {
   bookmarkTweet: "/tweets/bookmark",
   replyTweet: "/tweets/reply",
   changeUsername: "/profile/changeUsername",
+  userPreferences: "/auth/user_preferences",
 };
