@@ -7,6 +7,7 @@ export const requests = {
 
   getAllUsers: "/users",
   getUserById: "/user/",
+  change_password: "/auth/change_password",
   createTweets: "/tweets/create",
   getTweetById: "/tweets/",
   getTweets: "/tweets",
@@ -16,4 +17,6 @@ export const requests = {
   retweetTweet: "/tweets/retweet",
   bookmarkTweet: "/tweets/bookmark",
   replyTweet: "/tweets/reply",
+  changeUsername: "/profile/changeUsername",
+  userPreferences: "/auth/user_preferences",
 };

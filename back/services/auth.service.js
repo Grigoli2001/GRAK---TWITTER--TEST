@@ -2,6 +2,7 @@ const statusCodes = require("../constants/statusCode");
 const logger = require("../middleware/winston");
 const pool = require("../database/db_setup");
 const jwt = require("jsonwebtoken");
+const multer = require("multer");
 
 const {
   makeUsername,
@@ -9,6 +10,7 @@ const {
   generateOTP,
   sendEmail,
 } = require("../utils/auth.utils");
+const { info } = require("winston");
 
 const signup = async (req, res) => {
   const {
@@ -50,11 +52,8 @@ const signup = async (req, res) => {
         isGetmoreMarked,
         isConnectMarked,
         isPersonalizedMarked,
+        "default_profile_pic.jpg",
       ];
-
-      queryParams.push(
-        profile_pic !== undefined ? profile_pic : defaultProfilePicURL
-      );
 
       const addUser = await client.query(
         `INSERT INTO users(email,name, username, password,dob,isGetmoreMarked,isConnectMarked,isPersonalizedMarked,profile_pic)
@@ -107,6 +106,7 @@ const login = async (req, res) => {
     req.session.user = {
       email: user.rows[0].email,
     };
+
     const token = jwt.sign(
       {
         user: {
@@ -208,11 +208,82 @@ const sendOTP = async (req, res) => {
   }
 };
 
+const changePassword = async (req, res) => {
+  const { email, newPassword } = req.body;
+  const client = await pool.connect();
+  try {
+    const user = await client.query(
+      "UPDATE users SET password = crypt($1, gen_salt('bf')) WHERE email = $2;",
+      [newPassword, email]
+    );
+    if (user.rowCount) {
+      return res
+        .status(statusCodes.success)
+        .json({ message: "Password changed" });
+    }
+    return res.status(statusCodes.notFound).json({ message: "User not found" });
+  } catch (error) {
+    logger.error(error);
+    return res
+      .status(statusCodes.queryError)
+      .json({ message: "Error while changing password" });
+  } finally {
+    client.release();
+  }
+};
+
+const userPreferences = async (req, res) => {
+  const {
+    userId,
+    selectedTopics,
+    selectedCategories,
+    selectedLanguages,
+    userName,
+    profile_pic,
+  } = req.body;
+  // profile pic name
+  let profile_pic_name;
+  if (req.file !== undefined) {
+    profile_pic_name = req.file.filename;
+  } else {
+    profile_pic_name = false;
+  }
+
+  const client = await pool.connect();
+  try {
+    const user = await client.query(
+      "UPDATE users SET selectedTopics = $1, selectedCategories = $2, selectedLanguages = $3, username = $4, profile_pic = $5 WHERE id = $6;",
+      [
+        selectedTopics,
+        selectedCategories,
+        selectedLanguages,
+        userName,
+        profile_pic_name || "default_profile_pic.jpg",
+        userId,
+      ]
+    );
+    if (user.rowCount) {
+      return res
+        .status(statusCodes.success)
+        .json({ message: "Preferences updated" });
+    }
+    return res.status(statusCodes.notFound).json({ message: "User not found" });
+  } catch (error) {
+    logger.error(error);
+    return res
+      .status(statusCodes.queryError)
+      .json({ message: "Error while updating preferences" });
+  } finally {
+    client.release();
+  }
+};
+
 module.exports = {
   signup,
   login,
   logout,
   checkExistingUser,
   sendOTP,
+  changePassword,
+  userPreferences,
 };
-

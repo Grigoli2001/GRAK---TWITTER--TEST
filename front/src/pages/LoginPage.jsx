@@ -6,6 +6,7 @@ import RegisterPopup from "../components/authComponents/RegisterPopup";
 import LoginPopup from "../components/authComponents/LoginPopup";
 import LoginFooter from "../components/authComponents/LoginFooter";
 import Google from "../components/authComponents/Google";
+import { ToastContainer } from "react-toastify";
 const LoginPage = () => {
   const [isRegisterPopupOpen, setIsRegisterPopupOpen] = useState(false);
   const [isLoginPopupOpen, setIsLoginPopupOpen] = useState(false);
