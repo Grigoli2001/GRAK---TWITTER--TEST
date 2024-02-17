@@ -21,10 +21,27 @@ const getAllUsers = async (req, res) => {
   }
 };
 
+const getUserById = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const user = await pool.query(`SELECT id, name, username, email, profile_picture FROM users WHERE id = $1`, [id]);
+
+    if (!user.rowCount) {
+      return res.status(statusCodes.notFound).json({ message: "User not found" });
+    }
+    res.status(statusCodes.success).json({ user: user.rows[0] });
+  } catch (err) {
+    logger.error(err);
+    res.status(statusCodes.queryError).json({ message: "Error fetching user" });
+  } finally {
+    client.release();
+  }
+}
+
 const getUserByUsername = async (req, res) => {
     const { username } = req.params;
     try {
-        const user = await pool.query(`SELECT * FROM users WHERE username = $1`, [username]);
+        const user = await pool.query(`SELECT id, name, username, email, profile_picture FROM users WHERE username = $1`, [username]);
 
         if (!user.rowCount) {
             return res.status(statusCodes.notFound).json({ message: "User not found" });
@@ -72,6 +89,8 @@ const getAllFollowing = async (req, res) => {
 
 module.exports = {
     getAllUsers,
+    getUserById,
+    getUserByUsername,
     getAllFollowers,
     getAllFollowing,
 };
