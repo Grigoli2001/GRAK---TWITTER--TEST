@@ -7,8 +7,7 @@ const token = localStorage.getItem("user")
   ? JSON.parse(localStorage.getItem("user")).token
   : null;
 const decodedToken = token ? jwtDecode(token) : null;
-const user = decodedToken.user || users[0];
-console.log("user", user);
+const user = decodedToken ? decodedToken.user : users[0];
 
 export const UserProvider = ({ children }) => {
   return (

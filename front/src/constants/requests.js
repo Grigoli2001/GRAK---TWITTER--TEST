@@ -12,4 +12,5 @@ export const requests = {
   retweetTweet: "/tweets/retweet",
   bookmarkTweet: "/tweets/bookmark",
   replyTweet: "/tweets/reply",
+  changeUsername: "/profile/changeUsername",
 };
