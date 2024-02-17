@@ -9,13 +9,13 @@ import { CiSearch } from "react-icons/ci";
 import { UserBlock } from '../User';
 import { users } from '../../constants/feedTest'
 import '../../styles/messages.css'
-import { FaEllipsis, FaCircleCheck } from 'react-icons/fa6';
+import { FaEllipsis } from 'react-icons/fa6';
 import { Popover, PopoverHandler, PopoverContent } from '@material-tailwind/react'
 import { UserContext } from '../../context/testUserContext';
 import { evalRoom } from '../../utils/utils';
 import instance from '../../constants/axios';
-import { toast } from 'react-toastify';
-import { FaExclamationCircle } from 'react-icons/fa';
+// import { FaExclamationCircle } from 'react-icons/fa';
+import { createToast } from '../../hooks/createToast';
 
 
 const MessageList = () => {
@@ -34,32 +34,14 @@ const MessageList = () => {
             if (res.status === 204) throw new Error('No changes made')
             setUserList(prevUsers => prevUsers.filter(ouser => ouser.id !== otherUser.id))
             setDeletedRoom(room)
-            if (document.querySelector('.success-del-room')) return
-            toast.success("Conversation deleted!", {
-                position: "bottom-center",
-                icon: <FaCircleCheck/>,
-                autoClose: 2000,
-                hideProgressBar: true,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                className: 'success-del-room !bg-twitter-blue !text-white',
-            })
-
+            let className = 'success-del-room'
+            if (document.querySelector(`.${className}`)) return
+            createToast("Conversation deleted!", 'success', className)
         }).catch( err => {
             console.log(err)
-            if (document.querySelector('.error-del-room')) return // limit to one error toast
-                toast.warn("Sorry! An error occured", {
-                  position: "bottom-center",
-                  icon: <FaExclamationCircle/>,
-                  autoClose: 2000,
-                  hideProgressBar: true,
-                  closeOnClick: true,
-                  pauseOnHover: true,
-                  draggable: true,
-                  className: 'error-del-room !bg-twitter-blue !text-white',
-              });
-        
+            let className = 'error-del-room'
+            if (document.querySelector(`.${className}`)) return // limit to one error toast
+            createToast("Sorry! An error occured", 'error', className)
         })
     }
 
