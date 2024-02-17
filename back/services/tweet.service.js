@@ -1,10 +1,18 @@
 const tweetModel = require('../models/tweetModel');
 const userModel = require('../models/userModel');
 const statusCode = require('../constants/statusCode');
+const pool = require("../database/db_setup");
+
 
 const getAllTweets = async (req, res) => {
     try {
         const tweets = await tweetModel.find();
+
+        for (let i = 0; i < tweets.length; i++) {
+            const user = await pool.query(`SELECT * FROM users WHERE id = ${tweets[i].userId}`);
+            tweets[i].user = user;
+        }
+
         res.status(statusCode.success).json({
             status: "success",
             data: {
@@ -20,21 +28,42 @@ const getAllTweets = async (req, res) => {
 };
 
 const getTweetById = async (req, res) => {
-    const tweets = await tweetModel.findOne({ tweet_id: req.params.id });
+    const tweet = await tweetModel.findOne({ _id: req.params.id });
 
-    if (!tweets) {
-        res.status(statusCode.badRequest).json({
+    if (!tweet) {
+        return res.status(statusCode.badRequest).json({
             status: "fail",
             message: "No tweet found with that ID",
         });
     }
 
-    res.status(statusCode.success).json({
+    console.log(tweet)
+
+    const user = await pool.query(`SELECT id, username, name FROM users WHERE id = ${tweet.userId}`);
+    tweet.user = user.rows[0];
+
+    console.log(tweet);
+
+    if (!tweet) {
+        return res.status(statusCode.badRequest).json({
+            status: "fail",
+            message: "No tweet found with that ID",
+        });
+    }
+
+    if(user.rowCount === 0) {
+       return res.status(statusCode.badRequest).json({
+            status: "fail",
+            message: "No user found with that ID",
+        });
+    } else{
+    return res.status(statusCode.success).json({
         status: "success",
         data: {
-            tweets,
+            tweet,
         },
     });
+}
 };
 
 const createTweet = async (req, res) => {

@@ -6,6 +6,7 @@ import { RiDeleteBinLine } from "react-icons/ri";
 import { CIAddSquare } from '../customIcons';
 import { toast } from 'react-toastify';
 import { Button } from '../Button';
+import { createToast } from '../../hooks/createToast';
 
 export const Typing  = () => {  
 
@@ -27,17 +28,9 @@ const Message = forwardRef(({ message, messageType, isLastMessage,  handleModalO
   const handleCopyMessage = () => {
     navigator.clipboard.writeText(message.message)
     setShowMore(false)
-    if (document.querySelector('.copy-msg-success')) return
-    toast.success("Message copied to clipboard!", {
-      position: "bottom-center",
-      icon: <FaCircleCheck/>,
-      autoClose: 2000,
-      hideProgressBar: true,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      className: 'copy-msg-success !bg-twitter-blue !text-white',
-  });
+    let className = 'copy-msg-success'
+    if (document.querySelector(`.${className}`)) return
+    createToast("Message copied to clipboard!", 'success', className)
   }
 
   return (

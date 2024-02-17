@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { Types } = mongoose;
 
 const TweetSchema = new mongoose.Schema({
     tweetType: {
@@ -20,23 +21,16 @@ const TweetSchema = new mongoose.Schema({
         userId: Number,
     }],
     tweetMedia: {
-        data: Buffer, // Buffer is a built in object in nodejs to store binary data for the image
+        data: Buffer,
         contentType: String,
     },
-    tweet_comments: [{
-        user_id: Number,
-        comment_text: String,
-        comment_date: {
-            type: Date,
-            default: Date.now,
-        },
-    }],
-    tweet_retweets: [{
-        userId: Number,
-    }],
-    tweet_bookmarks: [{
-        userId: Number,
-    }],
+    referencing_by: {
+        reference_type: String,
+        reference_id: { type: Types.ObjectId, ref: 'Tweet' }
+    },
+    user: {
+        type: Object,
+    }
 });
 
 module.exports = mongoose.model('Tweet', TweetSchema);

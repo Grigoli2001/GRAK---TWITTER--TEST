@@ -25,6 +25,7 @@ import  Picker  from '@emoji-mart/react';
 import emojiData from '@emoji-mart/data';
 import { Popover, PopoverContent, PopoverHandler } from '@material-tailwind/react';
 import { DefaultModal as Modal } from '../NavModal'
+import { createToast } from '../../hooks/createToast';
 
 
 const MessageWindowWrapper = ({children}) => {
@@ -136,17 +137,9 @@ export const MessageWindow = () => {
             }
         })
         .catch (err => {
-                if (document.querySelector('.error-load-messages')) return // limit to one error toast
-                toast.warn("Sorry! An error occured", {
-                  position: "bottom-center",
-                  autoClose: 2000,
-                  hideProgressBar: true,
-                  closeOnClick: true,
-                  pauseOnHover: true,
-                  draggable: true,
-                  className: 'error-load-messages !bg-twitter-blue !text-white',
-              });
-              console.log(err)
+            let className = 'error-load-messages'
+            if (document.querySelector(`${className}`)) return // limit to one error toast
+            createToast("Sorry! An error occured", 'error', className)
             }
         )
         .finally(() => setLoading(false))
@@ -227,20 +220,11 @@ export const MessageWindow = () => {
 
     useEffect(() => {
         const handleSendError = (error) => {
-            console.log('error sending message', error)
-            if (document.querySelector('.error-send-message')) return
-            toast.warn("Failed to send message!", {
-                position: "bottom-center",
-                icon: <FaCircleExclamation />,
-                autoClose: 2000,
-                hideProgressBar: true,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                className: 'error-send-message !bg-twitter-blue !text-white',
-            })
+            let className = 'error-send-message'
+            if (document.querySelector(`.${className}`)) return
+            createToast("Failed to send message!", 'error', className)
         }
-        socket.on('message:error_sending_message', handleSendError)
+        socket.on('message:error_send_message', handleSendError)
         return () => {
             // console.log('cleaning up event listeners for error_sending_message')
             socket.off('message:error_send_message', handleSendError)
@@ -277,33 +261,15 @@ export const MessageWindow = () => {
             } 
         }).then(res => {
             if (res.status === 204) throw new Error('Failed to delete message')
-            console.log(res)
             setMessages(prevMessages => prevMessages.filter(msg => msg._id !== msg_id))
-            if (document.querySelector('.success-del-message')) return
-            toast.success("Message deleted!", {
-                position: "bottom-center",
-                icon: <FaCircleCheck/>,
-                autoClose: 2000,
-                hideProgressBar: true,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                className: 'success-del-message !bg-twitter-blue !text-white',
-            })
+            let className = 'success-del-message'
+            if (document.querySelector(`.${className}`)) return
+            createToast("Message deleted!", 'success', className)
         })
         .catch(err => {
-            if (document.querySelector('.error-del-message')) return
-            toast.error("Failed to delete message!", {
-                position: "bottom-center",
-                icon: <FaCircleExclamation />,
-                autoClose: 2000,
-                hideProgressBar: true,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                className: 'error-del-message !bg-twitter-blue !text-white',
-
-            })
+            let className = 'error-del-message'
+            if (document.querySelector(`.${className}`)) return
+            createToast("Failed to delete message!", 'error', className)
         }).finally(() => setModalOpen(false))
     }
 

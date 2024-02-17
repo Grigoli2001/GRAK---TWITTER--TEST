@@ -10,6 +10,7 @@ import { requests } from "../../constants/requests";
 import instance from "../../constants/axios";
 import useAppStateContext from "../../hooks/useAppStateContext";
 import { useNavigate } from "react-router-dom";
+import { createToast } from "../../hooks/createToast";
 
 const LoginPopup = ({ onClose, openSignUpFromLogin, Google }) => {
   const [user, setuser] = useState({
@@ -72,29 +73,32 @@ const LoginPopup = ({ onClose, openSignUpFromLogin, Google }) => {
       });
   };
   const handleEmailNotExists = () => {
-    toast.warn("Email or username does not exists", {
-      position: "bottom-center",
-      autoClose: 2000,
-      hideProgressBar: true,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      style: { backgroundColor: "#1268fc", color: "#fff" },
-    });
+    createToast("Email or username does not exists", "error");
+    // toast.warn("Email or username does not exists", {
+    //   position: "bottom-center",
+    //   autoClose: 2000,
+    //   hideProgressBar: true,
+    //   closeOnClick: true,
+    //   pauseOnHover: true,
+    //   draggable: true,
+    //   progress: undefined,
+    //   style: { backgroundColor: "#1268fc", color: "#fff" },
+    // });
   };
 
+  // TODO: can remove these functions and use createToast
   const handleWrongPassword = () => {
-    toast.warn("Wrong Password", {
-      position: "bottom-center",
-      autoClose: 2000,
-      hideProgressBar: true,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      style: { backgroundColor: "#1268fc", color: "#fff" },
-    });
+    createToast("Wrong Password", "warn");
+    // toast.warn("Wrong Password", {
+    //   position: "bottom-center",
+    //   autoClose: 2000,
+    //   hideProgressBar: true,
+    //   closeOnClick: true,
+    //   pauseOnHover: true,
+    //   draggable: true,
+    //   progress: undefined,
+    //   style: { backgroundColor: "#1268fc", color: "#fff" },
+    // });
   };
 
   return (

@@ -9,6 +9,7 @@ import { requests } from "../../constants/requests";
 import instance from "../../constants/axios";
 import useAppStateContext from "../../hooks/useAppStateContext";
 import { useNavigate } from "react-router-dom";
+import { createToast } from "../../hooks/createToast";
 
 const RegisterPopup = ({ onClose, user, setUser }) => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -131,21 +132,22 @@ const RegisterPopup = ({ onClose, user, setUser }) => {
         if (verificationInput === VerificationCode.toString()) {
           setCurrentPage(currentPage + 1);
         } else {
-          toast.warn("Verification code is not correct", {
-            position: "bottom-center",
-            autoClose: 2000,
-            hideProgressBar: true,
-            closeOnClick: true,
-            pauseOnHover: false,
-            draggable: false,
-            progress: undefined,
-            style: {
-              backgroundColor: "#1da1f2",
-              color: "white",
-            },
+          createToast("Verification code is not correct", "warn");
+          // toast.warn("Verification code is not correct", {
+            // position: "bottom-center",
+            // autoClose: 2000,
+            // hideProgressBar: true,
+            // closeOnClick: true,
+            // pauseOnHover: false,
+            // draggable: false,
+            // progress: undefined,
+            // style: {
+            //   backgroundColor: "#1da1f2",
+            //   color: "white",
+            // },
             // I tried to change toastify entreance animation but it does not work
             // transition: "spin",
-          });
+          // });
         }
         break;
       case 5:
