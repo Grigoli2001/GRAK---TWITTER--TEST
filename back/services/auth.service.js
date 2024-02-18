@@ -110,12 +110,16 @@ const login = async (req, res) => {
       email: user.rows[0].email,
     };
 
-    const token = generateToken(user.rows[0])
-    const refreshToken = generateRefreshToken(user.rows[0])
+    const token = generateToken(user.rows[0]);
+    const refreshToken = generateRefreshToken(user.rows[0]);
 
     return res
       .status(statusCodes.success)
-      .json({ token: token,refresh:refreshToken, username: user.rows[0].username });
+      .json({
+        token: token,
+        refresh: refreshToken,
+        username: user.rows[0].username,
+      });
   }
 
   // Normal login
@@ -139,12 +143,16 @@ const login = async (req, res) => {
         email: user.rows[0].email,
       };
 
-      const token = generateToken(user.rows[0])
-      const refreshToken = generateRefreshToken(user.rows[0])
+      const token = generateToken(user.rows[0]);
+      const refreshToken = generateRefreshToken(user.rows[0]);
 
       return res
         .status(statusCodes.success)
-        .json({ token: token, refresh: refreshToken, username: user.rows[0].username });
+        .json({
+          token: token,
+          refresh: refreshToken,
+          username: user.rows[0].username,
+        });
     } catch (error) {
       logger.error(error);
       return res
@@ -203,7 +211,6 @@ const changePassword = async (req, res) => {
 };
 
 const userPreferences = async (req, res) => {
-  console.log(req.body, "req.file");
   const {
     userId,
     selectedTopics,
@@ -212,7 +219,7 @@ const userPreferences = async (req, res) => {
     userName,
     profile_pic,
   } = req.body;
-  
+
   const client = await pool.connect();
   try {
     const user = await client.query(

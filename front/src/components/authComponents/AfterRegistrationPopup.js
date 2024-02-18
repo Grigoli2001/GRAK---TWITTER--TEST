@@ -16,7 +16,6 @@ import { jwtDecode } from "jwt-decode";
 
 import useUserContext from "../../hooks/useUserContext";
 
-
 const AfterRegistrationPopup = ({ onClose }) => {
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(2);
@@ -30,7 +29,7 @@ const AfterRegistrationPopup = ({ onClose }) => {
   const token = localStorage.getItem("user")
     ? JSON.parse(localStorage.getItem("user")).token
     : null;
-  const { user } = useUserContext()
+  const { user } = useUserContext();
   console.log(user);
   // const [userName, setUserName] = useState('runak');
   const [userName, setUserName] = useState(user.username);
@@ -45,23 +44,26 @@ const AfterRegistrationPopup = ({ onClose }) => {
   }, []);
   console.log(display);
 
-
-  const handleUpdateProfilePic = ( image ) => {
+  const handleUpdateProfilePic = (image) => {
     if (!image) return;
-    
+
     const storageRef = ref(storage, `profile_pics/${user.id}/profile_image`);
-    uploadBytesResumable(storageRef, image).then((snapshot) => {
-      console.log("Uploaded a blob or file!", snapshot);
-      getDownloadURL(snapshot.ref).then((downloadURL) => {
-        console.log("File available at", downloadURL);
-        setDisplay(downloadURL);
-        setProfilePic( downloadURL );
-      }).catch((error) => {
-        console.error("Error getting download URL:", error);
+    uploadBytesResumable(storageRef, image)
+      .then((snapshot) => {
+        console.log("Uploaded a blob or file!", snapshot);
+        getDownloadURL(snapshot.ref)
+          .then((downloadURL) => {
+            console.log("File available at", downloadURL);
+            setDisplay(downloadURL);
+            setProfilePic(downloadURL);
+          })
+          .catch((error) => {
+            console.error("Error getting download URL:", error);
+          });
+      })
+      .catch((error) => {
+        console.error("Error uploading file:", error);
       });
-    }).catch((error) => {
-      console.error("Error uploading file:", error);
-    });
   };
 
   const handleNext = (page) => {
@@ -120,9 +122,9 @@ const AfterRegistrationPopup = ({ onClose }) => {
         const data = {
           userId: user.id,
           selectedTopics: selectedTopics,
-          selectedCategories : selectedCategories,
-          selectedLanguages : selectedLanguages,
-          userName : userName,
+          selectedCategories: selectedCategories,
+          selectedLanguages: selectedLanguages,
+          userName: userName,
           profile_pic: profilePic,
         };
         instance

@@ -17,7 +17,7 @@ const messageRoutes = require("../routes/messages.routes");
 const profileRoutes = require("../routes/profile.routes");
 const userRoutes = require("../routes/user.routes");
 const tokenRoutes = require("../routes/token.routes");
-
+const notificationRoutes = require("../routes/notification.routes");
 const app = express();
 const PORT = process.env.PORT;
 // connect to the database
@@ -42,20 +42,20 @@ const registerCoreMiddleWare = async () => {
       })
     );
 
-    
     app.use(morgan("combined", { stream: logger.stream }));
     app.use(express.json());
     app.use(cors({}));
     app.use(helmet());
-    
+
     app.use("/auth", authRoutes);
-    app.use("/token", tokenRoutes)
+    app.use("/token", tokenRoutes);
     app.use(verifyToken);
     app.use("/tweets", tweetRoutes);
     app.use("/messages", messageRoutes);
     app.use("/profile", profileRoutes);
     app.use("/users", userRoutes);
-    
+    app.use("/notifications", notificationRoutes);
+
     app.use(notFound);
   } catch (err) {
     logger.error("Error thrown while executing registerCoreMiddleWare", err);

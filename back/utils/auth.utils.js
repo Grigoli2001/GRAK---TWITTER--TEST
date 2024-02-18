@@ -3,7 +3,6 @@ const otpGenerator = require("otp-generator");
 const nodemailer = require("nodemailer");
 const logger = require("../middleware/winston");
 
-
 const makeUsername = (name) => {
   const username =
     name
@@ -46,7 +45,7 @@ const generateOTP = () => {
 
 const sendEmail = async (to, subject, text) => {
   const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    service: "gmail",
     auth: {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASSWORD,
@@ -84,10 +83,10 @@ const generateToken = (user) => {
     },
     process.env.JWT_SECRET_KEY,
     {
-      expiresIn: "20s",
+      expiresIn: "3h",
     }
   );
-}
+};
 
 const generateRefreshToken = (user) => {
   return jwt.sign(
@@ -99,11 +98,11 @@ const generateRefreshToken = (user) => {
       expiresIn: "7d",
     }
   );
-}
+};
 
 const verifyRefreshToken = (token) => {
   return jwt.verify(token, process.env.REFRESH_SECRET_KEY);
-}
+};
 
 module.exports = {
   makeUsername,

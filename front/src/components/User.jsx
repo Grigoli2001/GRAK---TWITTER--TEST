@@ -26,7 +26,7 @@ import useUserContext from "../hooks/useUserContext";
  * Extends material-tailwind Avatar component
  */
 export const ExtAvatar = ({ src, ...props }) => {
-   if (src && !src.startsWith("http")) {
+  if (src && !src.startsWith("http")) {
     src = null;
   }
   return (
@@ -59,8 +59,8 @@ export const UserBlock = ({
   const [test, setTest] = useState(textSizes[textSize] ?? textSizes.md);
   const [prevTest, setPrevTest] = useState("text-xs");
   // const finalTextSize = textSizes[textSize] ?? textSizes.md
-  console.log(user, "user in user block");
-  console.log('profile_pic', user.profile_pic)
+  // console.log(user, "user in user block");
+  // console.log('profile_pic', user.profile_pic)
 
   useLayoutEffect(() => {
     let keys = Object.keys(textSizes);
@@ -197,7 +197,12 @@ export const UserDisplayer = ({
               >
                 {withFollow && (
                   <div className="ml-auto">
-                    <FollowButton followerid={blockUser.id} userid={user.id} followed={false} size="sm" />
+                    <FollowButton
+                      followerid={blockUser.id}
+                      userid={user.id}
+                      followed={false}
+                      size="sm"
+                    />
                   </div>
                 )}
               </UserBlock>
@@ -207,5 +212,3 @@ export const UserDisplayer = ({
     </div>
   );
 };
-
-

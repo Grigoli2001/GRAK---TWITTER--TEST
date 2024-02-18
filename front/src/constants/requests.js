@@ -29,7 +29,6 @@ export const followRequests = {
   following: "/users/following",
 };
 
-
 export const tweetRequests = {
   allTweets: "/tweets",
   forYou: "/tweets/category/foryou",
@@ -39,5 +38,10 @@ export const tweetRequests = {
   bookmarks: "/tweets/category/bookmarks",
   retweets: "/tweets/category/retweets",
   replies: "/tweets/category/replies",
-}
-  
+};
+
+export const notificationRequests = {
+  allNotifications: "/notifications",
+  markAsSeen: "/notifications/update",
+  deleteNotification: "/notifications/delete",
+};
