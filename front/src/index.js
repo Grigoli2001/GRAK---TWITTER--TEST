@@ -4,22 +4,25 @@ import "./index.css";
 import App from "./App";
 import { BrowserRouter } from "react-router-dom";
 import reportWebVitals from "./reportWebVitals";
-import { AppStateProvider } from "./context/appStateProvider";
 import { ToastContainer } from "react-toastify";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { Provider } from "react-redux";
 import store from "./store/store";
+import { UserProvider } from "./context/UserProvider";
+import SocketProvider from "./context/socketContext";
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
     <BrowserRouter>
     <Provider store={store}>
-      <AppStateProvider>
+      <UserProvider>
+        <SocketProvider>
         <GoogleOAuthProvider clientId="1092637215532-ktlj13jh7d5t1410n32pklpk6ubh9vo8.apps.googleusercontent.com">
           <App />
         </GoogleOAuthProvider>
         <ToastContainer />
-      </AppStateProvider>
+        </SocketProvider>
+      </UserProvider>
     </Provider>
     </BrowserRouter>
   </React.StrictMode>

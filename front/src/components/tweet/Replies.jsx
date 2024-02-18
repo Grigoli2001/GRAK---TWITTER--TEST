@@ -1,11 +1,12 @@
 import React, { useContext, useEffect, useState } from 'react'  
-import { UserContext } from '../../context/UserContext'
+
 import  Tweet  from './Tweet'
 import { users, followedTweets, forYouTweets } from '../../constants/feedTest'
 import instance from '../../constants/axios';
 import { requests } from '../../constants/requests';
 
 import ReactLoading from "react-loading";
+import useUserContext from '../../hooks/useUserContext';
 
 const Replies = ({asMedia, tweetId}) => {
 
@@ -22,7 +23,7 @@ const Replies = ({asMedia, tweetId}) => {
     const followCollection = users[0].following
 
       // api will determine the user for now use the context
-    let { user } = useContext(UserContext)
+    let { user } = useUserContext()
 
     const getAllReplies = async () => {
       try {

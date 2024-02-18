@@ -17,6 +17,7 @@ const tweetSlice = createSlice({
   },
   reducers: {
     setForYouTweets: (state, action) => {
+      console.log('action.payload', action.payload)
       state.forYou = action.payload;
     },
     setFollowingTweets: (state, action) => {
@@ -32,6 +33,8 @@ const tweetSlice = createSlice({
       state.retweets = action.payload;
     },
     setMyTweets: (state, action) => {
+      console.log('action.payload', action.payload)
+
       state.myTweets = action.payload;
     },
 
@@ -94,7 +97,7 @@ export const fetchFollowingTweetsAsync = () => async (dispatch) => {
 
 export const fetchLikedTweetsAsync = () => async (dispatch) => {
   try {
-    const fetchedData = await instance.get(tweetRequests.liked)
+    const fetchedData = await instance.get(tweetRequests.likes)
     dispatch(setLikedTweets(fetchedData.data.data.tweets));
   } catch (error) {
     console.error('Error fetching liked tweets:', error);
@@ -103,7 +106,7 @@ export const fetchLikedTweetsAsync = () => async (dispatch) => {
 
 export const fetchBookmarkedTweetsAsync = () => async (dispatch) => {
   try {
-    const fetchedData = await instance.get(tweetRequests.bookmarked)
+    const fetchedData = await instance.get(tweetRequests.bookmarks)
     dispatch(setBookmarkedTweets(fetchedData.data.data.tweets));
   } catch (error) {
     console.error('Error fetching bookmarked tweets:', error);

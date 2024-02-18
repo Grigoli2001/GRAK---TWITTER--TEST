@@ -53,7 +53,7 @@ import {
   ProfileModalRoutes,
   ProfileEditRoutes,
 } from "./components/profile/ProfileRoutes";
-import { UserProvider } from "./context/UserContext";
+import { UserProvider } from "./context/UserProvider";
 import PrivateRoute from "./routes/PrivateRoute";
 import PublicRoute from "./routes/PublicRoute";
 

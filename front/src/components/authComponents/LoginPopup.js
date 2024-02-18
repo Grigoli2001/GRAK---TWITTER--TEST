@@ -8,10 +8,11 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { requests } from "../../constants/requests";
 import instance from "../../constants/axios";
-import useAppStateContext from "../../hooks/useAppStateContext";
 import { useNavigate } from "react-router-dom";
 import { createToast } from "../../hooks/createToast";
 import { SocketContext } from "../../context/socketContext";
+
+import useUserContext from "../../hooks/useUserContext";
 
 const LoginPopup = ({ onClose, openSignUpFromLogin, Google }) => {
   const [user, setuser] = useState({
@@ -25,7 +26,7 @@ const LoginPopup = ({ onClose, openSignUpFromLogin, Google }) => {
   const [togglePassword, setTogglePassword] = useState(false);
   const {socket} = useContext(SocketContext);
 
-  const { dispatch } = useAppStateContext();
+  const { dispatch } = useUserContext();
 
   const navigate = useNavigate();
 

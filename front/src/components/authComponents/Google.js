@@ -2,13 +2,13 @@ import { GoogleLogin } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
 import { requests } from "../../constants/requests";
 import instance from "../../constants/axios";
-import useAppStateContext from "../../hooks/useAppStateContext";
 import AdditionalInfo from "./AdditionalInfo";
 import { useState } from "react";
+import useUserContext from "../../hooks/useUserContext";
 // TODO - Add Google OAuth
 // TODO - Responsive design
 const Google = ({ user, setUser }) => {
-  const { dispatch } = useAppStateContext();
+  const { dispatch } = useUserContext();
   const [isAddtionalInfoOpen, setIsAddtionalInfoOpen] = useState(false);
   const handleLogin = async (credentialResponse) => {
     const token = credentialResponse?.credential;

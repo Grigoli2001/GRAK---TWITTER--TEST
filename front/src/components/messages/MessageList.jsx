@@ -11,17 +11,17 @@ import { users } from '../../constants/feedTest'
 import '../../styles/messages.css'
 import { FaEllipsis } from 'react-icons/fa6';
 import { Popover, PopoverHandler, PopoverContent } from '@material-tailwind/react'
-import { UserContext } from '../../context/UserContext';
 import { evalRoom } from '../../utils/utils';
 import instance from '../../constants/axios';
 // import { FaExclamationCircle } from 'react-icons/fa';
 import { createToast } from '../../hooks/createToast';
+import useUserContext from '../../hooks/useUserContext';
 
 
 const MessageList = () => {
     const [userList, setUserList] = useState(users)
     const [deletedRoom, setDeletedRoom] = useState(null)
-    const { user } = useContext(UserContext)
+    const { user } = useUserContext()
     const navigate = useNavigate()
     const location = useLocation()
 

@@ -1,5 +1,4 @@
 import { createContext,  useEffect, useRef, useState, useContext } from 'react'
-import { UserContext } from "../../context/UserContext";
 
 //  components
 import { TextareaAutosize } from '@mui/base/TextareaAutosize';
@@ -28,7 +27,8 @@ import { SocketContext } from '../../context/socketContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { createToast } from '../../hooks/createToast';
 import { useDispatch, useSelector } from 'react-redux';
-import { selectMyTweets, setMyTweets } from '../../features/tweets/tweetSlice';
+import { selectMyTweets, setForYouTweets, setMyTweets } from '../../features/tweets/tweetSlice';
+import useUserContext from '../../hooks/useUserContext';
 
 /**
  * Form for creating a tweet
@@ -38,8 +38,8 @@ import { selectMyTweets, setMyTweets } from '../../features/tweets/tweetSlice';
 
 export const TweetContext = createContext(null);
 
-const TweetCreate = ({type = 'Post', reference_id = null}) => {
-  const user = useContext(UserContext);
+const TweetCreate = ({type = 'Post', reference_id = null, currentMyTweets, currentForYouTweets}) => {
+  const user = useUserContext()
   const tweetMaxLength = 300;
   const defaultTweetText = type === 'Post' ? 'What is happening?!' : 'Post your reply';
   const { socket } = useContext(SocketContext)
@@ -246,7 +246,9 @@ const TweetCreate = ({type = 'Post', reference_id = null}) => {
       )
       .then((response) => {
         // update redux 
-        // dispatch(setMyTweets({...mytweets, response.data.data.tweet}));
+        console.log('create', response.data.tweet)
+        dispatch(setMyTweets([response.data.tweet, ...currentMyTweets]));
+        dispatch(setForYouTweets([response.data.tweet, ...currentForYouTweets]));
 
 
         // reset form
@@ -265,8 +267,11 @@ const TweetCreate = ({type = 'Post', reference_id = null}) => {
         }
       })
       .catch((error) => {
+        console.log('create',error)
         createToast('An error occured while posting', 'error', 'error-create-post', {limit: 1});
-      });
+      }).finally(() => {
+        setLoading(false);
+      })
   }
 
   return (

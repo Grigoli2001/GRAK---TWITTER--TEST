@@ -1,11 +1,11 @@
 import React from "react";
 import { Navigate, Outlet } from "react-router-dom";
-import useAppStateContext from "../hooks/useAppStateContext";
+import useUserContext from "../hooks/useUserContext";
 
 const PublicRoute = () => {
-  const { appState } = useAppStateContext();
+  const { isAuthenticated, user } = useUserContext();
 
-  return !appState?.isAuthenticated && !appState?.user ? (
+  return !isAuthenticated && !user ? (
     <Outlet />
   ) : (
     <Navigate to="/home" />

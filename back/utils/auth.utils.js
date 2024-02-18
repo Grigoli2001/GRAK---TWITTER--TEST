@@ -1,6 +1,8 @@
+const jwt = require("jsonwebtoken");
 const otpGenerator = require("otp-generator");
 const nodemailer = require("nodemailer");
 const logger = require("../middleware/winston");
+
 
 const makeUsername = (name) => {
   const username =
@@ -72,9 +74,43 @@ const sendEmail = async (to, subject, text) => {
   }
 };
 
+const generateToken = (user) => {
+  return jwt.sign(
+    {
+      id: user.id,
+      username: user.username,
+      name: user.name,
+      profile_pic: user.profile_pic,
+    },
+    process.env.JWT_SECRET_KEY,
+    {
+      expiresIn: "20s",
+    }
+  );
+}
+
+const generateRefreshToken = (user) => {
+  return jwt.sign(
+    {
+      id: user.id,
+    },
+    process.env.REFRESH_SECRET_KEY,
+    {
+      expiresIn: "7d",
+    }
+  );
+}
+
+const verifyRefreshToken = (token) => {
+  return jwt.verify(token, process.env.REFRESH_SECRET_KEY);
+}
+
 module.exports = {
   makeUsername,
   checkExisting,
   generateOTP,
   sendEmail,
+  generateToken,
+  generateRefreshToken,
+  verifyRefreshToken,
 };

@@ -9,6 +9,7 @@ import { SocketContext } from '../../context/socketContext';
 import { TWEET_ACTIONS } from './Tweet'
 import { createToast } from '../../hooks/createToast';
 import { quantityFormat } from '../../utils/utils';
+import { UserContext } from '../../context/UserProvider';
 /**
  * Input For Poll 
  * TODO: clean this up
@@ -155,6 +156,7 @@ export const PollCreate = ({removePoll}) => {
 export const TweetPoll = forwardRef(({postState, dispatch, ...props}, ref) => {
 
   const { socket } = useContext(SocketContext)
+  const { user } = useContext(UserContext)
 
 
   useEffect(() => {
@@ -176,7 +178,7 @@ export const TweetPoll = forwardRef(({postState, dispatch, ...props}, ref) => {
       }
       console.log('tweet:poll:handle-live-vote', data)
       // TODO update to current user
-      dispatch({type: TWEET_ACTIONS.UPDATE_POLL, payload: {...data, userVoted: data.userVoted.userId === 3 ? data.userVoted : null }})
+      dispatch({type: TWEET_ACTIONS.UPDATE_POLL, payload: {...data, userVoted: data.userVoted.userId === user.id ? data.userVoted : null }})
     }
 
     socket.on('tweet:poll:handle-live-vote', handleLivePollVote)
@@ -190,7 +192,8 @@ export const TweetPoll = forwardRef(({postState, dispatch, ...props}, ref) => {
     e.stopPropagation()
     socket.emit('tweet:poll:vote', {
       room: postState?._id,
-      option: optionId
+      option: optionId,
+      userId: user.id
     })
   }
 

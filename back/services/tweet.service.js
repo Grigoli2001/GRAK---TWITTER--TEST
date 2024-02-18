@@ -51,6 +51,7 @@ const getTweetById = async (req, res) => {
 
 const getTweetsByCategory = async (req, res) => {
     const { category } = req.params;
+    console.log(req.user)
 
 
     const categoryConditions = {
@@ -97,14 +98,13 @@ const createTweet = async (req, res) => {
     try {
 
         const { data } = req.body;
-
-        // parse since its sent as form data to allow sending images
+        console.log(data);
         const newTweetData = JSON.parse(data);
         console.log(newTweetData)
-        
+
 
         // filter out any undefined o|r null values
-        Object.entries(newTweetData).forEach(([key, value]) => {  
+        Object.entries(newTweetData).forEach(([key, value]) => {
             if (value === undefined || value === null) {
                 delete newTweetData[key];
             }
@@ -114,13 +114,16 @@ const createTweet = async (req, res) => {
 
 
         if (!tweetType) {
-            throw new Error("tweetType is required");
+            return res.status(statusCode.badRequest).json({
+                message: "tweetType is required",
+            });
         }
 
         const originalTweet = tweetType === 'tweet'
         if (!originalTweet && !reference_id) {
-            throw new Error("if not original tweet, reference is required")
-          
+            return res.status(statusCode.badRequest).json({
+                message: "if not original tweet, reference is required",
+            });
         }
 
         if (originalTweet && reference_id) {
@@ -130,15 +133,18 @@ const createTweet = async (req, res) => {
         }
 
         if ((!tweetText && !req.file) || (req.file && tweetPoll)) {
-            throw Error("tweetText or tweetMedia is required",)
+            return res.status(statusCode.badRequest).json({
+                status: "fail",
+                message: "tweetText or tweetMedia is required",
+            });
         }
-    
-        if (req.file){
+
+        if (req.file) {
 
             await import('file-type').then(async ({ fileTypeFromBuffer }) => {
                 const { mime } = await fileTypeFromBuffer(req.file.buffer)
                 if (!mime.startsWith('image') && !mime.startsWith('video')) {
-                    throw new Error('Invalid file type, only JPEG, PNG and MP4 is allowed!');
+                    throw (new Error('Invalid file type, only JPEG, PNG and MP4 is allowed!'));
                 }
 
             })
@@ -155,45 +161,62 @@ const createTweet = async (req, res) => {
         const session = await mongoose.startSession();
         await session.withTransaction(async () => {
 
-        // filter out any undefined or null values
-        if (tweetPoll) {
-            const poll_options = tweetPoll?.choices.filter(option => !!option);
-            if (poll_options?.length < 2 || poll_options?.length > 4) {
-                throw Error("Poll must have between 2 and 4 options");
-            }else if(poll_options.some(option => !option.text || option.text.length > 25 )){
-               throw Error("Invalid poll data")
-            }else if(!tweetPoll.duration || tweetPoll.duration.days < 1 || tweetPoll.duration.hours < 1 || tweetPoll.duration.minutes < 1 || 
-                tweetPoll.duration.days > 7 || tweetPoll.duration.hours > 24 || tweetPoll.duration.minutes > 60){
-                throw Error("Invalid poll duration")
+            // filter out any undefined or null values
+            if (tweetPoll) {
+                const poll_options = tweetPoll?.choices.filter(option => !!option);
+                if (poll_options?.length < 2 || poll_options?.length > 4) {
+                    throw Error("Poll must have between 2 and 4 options");
+                } else if (poll_options.some(option => !option.text || option.text.length > 25)) {
+                    throw Error("Invalid poll data")
+                } else if (!tweetPoll.duration || tweetPoll.duration.days < 1 || tweetPoll.duration.hours < 1 || tweetPoll.duration.minutes < 1 ||
+                    tweetPoll.duration.days > 7 || tweetPoll.duration.hours > 24 || tweetPoll.duration.minutes > 60) {
+                    throw Error("Invalid poll duration")
+                }
+                const pollExpiration = new Date(Date.now() + (tweetPoll.duration.days * 24 * 60 * 60 * 1000) + (tweetPoll.duration.hours * 60 * 60 * 1000) + (tweetPoll.duration.minutes * 60 * 1000));
+
+                const poll = new pollModel({ options: poll_options, poll_end: pollExpiration });
+                console.log(poll, tweet);
+                tweet.poll = poll._id;
+                poll.tweet_id = tweet._id;
+                console.log(tweet);
+                await poll.save({ session });
+
             }
-            const pollExpiration = new Date(Date.now() + (tweetPoll.duration.days * 24 * 60 * 60 * 1000) + (tweetPoll.duration.hours * 60 * 60 * 1000) + (tweetPoll.duration.minutes * 60 * 1000));
-           
-            const poll = new pollModel({options:poll_options, poll_end: pollExpiration});
-            console.log(poll, tweet);
-            tweet.poll = poll._id;
-            poll.tweet_id = tweet._id;
-            console.log(tweet);
-            await poll.save({ session });
 
-        }
-        
-         });
+        });
 
-         if (!originalTweet){
+        if (!originalTweet) {
             tweet.reference_id = reference_id
         }
 
-         await tweet.save(); // enum will throw tweet type error or maybe set explicitly idk
+        await tweet.save(); // enum will throw tweet type error or maybe set explicitly idk
 
-        
+        const user = await pool.query(`SELECT id, username, name, profile_pic FROM users WHERE id = $1`, [ req.user.id ]);
+        let tweetData = tweet.toObject();
+        // Adding since front end is different query
+        tweetData.user = user.rows[0];
+        tweetData.totalLikes = 0,
+        tweetData.totalBookmarks=0,
+        tweetData.totalComments=0,
+        tweetData.totalVotes=0,
+        tweetData.userLiked=0,
+        tweetData.userRetweeted=0,
+        tweetData.userBookmarked=0,
+        tweetData.userVoted=0,
+        tweetData.totalComments = 0;
+        tweetData.totalRetweets = 0;
+        tweetData.userRetweeted = 0;
+
+
 
         if (tweetType === 'tweet') {
             // emit socket to push notify feed
 
         }
 
+        // TODO add: to redux feed on front
         res.status(statusCode.success).json({
-            tweet,
+            tweet: tweetData,
         });
 
     } catch (err) {
@@ -292,8 +315,9 @@ const getReplies = async (req, res) => {
 
 
 const likeTweet = async (req, res) => {
+    console.log(req.user.id)
     try {
-        const { tweetId, isLiked, userId } = req.body
+        const { tweetId, isLiked } = req.body
         console.log(tweetId, isLiked)
         const tweet = await tweetModel.findById(tweetId);
         if (!tweet) {
@@ -305,7 +329,7 @@ const likeTweet = async (req, res) => {
             );
         }
 
-        const currentLikeInteraction = await Interaction.findOne({ tweet_id: tweetId, userId: userId, interactionType: 'like' });
+        const currentLikeInteraction = await Interaction.findOne({ tweet_id: tweetId, userId: req.user.id, interactionType: 'like' });
         let likeInteraction;
         if (currentLikeInteraction) {
             const outOfSync = ((isLiked && currentLikeInteraction.is_deleted) || (!isLiked && !currentLikeInteraction.is_deleted))
@@ -316,7 +340,7 @@ const likeTweet = async (req, res) => {
                     is_liked: !currentLikeInteraction.is_deleted,
                 })
             } else {
-                likeInteraction = await Interaction.findOneAndUpdate({ tweet_id: req.body.tweetId, userId: req.body.userId, interactionType: 'like' }, { is_deleted: !currentLikeInteraction.is_deleted }, { new: true });
+                likeInteraction = await Interaction.findOneAndUpdate({ tweet_id: req.body.tweetId, userId: req.user.id, interactionType: 'like' }, { is_deleted: !currentLikeInteraction.is_deleted }, { new: true });
             }
         } else {
             likeInteraction = new Interaction({ tweet_id: req.body.tweetId, userId: req.body.userId, interactionType: 'like' });
@@ -349,8 +373,7 @@ const bookmarkTweet = async (req, res) => {
             );
         }
 
-        const userId = 3; // replace with user id from token
-        const currentBoomarkInteraction = await Interaction.findOne({ tweet_id: tweetId, userId: userId, interactionType: 'bookmark' });
+        const currentBoomarkInteraction = await Interaction.findOne({ tweet_id: tweetId, userId: req.user.id, interactionType: 'bookmark' });
         let bookmarkedInteraction;
         if (currentBoomarkInteraction) {
             const outOfSync = ((isBookmarked && currentBoomarkInteraction.is_deleted) || (!isBookmarked && !currentBoomarkInteraction.is_deleted))
@@ -360,10 +383,10 @@ const bookmarkTweet = async (req, res) => {
                     is_bookmarked: !currentBoomarkInteraction.is_deleted,
                 })
             } else {
-                bookmarkedInteraction = await Interaction.findOneAndUpdate({ tweet_id: tweetId, userId: userId, interactionType: 'bookmark' }, { is_deleted: !currentBoomarkInteraction.is_deleted }, { new: true });
+                bookmarkedInteraction = await Interaction.findOneAndUpdate({ tweet_id: tweetId, userId: req.user.id, interactionType: 'bookmark' }, { is_deleted: !currentBoomarkInteraction.is_deleted }, { new: true });
             }
         } else {
-            bookmarkedInteraction = new Interaction({ tweet_id: tweetId, userId: userId, interactionType: 'bookmark' });
+            bookmarkedInteraction = new Interaction({ tweet_id: tweetId, userId: req.user.id, interactionType: 'bookmark' });
         }
 
         await bookmarkedInteraction.save();

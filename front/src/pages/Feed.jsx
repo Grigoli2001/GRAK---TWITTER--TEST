@@ -11,9 +11,13 @@ import TweetFallBack from '../components/TweetFallBack';
 
 // icons
 import { FiSettings } from "react-icons/fi";
+import { useSelector } from 'react-redux';
+import { selectForYouTweets, selectMyTweets } from '../features/tweets/tweetSlice';
 
 
 const Feed = () => {
+  const currentMyTweets = useSelector(selectMyTweets);
+  const currentForYouTweets = useSelector(selectForYouTweets);
    
   return (
     <>
@@ -29,7 +33,7 @@ const Feed = () => {
 
       </TabsList>
       <section>
-        <TweetCreate />
+        <TweetCreate currentForYouTweets={currentForYouTweets} currentMyTweets={currentMyTweets}/>
         
         <TabPanel>
           <Tweets api={"for-you"} FallBackComponent={TweetFallBack()}/>

@@ -9,7 +9,6 @@ const socket = io('http://localhost:4000', {
 });
 
 socket.on("connect_error", (err) => {
-  toast.error(`Your session has expired. Please login again`);
 });
 
 export const SocketContext = createContext({ socket })

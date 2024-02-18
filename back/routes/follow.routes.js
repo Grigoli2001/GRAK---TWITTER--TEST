@@ -6,7 +6,8 @@ const userServices = require('../services/user.service')
 
 
 router.get('/', userServices.getAllUsers);
-router.post('/', userServices.getUser);
+router.get('/user', userServices.getUserById);
+router.post('/search', userServices.searchUser);
 router.post("/follow", followServices.addFollower);
 router.post("/unfollow", followServices.removeFollower);
 router.get("/followers", followServices.getFollowers);

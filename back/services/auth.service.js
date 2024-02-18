@@ -9,8 +9,11 @@ const {
   checkExisting,
   generateOTP,
   sendEmail,
+  generateToken,
+  generateRefreshToken,
 } = require("../utils/auth.utils");
 const { info } = require("winston");
+const { generate } = require("otp-generator");
 
 const signup = async (req, res) => {
   const {
@@ -107,28 +110,12 @@ const login = async (req, res) => {
       email: user.rows[0].email,
     };
 
-    const token = jwt.sign(
-      {
-        user: {
-          id: user.rows[0].id,
-          email: user.rows[0].email,
-          name: user.rows[0].name,
-          username: user.rows[0].username,
-          dob: user.rows[0].dob,
-          isGetmoreMarked: user.rows[0].isgetmoremarked,
-          isConnectMarked: user.rows[0].isconnectmarked,
-          isPersonalizedMarked: user.rows[0].ispersonalizedmarked,
-          profile_pic: user.rows[0].profile_pic,
-        },
-      },
-      process.env.JWT_SECRET_KEY,
-      {
-        expiresIn: "2h",
-      }
-    );
+    const token = generateToken(user.rows[0])
+    const refreshToken = generateRefreshToken(user.rows[0])
+
     return res
       .status(statusCodes.success)
-      .json({ token, username: user.rows[0].username });
+      .json({ token: token,refresh:refreshToken, username: user.rows[0].username });
   }
 
   // Normal login
@@ -139,7 +126,7 @@ const login = async (req, res) => {
   } else {
     try {
       const user = await pool.query(
-        "SELECT * FROM users WHERE (username = $1 OR email = $1) AND password = $2 ;",
+        "SELECT * FROM users WHERE (username = $1 OR email = $1) AND password = crypt($2, password) ;",
         [userInfo, password]
       );
       if (!user.rowCount) {
@@ -152,29 +139,12 @@ const login = async (req, res) => {
         email: user.rows[0].email,
       };
 
-      const token = jwt.sign(
-        {
-          user: {
-            id: user.rows[0].id,
-            email: user.rows[0].email,
-            name: user.rows[0].name,
-            username: user.rows[0].username,
-            dob: user.rows[0].dob,
-            isGetmoreMarked: user.rows[0].isgetmoremarked,
-            isConnectMarked: user.rows[0].isconnectmarked,
-            isPersonalizedMarked: user.rows[0].ispersonalizedmarked,
-            profile_pic: user.rows[0].profile_pic,
-          },
-        },
-        process.env.JWT_SECRET_KEY,
-        {
-          expiresIn: "2h",
-        }
-      );
+      const token = generateToken(user.rows[0])
+      const refreshToken = generateRefreshToken(user.rows[0])
 
       return res
         .status(statusCodes.success)
-        .json({ token, username: user.rows[0].username });
+        .json({ token: token, refresh: refreshToken, username: user.rows[0].username });
     } catch (error) {
       logger.error(error);
       return res

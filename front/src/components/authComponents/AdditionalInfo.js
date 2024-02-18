@@ -6,8 +6,8 @@ import { IoMdArrowBack } from "react-icons/io";
 import { FaEyeSlash, FaRegEye } from "react-icons/fa";
 import instance from "../../constants/axios";
 import { requests } from "../../constants/requests";
-import useAppStateContext from "../../hooks/useAppStateContext";
 import { useNavigate } from "react-router-dom";
+import useUserContext from "../../hooks/useUserContext";
 
 const AdditionalInfo = ({ onClose, user, setUser }) => {
   const [isPasswordFocused, setIsPasswordFocused] = useState(false);
@@ -15,7 +15,7 @@ const AdditionalInfo = ({ onClose, user, setUser }) => {
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
-  const { dispatch } = useAppStateContext();
+  const { dispatch } = useUserContext();
   const navigate = useNavigate();
   const handleNextClick = (page) => {
     switch (page) {

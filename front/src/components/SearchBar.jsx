@@ -6,6 +6,8 @@ import { cn } from '../utils/style';
 
 // test
 import { tags, users } from '../constants/feedTest';
+import instance from '../constants/axios';
+import { Link } from 'react-router-dom';
 
 /**
  * Template for search bar
@@ -23,52 +25,23 @@ const SearchBar = ({fetchResults, resultComponent, className, ...props}) => {
     const handleShowResults = (show) => {
         show ? searchContaner.current.classList.remove('hidden') : searchContaner.current.classList.add('hidden')
     }
-
-    const searchByTag = (value) => value.startsWith('#');
-    const searchByUser = (value) => value.startsWith('@');
-
-    const filterTags = (tags, value) => {
-        const trimmedValue = value.slice(1).toLowerCase().trim();
-     return tags.filter((tag) => tag.toLowerCase().includes(trimmedValue)).map((tag,  index, array) => ({type:'tag', value: tag, isLast: index === array.length - 1}));
-    };
-
-    const filterUsers = (users, value) => {
-        const trimmedValue = value.slice(1).toLowerCase();
-        return users.filter((user) =>
-                user.username?.toLowerCase().includes(trimmedValue) ||user.name?.toLowerCase().includes(trimmedValue) )
-                .map((user) => ({type:'user', value: user}));
-    };
-
-    const searchResults = (users, tags, value) => {
-    let results = [];
-
-    if (searchByTag(value)) {
-        results = filterTags(tags, value);
-    } else if (searchByUser(value)) {
-        results = filterUsers(users, value);
-    } else {
-        const userResults = filterUsers(users, value);
-        const tagResults = filterTags(tags, value);
-        results = [...tagResults, ...userResults, ];
-    }
-
-    setResults(results);
-};
-
+    
     const handleSearch = (e) => {
 
-        // fetchResults(e.target.value, api)
         let value = e.target.value.trim()
         setSearch(value)
-        if (value.length < 3)  {
+        if (value.length < 2)  {
             handleShowResults(false)
             setResults([])
             return 
         }
+        instance.post('/user/search', {search: value}).then((res) => {
+            console.log(res.data.users)
+            setResults(res.data.users)
+        }).catch((err) => {
+            console.log(err)
+        })
 
-        searchResults(users, tags, value);
-
-        // show results
         handleShowResults(true)
     }
 
@@ -94,20 +67,10 @@ const SearchBar = ({fetchResults, resultComponent, className, ...props}) => {
             
                 (results?.length > 0) ?
                     results.map((result, index) => {
-
                         return(
-
-                        result.type === 'user' ?
-                            <UserBlock key={index} user={result.value} withNav={'/'}/>
-                        :
-                             <div key={index} 
-                             className={cn('flex  items-center gap-4 p-4 text-black border-gray-200 border-solid font-bold hover:bg-slate-200/50 cursor-pointer',{
-                                        'border-b': result.isLast
-                                    })}>
-
-                                <FaSearch className="text-2xl" />
-                                <span>{result.value}{result.isLast}</span>
-                            </div>
+                            <Link to={`/${result.username}`} key={index} className="block">
+                            <UserBlock key={index} user={result} withNav={'/'}/>
+                            </Link>
                         )
                     })
 

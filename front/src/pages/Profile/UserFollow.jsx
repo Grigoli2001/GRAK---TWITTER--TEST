@@ -7,18 +7,19 @@ import { TabsList  } from '@mui/base/TabsList';
 import { TabPanel  } from '@mui/base/TabPanel';
 import { UserDisplayer } from '../../components/User'
 import { users } from '../../constants/feedTest'
-import { UserContext } from '../../context/UserContext'
+
 
 
 // icons
 import { FaArrowLeftLong} from "react-icons/fa6";
 import { FiSettings } from "react-icons/fi";
 import { showUsername } from '../../utils/utils';
+import useUserContext from '../../hooks/useUserContext';
 
 
 const UserFollow = ({api}) => {
 
-    const { user } = useContext(UserContext)
+    const { user } = useUserContext()
     const { username } = useParams()
     const navigate = useNavigate()
     const location = useLocation()

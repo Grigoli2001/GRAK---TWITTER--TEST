@@ -40,15 +40,15 @@ export const FollowButton = ({followed, ...props}) => {
         .catch(err => console.error(err))
     }
 
-    useEffect(() => {
-        instance
-            .get(followRequests.following, { params: { userId: userid } })
-            .then(res => {
-                const following = res.data.map(follower => follower.following)
-                setIsFollowed(following.includes(followerid))
-            })
-            .catch(err => console.error(err))
-        }, []);
+    // useEffect(() => {
+    //     instance
+    //         .get(followRequests.following, { params: { userId: userid } })
+    //         .then(res => {
+    //             const following = res.data.map(follower => follower.following)
+    //             setIsFollowed(following.includes(followerid))
+    //         })
+    //         .catch(err => console.error(err))
+    //     }, []);
 
     return (
          

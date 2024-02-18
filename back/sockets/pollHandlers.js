@@ -13,7 +13,7 @@ module.exports = (io, socket) =>  {
 
         try {
         console.log('tweet:poll:vote', data, socket.id)
-        const checkVote = await interactionModel.findOne({interactionType: 'vote', tweet_id: data.room, user: 3})
+        const checkVote = await interactionModel.findOne({interactionType: 'vote', tweet_id: data.room, user: data.userId})
         if (checkVote) {
             throw new Error('Already voted')
         }
@@ -26,7 +26,7 @@ module.exports = (io, socket) =>  {
         const newVote = new interactionModel({
             interactionType: 'vote',
             tweet_id: data.room,
-            userId: 3,
+            userId: data.userId,
             pollOption: data.option
         })
 

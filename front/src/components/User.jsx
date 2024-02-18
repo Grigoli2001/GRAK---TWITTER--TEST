@@ -12,7 +12,6 @@ import { MdVerified } from "react-icons/md";
 import { showUsername, defaultAvatar } from "../utils/utils";
 import { NavLink } from "react-router-dom";
 import { FollowButton } from "./FollowButton";
-import { UserContext } from "../context/UserContext";
 import {
   Popover,
   PopoverContent,
@@ -20,6 +19,7 @@ import {
 } from "@material-tailwind/react";
 import { users } from "../constants/feedTest";
 import { cn } from "../utils/style";
+import useUserContext from "../hooks/useUserContext";
 
 /**
  * Custom Avatar component which takes variant and size props
@@ -56,6 +56,7 @@ export const UserBlock = ({
   const [test, setTest] = useState(textSizes[textSize] ?? textSizes.md);
   const [prevTest, setPrevTest] = useState("text-xs");
   // const finalTextSize = textSizes[textSize] ?? textSizes.md
+  console.log(user, "user in user block");
 
   useLayoutEffect(() => {
     let keys = Object.keys(textSizes);
@@ -165,7 +166,7 @@ export const UserDisplayer = ({
   withFollow,
   FallbackComponent,
 }) => {
-  const { user } = useContext(UserContext);
+  const { user } = useUserContext();
   const [userBlocks, setUserBlocks] = useState([]);
 
   useEffect(() => {

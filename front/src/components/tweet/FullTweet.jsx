@@ -2,7 +2,6 @@ import { Buffer } from 'buffer';
 
 import { useEffect, useState, useContext, createRef } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { UserContext } from "../../context/UserContext";
 import TweetMedia, { TweetMiniMedia } from "./TweetMedia";
 import { ExtAvatar, UserCard } from "../User";
 import { Button } from "../Button";
@@ -36,6 +35,7 @@ import ReactLoading from "react-loading";
 import { showUsername, timeAgo, quantityFormat, TweetTime } from "../../utils/utils";
 import { cn } from "../../utils/style";
 import { BaseTweet } from './Tweet';
+import useUserContext from '../../hooks/useUserContext';
 
 
 
@@ -98,7 +98,7 @@ const TweetAction = ({
 };
 
 const BaseTweetView = ({tweetUser, postState, setPostState, isLast, complete }) => {
-    const { user } = useContext(UserContext);
+    const { user } = useUserContext()
     const childTweetRef = createRef();
 
     // TODO fix 

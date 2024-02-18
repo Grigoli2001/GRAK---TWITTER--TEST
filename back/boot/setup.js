@@ -16,6 +16,7 @@ const authRoutes = require("../routes/auth.routes");
 const messageRoutes = require("../routes/messages.routes");
 const profileRoutes = require("../routes/profile.routes");
 const userRoutes = require("../routes/user.routes");
+const tokenRoutes = require("../routes/token.routes");
 
 const app = express();
 const PORT = process.env.PORT;
@@ -48,10 +49,11 @@ const registerCoreMiddleWare = async () => {
     app.use(express.json());
     app.use(cors({}));
     app.use(helmet());
-    app.use(verifyToken);
-
-    app.use("/tweets", tweetRoutes);
+    
     app.use("/auth", authRoutes);
+    app.use("/token", tokenRoutes)
+    app.use(verifyToken);
+    app.use("/tweets", tweetRoutes);
     app.use("/messages", messageRoutes);
     app.use("/profile", profileRoutes);
     app.use("/user", followRoutes);

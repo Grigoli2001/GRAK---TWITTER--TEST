@@ -2,7 +2,6 @@ import React, { useContext, useEffect, useLayoutEffect, useState, useRef } from 
 import { useParams, useNavigate, NavLink, useLocation, Outlet } from 'react-router-dom'
 import { showUsername, quantityFormat, getJoinDate } from '../../utils/utils'
 import { users } from '../../constants/feedTest'
-import { UserContext } from '../../context/UserContext'
 import { ExtAvatar } from '../../components/User'
 import { Button } from '../../components/Button'
 import { FollowButton } from '../../components/FollowButton'
@@ -21,6 +20,7 @@ import { UserDisplayer } from '../../components/User'
 import instance from '../../constants/axios'
 import { followRequests, requests } from '../../constants/requests'
 import { joinDate } from '../../utils/utils'
+import useUserContext from '../../hooks/useUserContext'
 
 
 const MediaFallBack = ({user, isUser}) => { 
@@ -111,7 +111,7 @@ const OtherPostRepliesFallBack = ({user, isUser, isSetUp}) => {
 
 const Profile = () => {
 
-  const { user } = useContext(UserContext)
+  const { user } = useUserContext()
   const { username } = useParams()
 
   
@@ -350,7 +350,7 @@ const Profile = () => {
 
                   <section>
                     <TabPanel value={`/${username}`}>
-                      <Tweets api={'myposts'}  FallBackComponent={  <OtherPostRepliesFallBack isUser={isUser} user={userProfile} isSetUp={isSetUp} />  }/>
+                      <Tweets api={'mytweets'}  FallBackComponent={  <OtherPostRepliesFallBack isUser={isUser} user={userProfile} isSetUp={isSetUp} />  }/>
                     </TabPanel>
 
                     <TabPanel value={`/${username}/replies`}>

@@ -8,8 +8,9 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { requests } from "../../constants/requests";
 import instance from "../../constants/axios";
-import useAppStateContext from "../../hooks/useAppStateContext";
 import { useNavigate } from "react-router-dom";
+
+import useUserContext from "../../hooks/useUserContext";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
@@ -23,7 +24,7 @@ const ForgotPassword = () => {
   const [VerificationCode, setVerificationCode] = useState("");
   const [newPassword, setNewPassword] = useState("");
 
-  const { dispatch } = useAppStateContext();
+  const { dispatch } = useUserContext();
 
   const navigate = useNavigate();
 

@@ -1,4 +1,6 @@
-const AppStateReducer = (state, action) => {
+import { jwtDecode } from "jwt-decode";
+
+const UserReducer = (state, action) => {
   switch (action.type) {
     case "Login": {
       localStorage.setItem(
@@ -8,7 +10,9 @@ const AppStateReducer = (state, action) => {
       return {
         ...state,
         isAuthenticated: true,
-        user: action.payload,
+        token: action.payload.token,
+        refresh: action.payload.refresh,
+        user: jwtDecode(action.payload.token).user || jwtDecode(action.payload.token),
       };
     }
 
@@ -16,6 +20,8 @@ const AppStateReducer = (state, action) => {
       localStorage.removeItem("user");
       return {
         isAuthenticated: false,
+        token: null,
+        refresh: null,
         user: null,
       };
     }
@@ -24,4 +30,4 @@ const AppStateReducer = (state, action) => {
   }
 };
 
-export default AppStateReducer;
+export default UserReducer;

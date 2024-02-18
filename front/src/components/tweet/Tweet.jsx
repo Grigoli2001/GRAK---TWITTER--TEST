@@ -3,7 +3,6 @@ import { Buffer } from 'buffer';
 import { useEffect, useState, useContext, useReducer } from "react";
 import ReactLoading from 'react-loading'
 import { NavLink, useNavigate } from "react-router-dom";
-import { UserContext } from "../../context/UserContext";
 import TweetMedia, { TweetMiniMedia } from "./TweetMedia";
 import { ExtAvatar, UserCard } from "../User";
 import { Button } from "../Button";
@@ -36,6 +35,7 @@ import { showUsername, timeAgo, quantityFormat, tweetTime } from '../../utils/ut
 import { cn } from '../../utils/style';
 import { TweetPoll } from './Poll';
 import { createToast } from '../../hooks/createToast';
+import useUserContext from '../../hooks/useUserContext';
 
 export const TWEET_ACTIONS = {
   LIKE: "like",
@@ -129,6 +129,7 @@ function reducer( state, action ) {
 
         if (option.id === payload.option) {
           console.log('match')
+          console.log('payload ', payload.interactionCount)
           return {...option, votes: payload.interactionCount}
         }
         return option
@@ -143,8 +144,9 @@ function reducer( state, action ) {
 
 export const BaseTweet = ({ tweetUser, post, isLast, reply, fullView}) => {
   const [postState, dispatch] = useReducer(reducer, post)
+  console.log('post state IN base', postState?.tweetText, postState?.tweetType, postState?.userLiked)
   // const [postState, setPostState] = useState(post);
-  const { user } = useContext(UserContext);
+  const { user } = useUserContext()
 
 
   const handleLike = (e) => {
@@ -152,7 +154,6 @@ export const BaseTweet = ({ tweetUser, post, isLast, reply, fullView}) => {
     instance.post(requests.likeTweet, {
       tweetId: postState._id,
       isLiked: postState.userLiked,
-      userId: 3
     })
     .then((res) => {
       console.log(res.data)
@@ -168,7 +169,6 @@ export const BaseTweet = ({ tweetUser, post, isLast, reply, fullView}) => {
 
     instance.post(requests.retweetTweet, {
       tweetId: postState._id,
-      userId: user.id
     })
     .then((res) => {
       dispatch({ 
@@ -196,7 +196,6 @@ export const BaseTweet = ({ tweetUser, post, isLast, reply, fullView}) => {
     instance.post(requests.bookmarkTweet, {
       tweetId: postState._id,
       isBookmarked: postState.userBookmarked,
-      userId: user.id
     })
     .then((res) => {
       dispatch({type: TWEET_ACTIONS.BOOKMARK, payload: {...res.data}})
@@ -215,9 +214,9 @@ export const BaseTweet = ({ tweetUser, post, isLast, reply, fullView}) => {
   const navigate = useNavigate();
 
   const isValidMediaType = (contentType) => {
-    if (contentType.startsWith('image/')) {
+    if (contentType?.startsWith('image/')) {
         return 'image';
-    } else if (contentType.startsWith('video/')) {
+    } else if (contentType?.startsWith('video/')) {
         return 'video';
     } else {
         return null; // Invalid media type
@@ -393,6 +392,7 @@ export const FullTweet = ({ tweetId, isLast, parent }) => {
 
         instance.get(requests.getTweetById + tweetId).then(res => {
             setTweetPost(res.data.data.tweet)
+            console.log('full tweet', res.data.data.tweet)
             setLoading(false)
         }).catch(err => {
           console.log(err)

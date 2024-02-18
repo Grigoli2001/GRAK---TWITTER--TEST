@@ -5,8 +5,9 @@ const pool = require("../database/db_setup");
 
 
 const tweetQuery = async (matchOptions,userid) => {
+    console.log(matchOptions, userid)
     const tweets = await tweetModel.aggregate([
-       
+     
         {
             $lookup: {
                 from: 'polls',
@@ -99,6 +100,7 @@ const tweetQuery = async (matchOptions,userid) => {
                 tweetText: 1,
                 tweetMedia: 1,
                 userId: 1,
+                reference_id: 1,
                 createdAt: 1,
                 totalLikes: 1,
                 totalBookmarks: 1,

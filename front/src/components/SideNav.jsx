@@ -23,12 +23,9 @@ import "../styles/SideNavExtra.css";
 
 import { cn } from "../utils/style";
 
-// Testing
-import { UserContext } from "../context/UserContext";
-
 // context
-import useAppStateContext from "../hooks/useAppStateContext";
 import { SocketContext } from "../context/socketContext";
+import useUserContext from "../hooks/useUserContext";
 
 const SideNavTab = ({ text, icon, notif, url }) => {
     return (
@@ -59,8 +56,11 @@ const SideNavTab = ({ text, icon, notif, url }) => {
 
 export const ProfileTab = () => {
 // I added logout because I need for testing
-  const { dispatch } = useAppStateContext();
-  const { user} = useContext(UserContext);
+  const { dispatch } = useUserContext();
+  const { user, token, isAuthenticated} = useUserContext();
+  console.log(user, 'user in profiletab')
+  console.log(token,  'token in profiletab')
+  console.log(isAuthenticated, 'isAuthenticated in profiletab')
   const navigate = useNavigate();
   const handleLogout = () => {
     dispatch({
@@ -97,7 +97,7 @@ export const ProfileTab = () => {
 };
 
 const SideNav = () => {
-  const { user } = useContext(UserContext);
+  const { user } = useUserContext();
   const { socket } = useContext(SocketContext)
   const location = useLocation();
   const [ options, setOptions ] = useState([
@@ -252,7 +252,7 @@ const SideNav = () => {
              <Button size="lg" className="w-full">Post</Button>
             </NavLink>
 
-            <ProfileTab user={user} />
+            <ProfileTab/>
         </div>
 );
 };

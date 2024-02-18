@@ -7,12 +7,13 @@ import { FiBell } from "react-icons/fi";
 import { TbCameraPlus } from "react-icons/tb";
 import instance from "../../constants/axios";
 import { requests } from "../../constants/requests";
-import useAppStateContext from "../../hooks/useAppStateContext";
 import { useNavigate } from "react-router-dom";
 import { topics } from "../../constants/feedTest";
 import { UserDisplayer } from "../User";
 import { jwtDecode } from "jwt-decode";
-import { UserContext } from "../../context/UserContext";
+
+import useUserContext from "../../hooks/useUserContext";
+
 
 const AfterRegistrationPopup = ({ onClose }) => {
   const [loading, setLoading] = useState(false);
@@ -27,7 +28,7 @@ const AfterRegistrationPopup = ({ onClose }) => {
   const token = localStorage.getItem("user")
     ? JSON.parse(localStorage.getItem("user")).token
     : null;
-  const { user, setUser } = useContext(UserContext);
+  const { user } = useUserContext()
   const [userName, setUserName] = useState(user.username);
   const [profilePic, setProfilePic] = useState(null);
   const [display, setDisplay] = useState("/uploads/default_profile_pic.jpg");
@@ -74,7 +75,6 @@ const AfterRegistrationPopup = ({ onClose }) => {
               if (res.status === 200) {
                 setLoading(false);
                 setCurrentPage(7);
-                setUser({ ...user, username: userName });
               } else {
                 setLoading(false);
                 setIsUsernameAvailable(false);

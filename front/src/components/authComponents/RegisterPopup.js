@@ -7,9 +7,10 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { requests } from "../../constants/requests";
 import instance from "../../constants/axios";
-import useAppStateContext from "../../hooks/useAppStateContext";
 import { useNavigate } from "react-router-dom";
 import { createToast } from "../../hooks/createToast";
+
+import useUserContext from "../../hooks/useUserContext";
 
 const RegisterPopup = ({ onClose, user, setUser }) => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -28,7 +29,7 @@ const RegisterPopup = ({ onClose, user, setUser }) => {
   const [verificationInput, setverificationInput] = useState("");
   const [emailAlreadyExists, setEmailAlreadyExists] = useState(false);
 
-  const { dispatch } = useAppStateContext();
+  const { dispatch } = useUserContext();
   const navigate = useNavigate();
 
   const nameInputRef = useRef(null);
@@ -207,11 +208,7 @@ const RegisterPopup = ({ onClose, user, setUser }) => {
       .then((response) => {
         dispatch({
           type: "Login",
-          payload: {
-            token: response.data.token,
-            email: user.email,
-            username: user.username,
-          },
+          payload: response.data,
         });
         localStorage.setItem("justRegistered", "true");
         navigate("/after-registration");

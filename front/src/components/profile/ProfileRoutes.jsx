@@ -1,6 +1,6 @@
 import { useState, useContext, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { UserContext } from "../../context/UserContext";
+import useUserContext from "../../hooks/useUserContext";
 
 import NavModal from "../NavModal";
 import CustomInput from "../CustomInput";
@@ -70,7 +70,7 @@ const PhotoModal = ({ type, backTo }) => {
 };
 
 const EditProfileModal = ({ backTo }) => {
-  const { user } = useContext(UserContext);
+  const { user } = useUserContext();
   const navigate = useNavigate();
 
   const formConstant = {

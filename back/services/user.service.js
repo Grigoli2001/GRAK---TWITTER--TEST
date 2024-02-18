@@ -6,7 +6,7 @@ const jwt = require("jsonwebtoken");
 
 const getAllUsers = async (req, res) => {
   try {
-    const users = await SVGTextPositioningElement.query("SELECT * FROM users");
+    const users = await pool.query("SELECT * FROM users");
 
     if(!users.rowCount) {
       return res.status(statusCodes.notFound).json({ message: "No users found" });
@@ -16,13 +16,10 @@ const getAllUsers = async (req, res) => {
   } catch (err) {
     logger.error(err);
     res.status(statusCodes.queryError).json({ message: "Error fetching users" });
-  } finally {
-    client.release();
   }
 };
 
 const getUser = async (req, res) => {
-  const { id, username } = req.body;
   if (id) {
     return getUserById(req, res);
   } else if (username) {
@@ -33,11 +30,25 @@ const getUser = async (req, res) => {
 
 };
 
+const searchUser = async (req, res) => {
+  const { search } = req.body;
+  try {
+    const users = await pool.query(`SELECT id, name, username, email, profile_pic, created_at FROM users WHERE username LIKE '%${search}%' OR name LIKE '%${search}%'`);
+
+    if (!users.rowCount) {
+      return res.status(statusCodes.notFound).json({ message: "No users found" });
+    }
+    res.status(statusCodes.success).json({ users: users.rows });
+  } catch (err) {
+    logger.error(err);
+    res.status(statusCodes.queryError).json({ message: "Error fetching users" });
+  }
+}
+
 
 const getUserById = async (req, res) => {
-  const { id } = req.body;
   try {
-    const user = await pool.query(`SELECT id, name, username, email, profile_pic, created_at FROM users WHERE id = $1`, [id]);
+    const user = await pool.query(`SELECT id, name, username, profile_pic, created_at FROM users WHERE id = $1`, [req.user.id]);
 
     if (!user.rowCount) {
       return res.status(statusCodes.notFound).json({ message: "User not found" });
@@ -120,8 +131,7 @@ module.exports = {
     getUser,
     getUserById,
     getUserByUsername,
-    updateUser,
-    // getAllFollowers,
-    // getAllFollowing,
+    getAllFollowing,
+    searchUser
 };
 

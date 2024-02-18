@@ -12,7 +12,6 @@ import { NavLink, useParams } from 'react-router-dom';
 
 import '../../styles/messages.css'
 import { ExtAvatar } from '../User';
-import { UserContext } from '../../context/UserContext'
 import { users } from '../../constants/feedTest';
 import { evalRoom, showUsername } from '../../utils/utils';
 import { SocketContext } from '../../context/socketContext';
@@ -23,6 +22,7 @@ import emojiData from '@emoji-mart/data';
 import { Popover, PopoverContent, PopoverHandler } from '@material-tailwind/react';
 import { DefaultModal as Modal } from '../NavModal'
 import { createToast } from '../../hooks/createToast';
+import useUserContext from '../../hooks/useUserContext';
 
 
 const MessageWindowWrapper = ({children}) => {
@@ -58,7 +58,7 @@ export const DefaultMessageWindow = () => {
 export const MessageWindow = () => {
 
     const { socket } = useContext(SocketContext)
-    const { user } = useContext(UserContext)
+    const { user } = useUserContext()
     const { username } = useParams()
     const navigate = useNavigate()
     
