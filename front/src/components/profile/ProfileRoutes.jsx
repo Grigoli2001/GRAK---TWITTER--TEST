@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { UserContext } from "../../context/testUserContext";
 
@@ -14,13 +14,22 @@ import { CICameraPlus } from "../customIcons";
 import { cn } from "../../utils/style";
 import OptionSelector from "../OptionSelector";
 import { months, getDaysInMonth, getYears } from "../../utils/utils";
+import instance from "../../constants/axios";
+import { requests } from "../../constants/requests";
 
 const PhotoModal = ({ type, backTo }) => {
   // code to get a user since it is routable & reject if user does not exist
 
   // demo
   const { username } = useParams();
-  const user = users.find((otherUser) => otherUser.username === username);
+  const [user , setUser] = useState({})
+  useEffect(() => {
+    instance.post(requests.getUser, {username: username}).then(res => {
+      setUser(res.data.user)
+    }).catch(err => {
+      console.error(err)
+    })
+  },[username])
   const navigate = useNavigate();
 
   return (
@@ -49,7 +58,7 @@ const PhotoModal = ({ type, backTo }) => {
             className="w-full max-h-full object-cover"
           />
         ) : (
-          <ExtAvatar src={user.avatar} className="w-48 h-48" />
+          <ExtAvatar src={user.profile_pic} className="w-48 h-48" />
         )}
       </div>
     </NavModal>

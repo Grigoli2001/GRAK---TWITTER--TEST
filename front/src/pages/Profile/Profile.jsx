@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useLayoutEffect, useState, useRef } from 'react'
 import { useParams, useNavigate, NavLink, useLocation, Outlet } from 'react-router-dom'
-import { showUsername, quantiyFormat } from '../../utils/utils'
+import { showUsername, quantiyFormat, getJoinDate } from '../../utils/utils'
 import { users } from '../../constants/feedTest'
 import { UserContext } from '../../context/testUserContext'
 import { ExtAvatar } from '../../components/User'
@@ -19,7 +19,8 @@ import { IoLocationOutline } from "react-icons/io5";
 import { UserDisplayer } from '../../components/User'
 
 import instance from '../../constants/axios'
-import { followRequests } from '../../constants/requests'
+import { followRequests, requests } from '../../constants/requests'
+import { joinDate } from '../../utils/utils'
 
 
 const MediaFallBack = ({user, isUser}) => { 
@@ -113,17 +114,17 @@ const Profile = () => {
   const { user } = useContext(UserContext)
   const { username } = useParams()
 
-  //  checks if a profile is found
-  const userProfile = users.find(user => user.username === username)
+  
 
   // checks if the user is the current user 
-  const isUser = userProfile?.username === user.username
+  const isUser = username === user.username
       
 
   const [ postCount, setPostCount ] = useState(null)
   const [followerCount, setFollowerCount] = useState(null)
   const [followingCount, setFollowingCount] = useState(null)
   const [ following, setFollowing ] = useState([])
+  const [ userProfile, setUserProfile ] = useState(null)
 
   const [ isSetUp, setIsSetUp ] = useState(false)
   // get from user settings
@@ -131,6 +132,15 @@ const Profile = () => {
 
   const profileContainer = useRef(null)
   const noUserProfile = useRef(null)
+
+  //  checks if a profile is found
+  useEffect(() => {
+    instance.post(requests.getUser, {username: username}).then(res => {
+      setUserProfile(res.data.user)
+    }).catch(err => {
+      console.error(err)
+    })
+  },[username])
 
   useLayoutEffect(() => {
     document.title = `${showUsername(user)} / Twitter`
@@ -153,9 +163,12 @@ const Profile = () => {
     //   setTweets(tweets)
     // })
   // test
+
+  if(userProfile) {
     if (user.location || user.avatar || user.bio || user.website || user.birthday || user.cover) {
       setIsSetUp(true)
     }
+
     
     instance
     .get(followRequests.followers, {params: {followerId: userProfile.id}})
@@ -173,6 +186,7 @@ const Profile = () => {
     .catch(err => console.error(err))
 
     setPostCount(10)
+  }
   }, [userProfile])
 
   const location = useLocation() // used to pass previous location to the router for the cover and profile
@@ -180,9 +194,7 @@ const Profile = () => {
   const handleBack = () => {
     navigate(-1)
   }
-
-  const joinDate =  new Date(user.join_date).toLocaleDateString('en-US', {month: 'long', year: 'numeric'}) // update if getting date directly from api
-
+  
 
   return (
 
@@ -242,7 +254,7 @@ const Profile = () => {
                   {
                     userProfile ? 
                       <NavLink to={`/${userProfile.username}/photo`} state={{ background: location }}>
-                        <ExtAvatar src={userProfile.avatar} size="xxl" alt={`${userProfile.username}'s profile`} />
+                        <ExtAvatar src={userProfile.profile_pic} size="xxl" alt={`${userProfile.username}'s profile`} />
                       </NavLink>
 
                       :
@@ -294,7 +306,7 @@ const Profile = () => {
 
                   <span className="flex items-center justify-start gap-x-1 text-slate-500 text-sm">
                     <FaRegCalendarAlt />
-                    Joined { joinDate }
+                    Joined { getJoinDate(userProfile.created_at) }
                   </span>
               </div>
               {

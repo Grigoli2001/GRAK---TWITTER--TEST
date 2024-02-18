@@ -28,7 +28,7 @@ import { cn } from "../utils/style";
 export const ExtAvatar = ({ src, ...props }) => {
   return (
     <Avatar
-      src={src ?? defaultAvatar}
+      src={src ? `/uploads/${src}` : defaultAvatar}
       {...props}
       className={`hover:brightness-90 transition-opacity ${
         props.className ?? ""

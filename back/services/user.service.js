@@ -21,10 +21,23 @@ const getAllUsers = async (req, res) => {
   }
 };
 
+const getUser = async (req, res) => {
+  const { id, username } = req.body;
+  if (id) {
+    return getUserById(req, res);
+  } else if (username) {
+    return getUserByUsername(req, res);
+  } else {
+    res.status(statusCodes.badRequest).json({ message: "Missing fields" });
+  }
+
+};
+
+
 const getUserById = async (req, res) => {
-  const { id } = req.params;
+  const { id } = req.body;
   try {
-    const user = await pool.query(`SELECT id, name, username, email, profile_picture FROM users WHERE id = $1`, [id]);
+    const user = await pool.query(`SELECT id, name, username, email, profile_pic, created_at FROM users WHERE id = $1`, [id]);
 
     if (!user.rowCount) {
       return res.status(statusCodes.notFound).json({ message: "User not found" });
@@ -33,15 +46,13 @@ const getUserById = async (req, res) => {
   } catch (err) {
     logger.error(err);
     res.status(statusCodes.queryError).json({ message: "Error fetching user" });
-  } finally {
-    client.release();
   }
 }
 
 const getUserByUsername = async (req, res) => {
-    const { username } = req.params;
+    const { username } = req.body;
     try {
-        const user = await pool.query(`SELECT id, name, username, email, profile_picture FROM users WHERE username = $1`, [username]);
+        const user = await pool.query(`SELECT id, name, username, email, profile_pic, created_at FROM users WHERE username = $1`, [username]);
 
         if (!user.rowCount) {
             return res.status(statusCodes.notFound).json({ message: "User not found" });
@@ -50,8 +61,6 @@ const getUserByUsername = async (req, res) => {
     } catch (err) {
         logger.error(err);
         res.status(statusCodes.queryError).json({ message: "Error fetching user" });
-    } finally {
-        client.release();
     }
     }
 
@@ -89,6 +98,7 @@ const getAllFollowing = async (req, res) => {
 
 module.exports = {
     getAllUsers,
+    getUser,
     getUserById,
     getUserByUsername,
     getAllFollowers,

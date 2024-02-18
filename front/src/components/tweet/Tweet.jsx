@@ -100,29 +100,29 @@ export const BaseTweet = ({ tweetUser, post, isLast, reply }) => {
 
   useEffect(() => {
 
-    postState?.tweet_likes.forEach(element => {
-      if (element.userId === user.id) {
-        setPostState(prev => ({...prev, liked: true, likes: postState.tweet_likes.length}))
-      } else {
-        setPostState(prev => ({...prev, liked: false, likes: postState.tweet_likes.length}))
-      }
-    });
+    // postState?.tweet_likes.forEach(element => {
+    //   if (element.userId === user.id) {
+    //     setPostState(prev => ({...prev, liked: true, likes: postState.tweet_likes.length}))
+    //   } else {
+    //     setPostState(prev => ({...prev, liked: false, likes: postState.tweet_likes.length}))
+    //   }
+    // });
 
-    postState?.tweet_retweets.forEach(element => {
-      if (element.userId === user.id) {
-        setPostState(prev => ({...prev, retweeted: true, retweets: postState.tweet_retweets.length}))
-      } else {
-        setPostState(prev => ({...prev, retweeted: false, retweets: postState.tweet_retweets.length}))
-      }
-    });
+    // postState?.tweet_retweets.forEach(element => {
+    //   if (element.userId === user.id) {
+    //     setPostState(prev => ({...prev, retweeted: true, retweets: postState.tweet_retweets.length}))
+    //   } else {
+    //     setPostState(prev => ({...prev, retweeted: false, retweets: postState.tweet_retweets.length}))
+    //   }
+    // });
 
-    postState?.tweet_bookmarks.forEach(element => {
-      if (element.userId === user.id) {
-        setPostState(prev => ({...prev, bookmarked: true}))
-      } else {
-        setPostState(prev => ({...prev, bookmarked: false}))
-      }
-    });
+    // postState?.tweet_bookmarks.forEach(element => {
+    //   if (element.userId === user.id) {
+    //     setPostState(prev => ({...prev, bookmarked: true}))
+    //   } else {
+    //     setPostState(prev => ({...prev, bookmarked: false}))
+    //   }
+    // });
   }, [])
 
   const handleLike = (e) => {

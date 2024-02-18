@@ -101,6 +101,15 @@ export function getDaysInMonth(year, month) {
     return [ user?.id, otherUser?.id ].sort().join('-')
 }
 
+export function getJoinDate(date) {
+    const options = {
+        month: 'long',
+        year: 'numeric',
+    };
+
+    return new Date(date).toLocaleDateString('en-US', options);
+}
+
 export function TweetTime(date) {
     const options = {
         day: 'numeric',

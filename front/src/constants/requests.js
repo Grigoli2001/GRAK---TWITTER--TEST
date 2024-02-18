@@ -6,7 +6,7 @@ export const requests = {
   sendOTP: "/auth/sendOTP",
 
   getAllUsers: "/users",
-  getUserById: "/user/",
+  getUser: "/user",
   change_password: "/auth/change_password",
   createTweets: "/tweets/create",
   getTweetById: "/tweets/",

@@ -8,7 +8,7 @@ const mongoose = require("mongoose");
 const logger = require("../middleware/winston");
 const notFound = require("../middleware/notFound");
 const initSockets = require("../sockets/sockets");
-const veridyToken = require("../middleware/verifyToken");
+const verifyToken = require("../middleware/verifyToken");
 
 // routes
 const tweetRoutes = require("../routes/tweet.routes");
@@ -49,7 +49,7 @@ const registerCoreMiddleWare = async () => {
 
     app.use("/tweets", tweetRoutes);
     app.use("/auth", authRoutes);
-    app.use(veridyToken);
+    app.use(verifyToken);
     app.use("/messages", messageRoutes);
     app.use("/profile", profileRoutes);    
     app.use("/user", followRoutes);
