@@ -4,6 +4,7 @@ import { FaCircleCheck, FaCircleXmark, FaCircleInfo } from 'react-icons/fa6';
 
 export const createToast = (message, type, customClassName, options) => {
     // use options to override default toast options
+
     let caller;
     let icon;
     switch (type) {
@@ -23,6 +24,10 @@ export const createToast = (message, type, customClassName, options) => {
             caller = toast.info;
             icon = <FaCircleInfo/>;
             break;
+    }
+
+    if ( typeof options?.limit === 'number' && customClassName) {
+        if (document.querySelectorAll(`.${customClassName}`).length >= options.limit) return;
     }
 
     caller(message, {

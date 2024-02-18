@@ -216,7 +216,7 @@ const Profile = () => {
                       <h3 className="font-bold text-lg text-ellipsis overflow-hidden text-nowrap">{ userProfile.name }</h3>
 
                       <p id="user_post_count" className="text-slate-500">
-                        { quantiyFormat(postCount) } post{ postCount !== 1 && 's'}
+                        { quantityFormat(postCount) } post{ postCount !== 1 && 's'}
                       </p>
 
                       </>
@@ -314,8 +314,8 @@ const Profile = () => {
               }
               
               <div className="flex gap-x-4">
-                <NavLink to={`/${userProfile.username}/followers`} className="hover:underline"><b>{ quantiyFormat(followerCount) }</b> Follower{ followerCount !== 1 && 's'}</NavLink>
-                <NavLink to={`/${userProfile.username}/following`} className="hover:underline"><b>{ quantiyFormat(followingCount) }</b> Following</NavLink>
+                <NavLink to={`/${userProfile.username}/followers`} className="hover:underline"><b>{ quantityFormat(followerCount) }</b> Follower{ followerCount !== 1 && 's'}</NavLink>
+                <NavLink to={`/${userProfile.username}/following`} className="hover:underline"><b>{ quantityFormat(followingCount) }</b> Following</NavLink>
               </div>
             </div>
           </div>

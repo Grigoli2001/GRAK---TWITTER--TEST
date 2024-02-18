@@ -1,6 +1,6 @@
 import { Buffer } from 'buffer';
 
-import { useEffect, useState, useContext } from "react";
+import { useEffect, useState, useContext, useReducer } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { UserContext } from "../../context/testUserContext";
 import TweetMedia, { TweetMiniMedia } from "./TweetMedia";
@@ -14,7 +14,7 @@ import {
 import MiniDialog from "../MiniDialog";
 
 // axios
-import instance from '../../constants/axios';
+import instance, { baseURL } from '../../constants/axios';
 import { requests } from '../../constants/requests';
 
 // icons
@@ -31,8 +31,18 @@ import { CIQuote } from "../customIcons";
 import { RiDeleteBinLine } from "react-icons/ri";
 
 // utils
-import { showUsername, timeAgo, quantiyFormat } from "../../utils/utils";
-import { cn } from "../../utils/style";
+import { showUsername, timeAgo, quantityFormat } from '../../utils/utils';
+import { cn } from '../../utils/style';
+import { TweetPoll } from './Poll';
+import { createToast } from '../../hooks/createToast';
+
+export const TWEET_ACTIONS = {
+  LIKE: "like",
+  RETWEET: "retweet",
+  REPLY: "reply",
+  BOOKMARK: "bookmark",
+  UPDATE_POLL: "update_poll",
+};
 
 const TweetAction = ({
   Icon,
@@ -84,7 +94,7 @@ const TweetAction = ({
       {/* use ternary to eval 0 */}
       {actionCount ? (
         <span className={`text-sm -ml-[6px] ${style.text}`}>
-          {quantiyFormat(actionCount)}
+          {quantityFormat(actionCount)}
         </span>
       ) : null}
 
@@ -94,118 +104,148 @@ const TweetAction = ({
 };
 
 
+function reducer( state, action ) {
+  const { payload } = action;
+  switch (action.type) {
+    case TWEET_ACTIONS.LIKE:
+      return {...state, userLiked: payload.is_liked, totalLikes: state.totalLikes  + (payload.is_liked ? 1 : -1)}
+
+    case TWEET_ACTIONS.RETWEET:
+      return {...state, retweeted: payload.retweeted, retweets: payload.retweets}
+
+    case TWEET_ACTIONS.REPLY:
+      return {...state, replies: payload.replies }
+
+    case TWEET_ACTIONS.BOOKMARK:
+      if (payload.is_bookmarked){
+        createToast('Saved to bookmarks!', 'success', 'success-bookmark', {limit: 1})
+      }
+      return {...state, userBookmarked: payload.is_bookmarked, totalBookmarks: state.totalBookmarks  + (payload.is_bookmarked? 1 : -1)}
+
+    case TWEET_ACTIONS.UPDATE_POLL:
+      // option the votes for the option
+      console.log(payload.optionId, 'in playload')
+      // return state
+      return {...state,  totalVotes: payload.totalVotes,userVoted:payload.userVoted,   poll: { ...state.poll, options: state.poll.options.map(option => {
+
+        if (option.id === payload.option) {
+          console.log('match')
+          return {...option, votes: payload.interactionCount}
+        }
+        return option
+      }
+      )}}
+    default:
+      return state
+  }
+}
+
+
 export const BaseTweet = ({ tweetUser, post, isLast, reply }) => {
-  const [postState, setPostState] = useState(post);
+  const [postState, dispatch] = useReducer(reducer, post)
+  // const [postState, setPostState] = useState(post);
   const { user } = useContext(UserContext);
 
-  useEffect(() => {
+  // useEffect(() => {
+  //   postState?.tweet_likes.forEach(element => {
+  //     if (element.userId === currentUser) {
+  //       setPostState(prev => ({...prev, liked: true, likes: postState.tweet_likes.length}))
+  //     } else {
+  //       setPostState(prev => ({...prev, liked: false, likes: postState.tweet_likes.length}))
+  //     }
+  //   });
 
-    // postState?.tweet_likes.forEach(element => {
-    //   if (element.userId === user.id) {
-    //     setPostState(prev => ({...prev, liked: true, likes: postState.tweet_likes.length}))
-    //   } else {
-    //     setPostState(prev => ({...prev, liked: false, likes: postState.tweet_likes.length}))
-    //   }
-    // });
+  //   postState?.tweet_retweets.forEach(element => {
+  //     if (element.userId === currentUser) {
+  //       setPostState(prev => ({...prev, retweeted: true, retweets: postState.tweet_retweets.length}))
+  //     } else {
+  //       setPostState(prev => ({...prev, retweeted: false, retweets: postState.tweet_retweets.length}))
+  //     }
+  //   });
 
-    // postState?.tweet_retweets.forEach(element => {
-    //   if (element.userId === user.id) {
-    //     setPostState(prev => ({...prev, retweeted: true, retweets: postState.tweet_retweets.length}))
-    //   } else {
-    //     setPostState(prev => ({...prev, retweeted: false, retweets: postState.tweet_retweets.length}))
-    //   }
-    // });
-
-    // postState?.tweet_bookmarks.forEach(element => {
-    //   if (element.userId === user.id) {
-    //     setPostState(prev => ({...prev, bookmarked: true}))
-    //   } else {
-    //     setPostState(prev => ({...prev, bookmarked: false}))
-    //   }
-    // });
-  }, [])
+  //   postState?.tweet_bookmarks.forEach(element => {
+  //     if (element.userId === currentUser) {
+  //       setPostState(prev => ({...prev, bookmarked: true}))
+  //     } else {
+  //       setPostState(prev => ({...prev, bookmarked: false}))
+  //     }
+  //   });
+  // }, [])
 
   const handleLike = (e) => {
     e.stopPropagation();
-    // console.log("liked");
-    setPostState((prev) => ({
-      ...postState,
-      liked: !postState.liked,
-      likes: postState.liked ? postState.likes - 1 : postState.likes + 1,
-    }));
+
 
     instance.post(requests.likeTweet, {
       tweetId: postState._id,
-      userId: user.id
+      isLiked: postState.userLiked,
+      userId: 3
     })
     .then((res) => {
-      console.log(res)
+      console.log(res.data)
+      dispatch({type: TWEET_ACTIONS.LIKE, payload: { ...res.data }})
     })
     .catch((error) => {
-      console.log(error)
+      createToast('An error occured', 'error', 'error-like-tweet', {limit: 1})
     })
   }
 
   const handleRetweet = () => {
     console.log('retweeted')
-    setPostState({
-      ...postState,
-      retweeted: !postState.retweeted,
-      retweets: postState.retweeted
-        ? postState.retweets - 1
-        : postState.retweets + 1,
-    });
 
     instance.post(requests.retweetTweet, {
       tweetId: postState._id,
       userId: user.id
     })
     .then((res) => {
-      console.log(res)
+      dispatch({ 
+        type: TWEET_ACTIONS.RETWEET, 
+        payload:{
+          retweeted: res.data.retweeted, retweets: res.data.retweets 
+        }
+      })
     })
     .catch((error) => {
-      console.log(error)
+      createToast('An error occured', 'error', 'error-retweet-tweet', {limit: 1})
     })
   };
 
   const handleReply = (e) => {
     e.stopPropagation();
-    console.log("replied");
+
   };
 
   const handleBookmark = (e) => {
-    console.log("bookmarked");
     e.stopPropagation();
-    setPostState({
-      ...postState,
-      bookmarked: !postState.bookmarked,
-    });
+
     instance.post(requests.bookmarkTweet, {
       tweetId: postState._id,
+      isBookmarked: postState.userBookmarked,
       userId: user.id
     })
     .then((res) => {
-      console.log(res)
+      dispatch({type: TWEET_ACTIONS.BOOKMARK, payload: {...res.data}})
     })
     .catch((error) => {
-      console.log(error)
+      createToast('An error occured while bookmarking', 'error', 'error-bookmark-tweet', {limit: 1})
     })
   };
 
   const handleShare = (e) => {
-    e.stopPropagation();
-    console.log("shared");
-  };
+    e.stopPropagation()
+    navigator.clipboard.writeText(`${baseURL}${tweetUser.username}/status/${postState._id}`)
+    createToast('Link copied to clipboard', 'success', 'link-copied', {limit: 1})
+  }
 
   const navigate = useNavigate();
 
-  const isValidMediaType = (contentType) => {
+  const isValidMediaType = async (contentType) => {
     if (contentType.startsWith('image/')) {
       return 'image';
     } else if (contentType.startsWith('video/')) {
       return 'video';
     } else {
-      return 'gif'; // Invalid media type
+      return null; // Invalid media type
     }
   };
 
@@ -255,9 +295,6 @@ export const BaseTweet = ({ tweetUser, post, isLast, reply }) => {
               <span
                 className={cn(
                   "font-bold hover:underline text-ellipsis text-nowrap max-w-[300px] overflow-hidden",
-                  {
-                    // "underline": showUserCard
-                  }
                 )}
               >
                 {tweetUser.name}
@@ -270,7 +307,7 @@ export const BaseTweet = ({ tweetUser, post, isLast, reply }) => {
           </UserCard>
 
           <span className="text-nowrap">
-            · {timeAgo(post?.createdAt)}{" "}
+            · {timeAgo(postState?.createdAt)}
           </span>
           {post?.updatedAt && (
             <span className="text-sm font-medium italic">edited</span>
@@ -289,57 +326,66 @@ export const BaseTweet = ({ tweetUser, post, isLast, reply }) => {
               </PopoverHandler>
               <PopoverContent className="!p-0 !shadow-all-round text-black w-fit bg-white rounded-xl font-bold !outline-none z-10 overflow-hidden">
                 <ul className="list-none text-sm">
-                  <span className="text-red-500 flex items-center gap-x-2 p-2 hover:bg-gray-100 cursor-pointer">
-                    <RiDeleteBinLine /> Delete{" "}
-                  </span>
+                  <li className="p-2 flex items-center hover:bg-gray-100 cursor-pointer">
+                    Edit
+                  </li>
+                  <li className="text-red-500 flex items-center gap-x-2 p-2 hover:bg-gray-100 cursor-pointer">
+                    <RiDeleteBinLine /> Delete
+                  </li>
                 </ul>
               </PopoverContent>
             </Popover>
           )}
         </div>
 
-          <div className="text-justify break-words">
-              { post?.tweetText }
+          <div className="text-justify break-words overflow-wrap">
+              <p className='text-wrap'>{ postState?.tweetText } </p>
           </div>
-
           { 
           post?.tweetMedia && 
             <TweetMedia mediaType={isValidMediaType(post?.tweetMedia?.contentType)} src={`data:${post?.tweetMedia?.contentType};base64,${base64String}`} alt="" />
           }
+          {
+            postState?.poll && 
 
-          <div className="flex items-center justify-between p-4">
-            <TweetAction Icon={FaRegComment} actionCount={post?.tweet_comments} title="Reply" color="blue" onClick={handleReply}/>
+            <TweetPoll postState={postState} dispatch={dispatch} />
+
+          }
             
-            {/* <MiniDialog>
+          <div className="flex items-center justify-between px-4 py-2">
+            <TweetAction Icon={FaRegComment} actionCount={postState?.totalComments} title="Reply" color="blue" onClick={handleReply}/>
+            
+             <MiniDialog>
               <MiniDialog.Wrapper>
                 <MiniDialog.Dialog className='absolute -left-2 right-0 w-fit bg-white rounded-xl shadow-all-round font-bold !outline-none z-10'>
                     <ul className='list-none text-sm'>
-                        <li className='hover:bg-slate-200/50 p-3 cursor-pointer flex items-center gap-2 whitespace-nowrap' ><FaRetweet/> { postState.retweeted ? 'Undo Repost':'Repost' } </li>
+                        <li className='hover:bg-slate-200/50 p-3 cursor-pointer flex items-center gap-2 whitespace-nowrap' onClick={handleRetweet}><FaRetweet/> { postState.userRetweeted ? 'Undo Repost':'Repost' } </li>
                         <li className='hover:bg-slate-200/50 p-3 cursor-pointer flex items-center gap-2 whitespace-nowrap'><CIQuote/> Quote</li>
                     </ul>
                 </MiniDialog.Dialog>
-                <TweetAction Icon={FaRetweet} actionCount={postState?.retweets} title="Retweet" color="green" isActive={postState.retweeted}/>
+                <TweetAction Icon={FaRetweet} actionCount={postState?.totalRetweets} title="Retweet" color="green" isActive={postState?.userRetweeted}/>
               </MiniDialog.Wrapper>
-            </MiniDialog> */}
+            </MiniDialog> 
             
 
             <TweetAction
               Icon={GoHeart}
               ActiveIcon={GoHeartFill}
-              actionCount={postState.likes}
+              actionCount={postState?.totalLikes}
               title="Like"
               color="red"
               onClick={handleLike}
-              isActive={postState.liked}
+              isActive={postState?.userLiked}
             />
 
             <div className="flex">
               <TweetAction
                 Icon={FaRegBookmark}
+                actionCount={postState?.totalBookmarks}
                 ActiveIcon={FaBookmark}
                 title="Save"
                 onClick={handleBookmark}
-                isActive={postState.bookmarked}
+                isActive={postState?.userBookmarked}
               />
               <TweetAction Icon={GoUpload} title="Share" onClick={handleShare} />
             </div>

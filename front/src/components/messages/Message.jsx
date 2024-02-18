@@ -28,9 +28,11 @@ const Message = forwardRef(({ message, messageType, isLastMessage,  handleModalO
   const handleCopyMessage = () => {
     navigator.clipboard.writeText(message.message)
     setShowMore(false)
-    let className = 'copy-msg-success'
-    if (document.querySelector(`.${className}`)) return
-    createToast("Message copied to clipboard!", 'success', className)
+    createToast(
+      "Message copied to clipboard!", 
+      'success', 
+      'copy-msg-success', 
+      {limit: 1})
   }
 
   return (

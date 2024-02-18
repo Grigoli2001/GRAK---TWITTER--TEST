@@ -6,7 +6,6 @@ import { GrImage } from "react-icons/gr";
 import { MdOutlineGifBox } from "react-icons/md";
 import { BsEmojiSmile } from "react-icons/bs";
 import { AiOutlineSend } from "react-icons/ai";
-import { FaCircleCheck, FaCircleExclamation } from 'react-icons/fa6';
 import { TextareaAutosize } from '@mui/base/TextareaAutosize';
 import Message, { Typing } from './Message';
 import { NavLink, useParams } from 'react-router-dom';
@@ -19,8 +18,6 @@ import { evalRoom, showUsername } from '../../utils/utils';
 import { SocketContext } from '../../context/socketContext';
 import { Spinner } from "@material-tailwind/react";
 import instance from '../../constants/axios'
-import { toast } from 'react-toastify';
-
 import  Picker  from '@emoji-mart/react';
 import emojiData from '@emoji-mart/data';
 import { Popover, PopoverContent, PopoverHandler } from '@material-tailwind/react';
@@ -220,9 +217,7 @@ export const MessageWindow = () => {
 
     useEffect(() => {
         const handleSendError = (error) => {
-            let className = 'error-send-message'
-            if (document.querySelector(`.${className}`)) return
-            createToast("Failed to send message!", 'error', className)
+            createToast("Failed to send message!", 'error', 'error-send-message', { limit : 1})
         }
         socket.on('message:error_send_message', handleSendError)
         return () => {
@@ -262,14 +257,10 @@ export const MessageWindow = () => {
         }).then(res => {
             if (res.status === 204) throw new Error('Failed to delete message')
             setMessages(prevMessages => prevMessages.filter(msg => msg._id !== msg_id))
-            let className = 'success-del-message'
-            if (document.querySelector(`.${className}`)) return
-            createToast("Message deleted!", 'success', className)
+            createToast("Message deleted!", 'success', 'success-del-message', {limit: 1})
         })
         .catch(err => {
-            let className = 'error-del-message'
-            if (document.querySelector(`.${className}`)) return
-            createToast("Failed to delete message!", 'error', className)
+            createToast("Failed to delete message!", 'error', 'error-del-message', {limit: 1})
         }).finally(() => setModalOpen(false))
     }
 

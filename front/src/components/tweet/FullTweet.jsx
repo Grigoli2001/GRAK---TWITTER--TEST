@@ -33,7 +33,7 @@ import ReactLoading from "react-loading";
 
 
 // utils
-import { showUsername, timeAgo, quantiyFormat, TweetTime } from "../../utils/utils";
+import { showUsername, timeAgo, quantityFormat, TweetTime } from "../../utils/utils";
 import { cn } from "../../utils/style";
 import { BaseTweet } from './Tweet';
 
@@ -88,7 +88,7 @@ const TweetAction = ({
             {/* use ternary to eval 0 */}
             {actionCount ? (
                 <span className={`text-sm -ml-[6px] ${style.text}`}>
-                    {quantiyFormat(actionCount)}
+                    {quantityFormat(actionCount)}
                 </span>
             ) : null}
 

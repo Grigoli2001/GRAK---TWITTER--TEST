@@ -1,4 +1,4 @@
-import { quantiyFormat } from '../utils/utils'
+import { quantityFormat } from '../utils/utils'
 import { Popover, PopoverContent, PopoverHandler } from '@material-tailwind/react'
 
 // icons
@@ -22,7 +22,7 @@ const Trend = ({index, category, title, numTweets, isWidget}) => {
                 {category} · Trending
             </span>
               <span className='font-bold'>{title}</span>
-              <span className={`${textSize} text-slate-500`}>{quantiyFormat(numTweets)} posts</span>
+              <span className={`${textSize} text-slate-500`}>{quantityFormat(numTweets)} posts</span>
           </div>
 
           <Popover placement='left' offset={{ crossAxis: 20 }}>

@@ -1,10 +1,11 @@
 const mongoose = require('mongoose');
-const { Types } = mongoose;
+const { Schema } = mongoose;
 
-const TweetSchema = new mongoose.Schema({
+const TweetSchema = new Schema({
     tweetType: {
         type: String,
         required: [true, "tweet_type is required"],
+        enum: ['tweet', 'comment', 'retweet', 'reply', 'quote']
     },
     tweetText: {
         type: String,
@@ -13,26 +14,31 @@ const TweetSchema = new mongoose.Schema({
         type: Number,
         required: [true, "user_id is required"],
     },
-    createdAt: {
-        type: Date,
-        default: Date.now,
+    poll: {
+        type: Schema.Types.ObjectId,
+        ref: 'Poll',
     },
-    tweet_likes: [{
-        userId: Number,
-    }],
     tweetMedia: {
         data: Buffer,
         contentType: String,
     },
-    referencing_by: {
-        reference_type: String,
-        reference_id: Types.ObjectId
+    reference_id: { 
+        type: Schema.Types.ObjectId, 
+        ref: 'Tweet' 
     },
 
     // So that user data can be populated when fetching tweets
     user: {
         type: Object,
+    },
+    }, {
+    timestamps: {
+        createdAt: 'createdAt',
+        updatedAt: {
+            default: null
+        }
     }
+    
 });
 
 module.exports = mongoose.model('Tweet', TweetSchema);

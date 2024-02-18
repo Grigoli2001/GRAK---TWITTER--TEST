@@ -6,20 +6,24 @@ export function showUsername(user) {
 // export const defaultAvatar = "https://pbs.twimg.com/profile_images/1707730440331673600/oZeLdbKN_bigger.png"
 export const defaultAvatar = "https://abs.twimg.com/sticky/default_profile_images/default_profile_bigger.png"
 
-export function timeAgo (date) {
+export function timeAgo (date, initialDate = new Date()) {
     // returns a date in a time ago format
 
     if (typeof date === "string") {
         date = new Date(date);
     }
 
-    var seconds = Math.floor(((new Date().getTime()/1000) - date.getTime() / 1000)),
-    interval = Math.floor(seconds / 31536000);
+    if (typeof initialDate === "string") {
+        initialDate = new Date(initialDate);
+    }
+
+    var seconds = Math.floor(((initialDate.getTime()/1000) - date.getTime() / 1000))
+    var interval = Math.floor(seconds / 31536000);
 
     if (interval > 1) return interval + "y";
 
     interval = Math.floor(seconds / 2592000);
-    if (interval > 1) return interval + "m";
+    if (interval >= 1) return interval + "m";
 
     interval = Math.floor(seconds / 86400);
     if (interval >= 1) return interval + "d";
@@ -28,27 +32,18 @@ export function timeAgo (date) {
     if (interval >= 1) return interval + "h";
 
     interval = Math.floor(seconds / 60);
-    if (interval > 1) return interval + "min";
+    if (interval >= 1) return interval + "min";
 
     return Math.floor(seconds) + "s";
 }
 
-export function quantiyFormat (number) {
+export function quantityFormat (number) {
     // returns a number in a compact format
     return Intl.NumberFormat('en-US',{
     notation: "compact",
     maximumFractionDigits: 1
     }
     ).format(number);
-}
-
-export function parseMedia(media){
-    // returns if media is image or video
-    // TODO: read file headers to determine media type
-    if (media.includes("mp4")) {
-        return "video";
-    }
-    return "image";
 }
 
 export const months = [
@@ -127,6 +122,6 @@ export function TweetTime(date) {
     return `· ${formattedTime} · ${formattedDate} ·`;
 }
 
-  export const dayOptions = Array.from(Array(7), (_, i) => i+1)
-  export const hourOptions = Array.from(Array(23), (_, i) => i+1)
+  export const dayOptions = Array.from(Array(7), (_, i) => i)
+  export const hourOptions = Array.from(Array(23), (_, i) => i)
   export const minuteOptions = Array.from(Array(59), (_, i) => i+1)

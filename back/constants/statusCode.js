@@ -6,6 +6,8 @@ const unauthorized = 401;
 const badRequest = 400;
 const userAlreadyExists = 409;
 const notModified = 304;
+const fileTooLarge = 413;
+const invalidFileType = 415;
 
 module.exports = {
   queryError,
@@ -15,5 +17,7 @@ module.exports = {
   unauthorized,
   badRequest,
   userAlreadyExists,
-  notModified
+  notModified,
+  fileTooLarge,
+  invalidFileType
 };
