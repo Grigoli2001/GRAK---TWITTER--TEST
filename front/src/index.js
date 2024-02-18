@@ -9,7 +9,9 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 import { Provider } from "react-redux";
 import store from "./store/store";
 import { UserProvider } from "./context/UserProvider";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import SocketProvider from "./context/socketContext";
+const queryClient = new QueryClient();
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
@@ -18,9 +20,12 @@ root.render(
       <UserProvider>
         <SocketProvider>
         <GoogleOAuthProvider clientId="1092637215532-ktlj13jh7d5t1410n32pklpk6ubh9vo8.apps.googleusercontent.com">
-          <App />
+          <QueryClientProvider client={queryClient}>
+            <App />
+          </QueryClientProvider>
         </GoogleOAuthProvider>
-        <ToastContainer />
+        {/* limit testing sockets */}
+        <ToastContainer limit={2} />
         </SocketProvider>
       </UserProvider>
     </Provider>

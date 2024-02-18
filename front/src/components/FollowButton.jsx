@@ -4,51 +4,59 @@ import { cn } from '../utils/style'
 
 import instance from '../constants/axios'
 import { followRequests } from '../constants/requests'
+import { createToast } from '../hooks/createToast'
 
 
 /**
  * Follow button component which takes followed prop
  * Special Case of Button Component with its own internal state
- * TODO: handle follow/unfollow logic
  */
-export const FollowButton = ({followed, ...props}) => {
+export const FollowButton = ({followed ,setFollowerCount, followerid, userid, ...props}) => {
 
-    const { followerid, userid } = props
-    const [isFollowed, setIsFollowed] = useState(followed || false)
+    const [isFollowed, setIsFollowed] = useState(followed)
     const [isHovered, setIsHovered] = useState(false)
     
     const handleFollow = (evt) => {
         evt.stopPropagation()
         evt.preventDefault()
-        setIsFollowed(true)
-    
+
+        if (followerid === userid) {
+            createToast('You cannot follow yourself', 'error', 'error-follow', {limit:1})
+            return
+        }
+
         instance
-        .post(followRequests.follow, {userId: userid, followerId: followerid})
-        .then(res => console.log(res))
-        .catch(err => console.error(err))
+        .post(followRequests.follow, {
+            followerId: followerid
+        })
+        .then(res => {  
+            setIsFollowed(true)
+            if (setFollowerCount) setFollowerCount((prev) => prev + 1)
+        })
+        .catch(err => createToast('We couldnt process this request at the moment'+ err.message,'error', 'error-follow', {limit:1}))
     }
 
     const handleUnFollow = (evt) => {
         // opens modal
         evt.stopPropagation()
         evt.preventDefault()
-        setIsFollowed(false)
+        
+
+        if (followerid === userid) {
+            createToast('You cannot follow yourself', 'error', 'error-un-follow', {limit:1})
+            return
+        }
 
         instance
         .post(followRequests.unfollow, {userId: userid, followerId: followerid})
-        .then(res => console.log(res))
+        .then(res =>{ 
+            setIsFollowed(false); 
+            if (setFollowerCount) setFollowerCount((prev) => prev - 1)
+        })
         .catch(err => console.error(err))
     }
 
-    // useEffect(() => {
-    //     instance
-    //         .get(followRequests.following, { params: { userId: userid } })
-    //         .then(res => {
-    //             const following = res.data.map(follower => follower.following)
-    //             setIsFollowed(following.includes(followerid))
-    //         })
-    //         .catch(err => console.error(err))
-    //     }, []);
+
 
     return (
          

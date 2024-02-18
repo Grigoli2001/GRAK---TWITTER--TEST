@@ -5,7 +5,6 @@ import useUserContext from "../../hooks/useUserContext";
 import NavModal from "../NavModal";
 import CustomInput from "../CustomInput";
 import { ExtAvatar } from "../User";
-import { users } from "../../constants/feedTest";
 import { Route } from "react-router-dom";
 import { Button } from "../Button";
 import { FaXmark } from "react-icons/fa6";
@@ -20,7 +19,8 @@ import { requests } from "../../constants/requests";
 import { storage } from "../../utils/firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { v4 } from "uuid";
-import Loading from "react-loading";
+import { createToast } from "../../hooks/createToast";
+import { QueryClient } from "@tanstack/react-query";
 
 const PhotoModal = ({ type, backTo }) => {
   // code to get a user since it is routable & reject if user does not exist
@@ -28,8 +28,9 @@ const PhotoModal = ({ type, backTo }) => {
   // demo
   const { username } = useParams();
   const [user , setUser] = useState({})
+  
   useEffect(() => {
-    instance.post(requests.getUser, {username: username}).then(res => {
+    instance.get(requests.getUser, {params:{username: username}}).then(res => {
       setUser(res.data.user)
     }).catch(err => {
       console.error(err)
@@ -71,7 +72,7 @@ const PhotoModal = ({ type, backTo }) => {
 };
 
 const EditProfileModal = ({ backTo }) => {
-  const { user } = useUserContext();
+  const { user, dispatch } = useUserContext();
   const navigate = useNavigate();
 
   const formConstant = {
@@ -103,31 +104,29 @@ const EditProfileModal = ({ backTo }) => {
   const [year, setYear] = useState();
   const [dayOptions, setDayOptions] = useState();
   const years = getYears(16, 100);
+  const queryClient = new QueryClient();
 
-  const [formState, setFormState] = useState({
-    id: user?.id,
-    name: user?.name || "",
-    username: user?.username || "",
-    bio: user?.bio || "",
-    location: user?.location || "",
-    profile_pic: user?.profile_pic || "",
-    website: user?.website || "",
-    cover: user?.cover || "",
-    dob: user?.dob || "",
-  });
-  const [showForm, setShowForm] = useState({});
+  const [formState, setFormState] = useState({})
+    // id: user?.id,
+    // name: user?.name || "",
+    // username: user?.username || "",
+    // bio: user?.bio || "",
+    // location: user?.location || "",
+    // profile_pic: user?.profile_pic || "",
+    // website: user?.website || "",
+    // cover: user?.cover || "",
+    // dob: user.dob,
+  // });
 
   useEffect(() => {
-    instance.post(requests.getUser, {id: user.id}).then(res => {
-      setFormState(res.data.user)
-      setShowForm({
-        name: res.data.user.name,
-        username: res.data.user.username,
-        bio: res.data.user.bio,
-        location: res.data.user.location,
-        website: res.data.user.website,
-      })
+    instance.get(requests.getUser, {params: {id: user.id}}).then(res => {
 
+      // remove unneeded fields
+      const { email, dob,profile_pic,cover,created_at,  ...formData } = res.data.user;
+      console.log(res.data.user, 'user')
+      setFormState(formData)          
+
+      // set dob for option selector
       const date = new Date(res.data.user.dob);  
       setDay(date.getDate());
       setMonth(getMonthCounterpart(date.getMonth()));
@@ -175,12 +174,6 @@ const EditProfileModal = ({ backTo }) => {
     return monthMap[month];
   }
 
-
-  const setDob = () => {
-    const dob = `${year}/${getMonthCounterpart(month)}/${day}`
-    setFormState({...formState, dob: dob})
-  }
-
   const handleUpdateForm = (e) => {
     const fieldMaxLength = formConstant[e.target.name].maxLength;
     if (e.target.value.length > fieldMaxLength) {
@@ -203,7 +196,7 @@ const EditProfileModal = ({ backTo }) => {
         console.log("File available at", downloadURL);
         setFormState({ ...formState, profile_pic: downloadURL });
       }).catch((error) => {
-        console.error("Error getting download URL:", error);
+        // console.error("Error getting download URL:", error);
       });
     }).catch((error) => {
       console.error("Error uploading file:", error);
@@ -230,18 +223,23 @@ const EditProfileModal = ({ backTo }) => {
   };
 
   const updateProfile = () => {
-    instance.post(requests.updateUser, formState)
+    console.log(year, month, day, 'date')
+    const dob = new Date(`${year}-${months.indexOf(month) + 1}-${day}`).toISOString();
+    instance.post(requests.updateUser, {...formState, dob})
     .then(res => {
-      console.log(res)
-      navigate(`/${formState.username}`, { state: { user: formState } })
+      createToast('Profile updated', 'success', 'profile-updated', {limit: 1})
+      queryClient.invalidateQueries(['user', user.username])
+      dispatch({type: 'UPDATE', payload: formState})
+      navigate(`/${formState.username}`)
+      
     }).catch(err => {
-      console.error(err)
+      createToast('Error updating profile', 'error', 'errorr-updating-profile', {limit: 1})
     })
   };
 
-  if (loading) {
-    return <p>Loading...</p>; // Render loading indicator until data is fetched
-  }
+  // if (loading) {
+  //   return <p>Loading...</p>; // Render loading indicator until data is fetched
+  // }
 
   return (
     <NavModal backTo={backTo}>
@@ -269,11 +267,17 @@ const EditProfileModal = ({ backTo }) => {
 
         <div className="h-48 w-full relative mb-6 bg-slate-300 col-span-full flex items-center justify-center gap-x-4 bm-8">
           <div id="cover_photo" className="h-full w-full absolute z-10">
-              <img
-                src={formState.cover ||'https://images.unsplash.com/photo-1708246116078-8169fbf71fb4?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHw4fHx8ZW58MHx8fHx8'}
-                alt="cover"
-                className="w-full h-full object-cover"
-              />
+              {
+                formState.cover && 
+                  <img
+                  src={formState.cover}
+                  alt="cover"
+                  className="w-full h-full object-cover"
+                />
+
+              }
+              
+             
           </div>
 
           <div className="z-20 flex items-center justify-center gap-x-4">
@@ -296,8 +300,10 @@ const EditProfileModal = ({ backTo }) => {
               </label>
             </Button>
 
-            {user?.cover && (
+            {formState?.cover && (
+
               <Button
+              onClick={() => {setFormState({...formState, cover: ''})}}
                 variant="icon"
                 size="icon-sm"
                 tooltip="Remove cover photo"
@@ -342,7 +348,7 @@ const EditProfileModal = ({ backTo }) => {
 
         {/* place all fields here */}
         <div className="p-4 mt-10 grid gap-y-3">
-          {Object.keys(showForm).map((field, index) => {
+          {Object.keys(formState).filter(key => !['profile_pic', 'cover', 'id', 'dob'].includes(key)).map((field, index) => {
             return (
               <CustomInput
                 key={index}
@@ -367,7 +373,7 @@ const EditProfileModal = ({ backTo }) => {
                 defaultValue={day}
                 onChange={(e, newVal) => {
                   setDay(newVal)
-                  setDob()
+                  // setDob()
                 }}
               />
 
@@ -378,7 +384,7 @@ const EditProfileModal = ({ backTo }) => {
                 onChange={(e, newVal) => {
                   setMonth(newVal);
                   setDayOptions(getDaysInMonth(year, months.indexOf(newVal)))
-                  setDob()
+                  // setDob()
                 }}
               />
 
@@ -389,7 +395,7 @@ const EditProfileModal = ({ backTo }) => {
                 onChange={(e, newVal) => {
                   setYear(newVal);
                   setDayOptions(getDaysInMonth(newVal, months.indexOf(month)))
-                  setDob()
+                  // setDob()
                 }}
               />
             </div>
@@ -419,7 +425,7 @@ export const ProfileEditRoutes = (backTo) => {
   return (
     <Route
       path="/settings/profile"
-      element={<EditProfileModal backTo={backTo} />}
+    element={<EditProfileModal backTo={backTo} />}
     />
   );
 };

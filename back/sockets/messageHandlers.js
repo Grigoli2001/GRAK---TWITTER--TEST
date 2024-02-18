@@ -1,6 +1,5 @@
 const Message = require('../models/messageModel')
 const { registerSocketMiddleware } = require('./socket-middleware')
-
 module.exports = (io, socket) =>  {
     registerSocketMiddleware(io)
     
@@ -13,7 +12,7 @@ module.exports = (io, socket) =>  {
 
     // leaving room
     socket.on('message:leave_room', (room) => {
-        console.log('message:leaving room', room)
+        // console.log('message:leaving room', room)
         socket.leave(room)
     })
 
@@ -21,13 +20,24 @@ module.exports = (io, socket) =>  {
     socket.on('message:send_message', async (data) => {
 
         try {
+
+            const { sender_id, receiver_id, room, message, date } = data
+            if (!sender_id || !receiver_id || !room || !message || !date) {
+                throw new Error('sender_id, receiver_id, room, message, date are required')
+            }
+            if (message.length > 1000) {
+                throw new Error('Message too long')
+            }
             const newMessage = new Message({
-                sender_id: data.sender_id,
+                sender_id,
+                receiver_id,
                 room_id: data.room,
-                message: data.message,
-                date: data.date,
+                message,
+                date,
                 is_read: false
             })
+            // DID NOT IMPLEMENT SENDING IMAGE
+            
             await newMessage.save()
             data._id = newMessage._id
             // use io instead of socket to also send to sender for _id for deletion and checking last message

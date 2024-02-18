@@ -1,4 +1,4 @@
-import { forwardRef, useState, useContext, useEffect, useMemo } from 'react'
+import { forwardRef, useState, useContext, useEffect } from 'react'
 import { FaPlus, FaMinus, FaCircleCheck } from "react-icons/fa6";
 import OptionSelector from '../OptionSelector';
 import { Button } from '../Button';
@@ -9,7 +9,9 @@ import { SocketContext } from '../../context/socketContext';
 import { TWEET_ACTIONS } from './Tweet'
 import { createToast } from '../../hooks/createToast';
 import { quantityFormat } from '../../utils/utils';
-import { UserContext } from '../../context/UserProvider';
+import useUserContext from '../../hooks/useUserContext';
+
+
 /**
  * Input For Poll 
  * TODO: clean this up
@@ -156,7 +158,7 @@ export const PollCreate = ({removePoll}) => {
 export const TweetPoll = forwardRef(({postState, dispatch, ...props}, ref) => {
 
   const { socket } = useContext(SocketContext)
-  const { user } = useContext(UserContext)
+  const { user } = useUserContext()
 
 
   useEffect(() => {
@@ -167,18 +169,17 @@ export const TweetPoll = forwardRef(({postState, dispatch, ...props}, ref) => {
 
    }, [socket])
 
-  const pollEndDate = useMemo(() => new Date(postState.poll.poll_end))
+  const pollEndDate = new Date(postState.poll.poll_end)
 
   useEffect(() => {
     const handleLivePollVote = (data) => {
       console.log('tweet:poll:handle-live-vote', data)
       if (data.error) {
-        createToast('An error occured while voting', 'error', 'error-vote-poll', {limit: 2})
+        createToast('An error occured while voting', 'error', 'error-vote-poll', {limit: 1})
         return
-      }
-      console.log('tweet:poll:handle-live-vote', data)
-      // TODO update to current user
-      dispatch({type: TWEET_ACTIONS.UPDATE_POLL, payload: {...data, userVoted: data.userVoted.userId === user.id ? data.userVoted : null }})
+      } 
+
+       dispatch({type: TWEET_ACTIONS.UPDATE_POLL, payload: {...data, iscurrentuser: data.voterId === user.id,}})
     }
 
     socket.on('tweet:poll:handle-live-vote', handleLivePollVote)
@@ -221,7 +222,7 @@ export const TweetPoll = forwardRef(({postState, dispatch, ...props}, ref) => {
           )}
   
           <div className='flex items-center gap-2'>
-            <span className='text-sm text-slate-400'>{quantityFormat(postState.totalVotes)} vote(s)</span>
+            <span className='text-sm text-slate-400'>{quantityFormat(postState.totalVotes)} vote{postState.totalVotes != 1 && 's'}</span>
             <span className='text-sm text-slate-400'>{new Date() < pollEndDate ? `${timeAgo(new Date(), postState.poll.poll_end)} left` : 'Final Results'}</span>
           </div>
         </>

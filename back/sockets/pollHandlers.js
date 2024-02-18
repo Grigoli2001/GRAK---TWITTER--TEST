@@ -13,7 +13,11 @@ module.exports = (io, socket) =>  {
 
         try {
         console.log('tweet:poll:vote', data, socket.id)
-        const checkVote = await interactionModel.findOne({interactionType: 'vote', tweet_id: data.room, user: data.userId})
+        const { room, userId, option  } = data
+        if (!room || !userId || !option) {
+            throw new Error('room, userId, option are required')
+        }
+        const checkVote = await interactionModel.findOne({interactionType: 'vote', tweet_id: room, userId})
         if (checkVote) {
             throw new Error('Already voted')
         }
@@ -22,27 +26,26 @@ module.exports = (io, socket) =>  {
         if (!pollCheck || pollCheck.poll_end < new Date()) {
             throw new Error('Poll not found or has ended')
         }
-        // create a new vote TODO: update to current user
         const newVote = new interactionModel({
             interactionType: 'vote',
-            tweet_id: data.room,
-            userId: data.userId,
-            pollOption: data.option
+            tweet_id: room,
+            userId: userId,
+            pollOption: option
         })
 
         await newVote.save()
 
         // get the poll
-        let interactionCount = await interactionModel.countDocuments({interactionType: 'vote', tweet_id: data.room, pollOption: data.optionId})
-        let totalVotes = await interactionModel.countDocuments({interactionType: 'vote', tweet_id: data.room})
-       
-        io.to(data.room).emit('tweet:poll:handle-live-vote', {...data, interactionCount, totalVotes, userVoted: newVote})
+        let interactionCount = await interactionModel.countDocuments({interactionType: 'vote', tweet_id: room, pollOption: option})
+        let totalVotes = await interactionModel.countDocuments({interactionType: 'vote', tweet_id: room})
+        // console.log('interactionCount', interactionCount, 'totalVotes', totalVotes, 'newVote', newVote)
+        io.to(room).emit('tweet:poll:handle-live-vote', {interactionCount, totalVotes, newVote, voterId: userId})
         
 
 
     } catch (error) {
 
-        io.to(socket.id).emit('tweet:poll:handle-live-vote', { error })
+        io.to(socket.id).emit('tweet:poll:handle-live-vote', { error: error.message })
     }
     })
 

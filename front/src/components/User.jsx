@@ -3,7 +3,9 @@ import {
   useEffect,
   useContext,
   useLayoutEffect,
+  useCallback,
   useRef,
+  forwardRef,
   Fragment,
 } from "react";
 import { useNavigate } from "react-router-dom";
@@ -20,6 +22,11 @@ import {
 import { users } from "../constants/feedTest";
 import { cn } from "../utils/style";
 import useUserContext from "../hooks/useUserContext";
+import useInstance from "../hooks/useInstance";
+import instance from "../constants/axios";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import ReactLoading from "react-loading";
+
 
 /**
  * Custom Avatar component which takes variant and size props
@@ -47,14 +54,14 @@ const textSizes = {
   lg: "text-lg",
 };
 
-export const UserBlock = ({
+export const UserBlock =  forwardRef(({
   user,
   children,
   withNavTo,
   avatarSize = "md",
   textSize = "sm",
   withCard,
-}) => {
+}, ref) => {
   // TODO: add as variant ?
   const [test, setTest] = useState(textSizes[textSize] ?? textSizes.md);
   const [prevTest, setPrevTest] = useState("text-xs");
@@ -86,7 +93,9 @@ export const UserBlock = ({
       >
         <ExtAvatar src={user.profile_pic} size={avatarSize} />
 
-        <div className="min-w-0 max-w-full">
+        <div
+          ref={ref}
+         className="min-w-0 max-w-full">
           <span className="flex items-center">
             <p className={`font-bold flex-shrink-1 truncate ${test}`}>
               {user.name}
@@ -102,7 +111,8 @@ export const UserBlock = ({
       </BaseBlock>
     </CardBlock>
   );
-};
+}
+)
 
 export const UserCard = ({ user, children }) => {
   const navigate = useNavigate();
@@ -164,51 +174,117 @@ export const UserCard = ({ user, children }) => {
 
 export const UserDisplayer = ({
   api,
-  limit,
+  params,
   withCard,
   withNavTo,
   withFollow,
   FallbackComponent,
+  isInfinite=true
 }) => {
   const { user } = useUserContext();
-  const [userBlocks, setUserBlocks] = useState([]);
+  // const [userBlocks, setUserBlocks] = useState([]);
 
-  useEffect(() => {
-    // use api to fetch certain users
-    let w = users.filter((otherUser) => otherUser.id !== user.id);
-    if (limit) {
-      w = w.slice(0, limit);
+  const defaultParams = {
+    // page: 0,
+    limit: 10,
+    ...params
+  };
+
+  const containerRef = useRef(null);
+
+  const { error, data, fetchNextPage, isFetchingNextPage, hasNextPage, isLoading} = useInfiniteQuery({
+    queryKey: ['users',api, defaultParams],
+    enables: !!api,
+    getNextPageParam: (lastPage, allPages) => {   
+      if (lastPage.users.length < defaultParams.limit) {
+        return undefined
+      }
+      return lastPage.prevPage + 1  
+    },
+    initialPageParam: 0,
+    queryFn: async ({ queryKey, pageParam }) => {
+      const res = await  instance.get(queryKey[1], { params: { page: pageParam, limit: queryKey[2]?.limit, q: queryKey[2]?.query  } })
+      return {...res.data, prevPage: pageParam}
     }
-    setUserBlocks(w);
-  }, []);
+  })
 
+
+  // useEffect(() => {
+  //   // use api to fetch certain users
+  //   let w = users.filter((otherUser) => otherUser.id !== user.id);
+  //   if (limit) {
+  //     w = w.slice(0, limit);
+  //   }
+  //   setUserBlocks(w);
+  // }, []);
+
+  
+  const observer = useRef()
+  const lastUser = useCallback(userblock => {
+
+    if (isLoading) return
+    if (observer.current) observer.current.disconnect()
+
+    observer.current = new IntersectionObserver(entries => {
+        if (entries[0].isIntersecting && hasNextPage){
+          fetchNextPage()
+        }
+    }, 
+    {
+        root: containerRef.current,
+        threshold:0.8,
+    }
+    )
+    if (userblock) observer.current.observe(userblock)
+}, [isLoading, hasNextPage, fetchNextPage])
+
+if (isLoading) {  
   return (
-    <div className="flex flex-col gap-y-4 pb-4">
-      {userBlocks.length
-        ? userBlocks.map((blockUser) => {
-            return (
-              <UserBlock
-                key={blockUser.id}
-                user={blockUser}
-                avatarSize="sm"
-                textSize="lg"
-                withNavTo={withNavTo}
-                withCard={withCard}
-              >
-                {withFollow && (
-                  <div className="ml-auto">
-                    <FollowButton
-                      followerid={blockUser.id}
-                      userid={user.id}
-                      followed={false}
-                      size="sm"
-                    />
-                  </div>
-                )}
-              </UserBlock>
-            );
-          })
-        : FallbackComponent ?? <div>Nothing to show here</div>}
+    <div className="flex justify-center items-center flex-col">
+      <ReactLoading type="spin" color="#1da1f2" height={30} width={30} />
     </div>
   );
-};
+}
+
+const users = data?.pages?.reduce((acc, page) => {
+  return [...acc, ...page.users]
+}, [])
+
+if (users && users.length ===0  || error) {
+  return FallbackComponent
+}
+
+return (
+  <div className='flex flex-col gap-y-4 pb-4 relative'>
+      <>
+        {users &&  users.map((blockUser, index, arr) => (
+          <UserBlock
+            key={blockUser.id}
+            user={blockUser}
+            avatarSize="sm"
+            textSize="lg"
+            withNavTo={withNavTo}
+            withCard={withCard}
+            {...(index === arr.length - 1 && isInfinite && { ref: lastUser })}
+          >
+            {withFollow && blockUser.id !== user.id && (
+              <div className="ml-auto">
+                <FollowButton
+                  followerid={blockUser.id}
+                  userid={user.id}
+                  followed={blockUser.is_followed}
+                  size="sm"
+                />
+              </div>
+            )}
+          </UserBlock>
+        ))}
+        {isFetchingNextPage && (
+          <div className="flex justify-center items-center">
+            <ReactLoading type="spin" color="#1da1f2" height={30} width={30} />
+          </div>
+        )}
+      </>
+  </div>
+);
+    }  

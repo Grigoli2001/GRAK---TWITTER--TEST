@@ -5,6 +5,11 @@ const MessageSchema = new mongoose.Schema({
         type: Number,
         required: [true, "sender_id is required"],
     },
+    // used to get active chats
+    receiver_id: {
+        type: Number,
+        required: [true, "receiver_id is required"],
+    },
     // room to allow for private messaging and group messaging
     room_id: {
         type: String,
@@ -26,10 +31,13 @@ const MessageSchema = new mongoose.Schema({
         type: Array,
         default: [],
     },
-    is_room_deleted_for: {
-        type: Array,
-        default: [],
-    },
+    // is_room_deleted_for: {
+    //     type: Array,
+    //     default: [],
+    // },
 });
 
-module.exports = mongoose.model('Message', MessageSchema);
+const Message = mongoose.model('Message', MessageSchema);
+
+module.exports = Message;
+

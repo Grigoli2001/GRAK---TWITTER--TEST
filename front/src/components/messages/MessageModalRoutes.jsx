@@ -4,9 +4,12 @@ import { FaXmark } from "react-icons/fa6";
 import SearchBar from '../SearchBar';
 import { UserDisplayer } from '../User';
 import { Button } from '../Button';
+import { followRequests } from '../../constants/requests';
+import useUserContext from '../../hooks/useUserContext';
 
 export const MessageComposeModal = ({backTo}) => {
     const navigate = useNavigate()
+    const { user }= useUserContext()
     return (
         <NavModal backTo={backTo}>
             <div className='block w-fit h-[80%] min-w-[40%] overflow-y-auto bg-white rounded-2xl'>
@@ -20,17 +23,16 @@ export const MessageComposeModal = ({backTo}) => {
                 {/* Removed next button as there are no group chats */}
                 </div>
                 <div className='p-4'>
-                    <SearchBar placeholder="Search for people" />
+                    <SearchBar placeholder="Search for people" forceMode={'users'} withNavTo={'/messages/'} />
                 </div>
 
-                <UserDisplayer withNavTo={'/messages/'} />
+                <UserDisplayer api={followRequests.followData + `?userId=${user.id}&followType=following`} withNavTo={'/messages/'} />
 
             </div>
         </NavModal>
     )
 
 }
-    
 
 export const MessageModalRoutes = (backTo) => {
     return (

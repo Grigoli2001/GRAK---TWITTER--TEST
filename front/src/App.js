@@ -3,7 +3,7 @@ import { Route, Routes, Navigate, useLocation } from "react-router-dom";
 // pages
 import LoginPage from "./pages/LoginPage";
 import Feed from "./pages/Feed";
-import Explore from "./pages/Explore";
+import { Explore, ExploreTags } from "./pages/Explore";
 import Profile from "./pages/Profile/Profile";
 import Notifications from "./pages/Notifications";
 import Bookmarks from "./pages/Bookmarks";
@@ -34,7 +34,6 @@ import Preferences from "./pages/Settings/Preferences";
 // layouts
 import MainLayout from "./components/layouts/MainLayout";
 import SettingsLayout from "./components/layouts/SettingsLayout";
-import SideNav from "./components/SideNav";
 
 // not found
 import NotFound from "./pages/NotFound/NotFoundSearch";
@@ -63,6 +62,7 @@ import ViewTweet from "./pages/ViewTweet";
 import ForgotPassword from "./components/authComponents/ForgotPassword";
 import AfterRegistrationPopup from "./components/authComponents/AfterRegistrationPopup";
 import ParentLayout from "./components/layouts/ParentLayout";
+import RequireValidUser from "./components/RequireValidUser";
 
 import { HandleNotification } from "./components/notificationsComponents/HandleNotification";
 
@@ -80,7 +80,7 @@ function App() {
             <Route path="/forgot-password" element={<ForgotPassword />} />
           </Route>
 
-          {/* <Route element={<PrivateRoute />}> */}
+            <Route element={<PrivateRoute />}>
 
           {justRegistered && (
             <Route
@@ -107,7 +107,7 @@ function App() {
                 {ProfileEditRoutes()}
               </Route>
 
-              <Route path="/compose/tweet" element={<Feed />}>
+              <Route path="/compose" element={<Feed />}>
                 {HomeRoutes()}
               </Route>
 
@@ -120,47 +120,47 @@ function App() {
                 <Route key={path} path={path} element={<Notifications />} />
               ))}
 
-              {/* PROFILE */}
-              <Route path="/bookmarks" element={<Bookmarks />} />
+                    {/* BOOKMARKS */}
+                    <Route path="/bookmarks" element={<Bookmarks />} />
+                    
+                    {/* PROFILE */}
 
-              {/* PROFILE */}
-              <Route path=":username">
-                <Route index element={<Profile />} />
+                    <Route path=":username" element={<RequireValidUser />} >
+                      
+                      <Route index element={<Profile  />} />
+                      {/* View Tweets */}
+                        <Route path="status/:tweetId" element={<ViewTweet />} />
+                      
+                        {['verified-followers', 'followers', 'following'].map((path)=> 
+                            <Route key={path} path={path} element={<UserFollow />}  />
+                        )}
+                        {['replies', 'highlights', 'media', 'likes'].map((path)=> 
+                            <Route key={path} path={path} element={<Profile />}  />
+                        )}
 
-                {/* View Tweets */}
-                <Route path="status/:tweetId" element={<ViewTweet />} />
-
-                {["verified-followers", "followers", "following"].map(
-                  (path) => (
-                    <Route key={path} path={path} element={<UserFollow />} />
-                  )
-                )}
-                {["replies", "highlights", "media", "likes"].map((path) => (
-                  <Route key={path} path={path} element={<Profile />} />
-                ))}
-
-                <Route path="status/:tweetId" element={<ViewTweet />} />
-              </Route>
+                        <Route path="status/:tweetId" element={<ViewTweet />} />
+                    </Route>
 
               {/* modal Routes  */}
               {ProfileModalRoutes()}
             </Route>
 
-            {/* exclude render widgets changed to include to be more explicit */}
-            <Route
-              element={<MainLayout includeRenderWidgets={["WhoToFollow"]} />}
-            >
-              <Route path="/explore">
-                <Route index element={<Explore />} />
-              </Route>
-            </Route>
+                {/* exclude render widgets changed to include to be more explicit */}
+                <Route element={<MainLayout includeRenderWidgets={['WhoToFollow']}/>}>
+                    <Route path="/explore" >
+                          <Route index element={<Explore />} />
+                          <Route path=":tag" element={<ExploreTags />} />
+                      </Route>
+                </Route>
 
             {/* messages */}
             <Route element={<MessageLayout />}>
               <Route path="/messages">
                 <Route index element={<DefaultMessageWindow />} />
-                <Route path=":username" element={<MessageWindow />} />
-                <Route path=":username/info" element={<MessageInfo />} />
+                  <Route path=":username" element={<RequireValidUser redirect={'/messages'} />} >
+                    <Route index element={<MessageWindow />} />
+                    <Route path="info" element={<MessageInfo />} />
+                  </Route>
               </Route>
               <Route path="/messages" element={<DefaultMessageWindow />}>
                 {MessageModalRoutes()}
@@ -232,27 +232,32 @@ function App() {
               </Route>
             </Route>
 
-            {/* catch all after profile */}
-            <Route element={<MainLayout excludeRightNav />}>
-              <Route path="/404" element={<NotFound />} />
-              <Route path="*" element={<NotFound />} />
+              {/* catch all after profile */}
+              <Route element={<MainLayout excludeRightNav />}>
+                <Route path="/404" element={<NotFound/>}  />
+                <Route path="*" element={<NotFound />} />
+              </Route>
             </Route>
           </Route>
-          {/* </Route> */}
         </Routes>
 
-        {background && (
-          <Routes>
-            {/* <Route Route element={<PrivateRoute />}> */}
-            {ProfileModalRoutes(background.pathname)}
-            {ProfileEditRoutes(background.pathname)}
-            {HomeRoutes(background.pathname)}
-            {MessageModalRoutes(background.pathname)}
-            {/* </Route> */}
-          </Routes>
-        )}
-      </UserProvider>
-    </SocketProvider>
+        { 
+          background && 
+          
+            <Routes>
+              <Route Route element={<PrivateRoute />}>
+                    { ProfileModalRoutes(background.pathname) }
+                    { ProfileEditRoutes(background.pathname)}
+                    <Route path="/compose" >
+                      { HomeRoutes(background.pathname)}
+                    </Route>
+                    { MessageModalRoutes(background.pathname) }
+              </Route>
+            </Routes>
+          
+        }
+        </UserProvider>
+        </SocketProvider>   
   );
 }
 

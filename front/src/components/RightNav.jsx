@@ -1,11 +1,10 @@
-import { useContext, useEffect, useState } from 'react'
+// import { useContext, useEffect, useState } from 'react'
 import SearchBar from './SearchBar'
 import { UserDisplayer } from './User'
-import Trend from './Trend'
+import { TrendData } from './Trend'
 import { NavLink, useLocation } from 'react-router-dom'
+import { requests } from '../constants/requests'
 import useUserContext from '../hooks/useUserContext'
-// test
-import { trends } from '../constants/feedTest'
 
 /**
  * Widget component for who to follow and trends
@@ -25,14 +24,6 @@ const RightNav = ({includeRenderWidgets=[]}) => {
     const location = useLocation()
     const { user } = useUserContext()
     
-    
-    const [trending, setTrending] = useState([])
-
-    useEffect(() => {
-        // fetch and set  trending
-        setTrending(trends.slice(0,5))
-    }, [])
-
     return (
         <div className="hidden h-screen sticky top-0 border-l border-l-gray-200 px-4 flex-col min-w-[250px]  
                         md:flex md:flex-1"
@@ -47,7 +38,7 @@ const RightNav = ({includeRenderWidgets=[]}) => {
 
                 {includeRenderWidgets?.includes('WhoToFollow') &&
                 <Widget title={location.pathname.includes(`/${user.username}`) ?  " You might Like ": " Who to follow " }>
-                        <UserDisplayer limit={3} withCard withFollow withNavTo="/" />
+                        <UserDisplayer api={requests.exploreUsers} params={{limit:3}} withCard withFollow withNavTo="/" isInfinite={false} />
                         <NavLink to={`/i/connect-people`} >
                             <div className='p-4 hover:bg-slate-200/50 cursor-pointer text-twitter-blue hover:underline text-sm'>
                                 <span>Show more</span>
@@ -57,12 +48,9 @@ const RightNav = ({includeRenderWidgets=[]}) => {
                 }
 
             {includeRenderWidgets?.includes('Trending') &&
+
                 <Widget title='Trends for you'>
-                    {
-                        trending.map((trend, index) => {
-                            return <Trend key={index} index={index+1} category={trend.category} title={trend.title} numTweets={trend.tweets} isWidget={true} />
-                        })
-                    }
+                   <TrendData isInfinite={false}/>
                    <NavLink to={`/i/trends`} >
                         <div className='p-4 hover:bg-slate-200/50 cursor-pointer text-twitter-blue hover:underline text-sm'>
                             <span>Show more</span>

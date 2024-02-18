@@ -6,6 +6,7 @@ const { registerSocketMiddleware } = require("./socket-middleware");
 const registerMessageHandlers = require("./messageHandlers");
 const registerPollHandlers = require("./pollHandlers");
 const registerNotificationHandlers = require("./notificationHandlers");
+const registerFeedHandlers = require("./feedHandlers"); 
 
 const httpPort = 4000;
 const initSockets = (app) => {
@@ -45,6 +46,7 @@ const initSockets = (app) => {
     registerMessageHandlers(io, socket);
     registerPollHandlers(io, socket);
     registerNotificationHandlers(io, socket);
+    registerFeedHandlers(io, socket);
   });
 
   http.listen(httpPort, () => {

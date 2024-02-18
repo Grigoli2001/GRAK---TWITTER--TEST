@@ -7,11 +7,11 @@ import { fetchAllTweetsAsync } from '../../features/tweets/tweetSlice';
 
 
 const ParentLayout = () => {
-  const dispatch = useDispatch();
+  // const dispatch = useDispatch();
 
-  useEffect(() => {
-    dispatch(fetchAllTweetsAsync());
-  }, [dispatch]);
+  // useEffect(() => {
+  //   dispatch(fetchAllTweetsAsync());
+  // }, [dispatch]);
 
   return (
         <div className="main-container flex h-full w-full max-w-[1300px] mx-auto">

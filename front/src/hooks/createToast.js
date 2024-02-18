@@ -26,6 +26,8 @@ export const createToast = (message, type, customClassName, options) => {
             break;
     }
 
+    toast.clearWaitingQueue();
+    
     if ( typeof options?.limit === 'number' && customClassName) {
         if (document.querySelectorAll(`.${customClassName}`).length >= options.limit) return;
     }

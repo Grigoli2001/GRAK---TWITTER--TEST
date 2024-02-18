@@ -5,6 +5,7 @@ import {Tabs} from '@mui/base/Tabs';
 import { TabsList  } from '@mui/base/TabsList';
 import { TabPanel  } from '@mui/base/TabPanel';
 import { UserDisplayer } from '../components/User'
+import { requests } from '../constants/requests'
 
 // icons
 import { FaArrowLeftLong} from "react-icons/fa6";
@@ -49,12 +50,12 @@ const Connect = () => {
               <section>
                 <TabPanel>
                     <h2 className="text-xl font-bold p-3" >Suggested for you</h2>
-                    <UserDisplayer withCard withFollow />
+                    <UserDisplayer api={requests.exploreUsers} params={{limit:5}} withCard withFollow withNavTo="/" isInfinite={false} />
                 </TabPanel>
       
                 <TabPanel>
                     <h2 className="text-xl font-bold p-3" >Creators for you</h2>
-                    <UserDisplayer limit={null} withCard withFollow />
+                    <UserDisplayer api={requests.exploreUsers} params={{limit:5}} withCard withFollow withNavTo="/" isInfinite={false} />
                 </TabPanel>
               
             </section>

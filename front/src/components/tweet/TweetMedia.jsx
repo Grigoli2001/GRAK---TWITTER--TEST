@@ -15,18 +15,18 @@ import { FaXmark } from "react-icons/fa6";
 
 export const TweetMiniMedia = ({post, user}) => {
 
-    const media = post.media;
+    const media = post.tweetMedia;
     // navigate to modal
     return (
-            <NavLink to={`/${user.username}/status/${post.id}/${post.media.mediaType}`} className="relative  flex items-center justify-center">
+        // not implemented yet
+            <NavLink to={`/${user.username}/status/${post._id}`} className="relative  flex items-center justify-center">
                 {
-                    (media.mediaType === 'image' || media.mediaType === 'gif')  && 
-                    <img className="h-48 w-full  bg-white object-cover" src={media.src} alt={media.alt} />
+                    media?.mimeType.startsWith('image')  &&   
+                    <img className="h-48 w-full  bg-white object-cover" src={media.src} alt={`${user.username}'s post - post.id`} />
                 }
 
                 { 
-                    media.mediaType === 'video' && 
-
+                    media?.mimeType.startsWith('video')  &&   
                         <ReactPlayer url={media.src} light={media.thumbnail ?? true} className="!h-48"/>
                 }
     
@@ -55,12 +55,12 @@ const TweetMedia = ({mediaType, src, alt, as_form, removeMedia}) => {
 
                 }
                 {
-                    (mediaType === 'image' || mediaType === 'gif')  && 
+                    mediaType?.startsWith('image')  && 
                     <img className="h-full w-full bg-black object-cover" src={src} alt={alt} />
                 }
 
                 { 
-                    mediaType === 'video' && 
+                    mediaType?.startsWith('video') && 
 
                         <ReactPlayer url={src} controls={true} width="250" height="250" className="h-full w-full"/>
                         

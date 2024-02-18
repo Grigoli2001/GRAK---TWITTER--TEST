@@ -36,7 +36,7 @@ export const NotificationComp = ({ NotificationType }) => {
   const endIndex = startIndex + notificationsPerPage;
 
   // Get the notifications to display on the current page
-  const currentNotifications = notifications.slice(startIndex, endIndex);
+  const currentNotifications = notifications?.slice(startIndex, endIndex);
 
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
@@ -165,7 +165,7 @@ export const NotificationComp = ({ NotificationType }) => {
                     )
                   }
                 >
-                  "{notification.tweetId?.tweetText.slice(0, 20)}..."{" "}
+                  "{notification.tweetId?.tweetText?.slice(0, 20)}..."{" "}
                 </span>
               </p>
             </div>
@@ -236,7 +236,7 @@ export const NotificationComp = ({ NotificationType }) => {
                     : ""}
                   {" - "}
                   <span className="hover:underline">
-                    "{notification.tweetId?.tweetText.slice(0, 20)}..."{" "}
+                    "{notification.tweetId?.tweetText?.slice(0, 20)}..."{" "}
                   </span>
                 </p>
               </div>

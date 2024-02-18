@@ -288,7 +288,7 @@ const AfterRegistrationPopup = ({ onClose }) => {
 
   return (
     <div className="w-screen h-screen bg-gray-500/55 overflow-hidden z-[99999]">
-      <div className=" w-[600px] min-h-[300px] h-[650px] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-black rounded-xl pb-6 z-50">
+      <div className=" w-[600px] min-h-[300px] h-[650px] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black rounded-xl pb-6 z-50">
         {loading ? (
           <ReactLoading
             type={"spin"}
@@ -312,7 +312,7 @@ const AfterRegistrationPopup = ({ onClose }) => {
                 <svg
                   viewBox="0 0 24 24"
                   aria-hidden="true"
-                  className="h-8 r-4qtqp9 r-yyyyoo r-dnmrzs r-bnwqim r-1plcrui r-lrvibr r-1nao33i r-rxcuwo r-1777fci r-m327ed r-494qqr fill-current dark:text-gray-50"
+                  className="h-8 r-4qtqp9 r-yyyyoo r-dnmrzs r-bnwqim r-1plcrui r-lrvibr r-1nao33i r-rxcuwo r-1777fci r-m327ed r-494qqr fill-current text-gray-50"
                 >
                   <g>
                     <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path>
@@ -455,9 +455,9 @@ const AfterRegistrationPopup = ({ onClose }) => {
                         onChange={(e) =>
                           setUserName(e.target.value.toLowerCase().trim())
                         }
-                        className={`dark:bg-black dark:text-white w-[300px] h-[60px] rounded-md p-4 pt-7 pl-7 border-gray-300 dark:border-gray-900 ${
+                        className={`bg-black text-white w-[300px] h-[60px] rounded-md p-4 pt-7 pl-7 border-gray-300  ${
                           isUsernameAvailable === false &&
-                          "border-red-700 dark:border-red-700"
+                          "border-red-700 "
                         }  border-2 focus:outline-none focus:border-blue-600 transition-all `}
                       />
                       <label

@@ -7,6 +7,7 @@ import Tweets from '../components/tweet/Tweets'
 import { FaArrowLeftLong} from "react-icons/fa6";
 import { showUsername } from '../utils/utils'
 import useUserContext from '../hooks/useUserContext'
+import { tweetRequests } from '../constants/requests';
 
 
 const BookmarksFallBack = () => {
@@ -61,7 +62,7 @@ const Bookmarks = () => {
             </div>
 
               <div>
-                <Tweets api={'bookmarks'} FallBackComponent={BookmarksFallBack} />
+                <Tweets api={tweetRequests.bookmarks} params={{ userId: user.id}} FallBackComponent={<BookmarksFallBack/>} />
               </div>
             
           </>

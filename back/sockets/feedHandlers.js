@@ -1,8 +1,10 @@
+// should rename to navHandlers
 module.exports = (io , socket) => {
-    // on post add to db and emit to all
     socket.on('feed:notify-create-post', (data) => {
-        io.emit('notificiation:new',{
-            title: 'Home',
+        console.log('feed:notify-create-post', data?.user.id)
+        // notify all users except the user who created the post -- still buggy
+        io.except(data?.user?.id ?? 0).except(socket.id).emit('nav:notif:new',{
+            category: 'home',
             value: 1
         })
     })

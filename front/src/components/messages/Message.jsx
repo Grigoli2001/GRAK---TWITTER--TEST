@@ -65,7 +65,7 @@ const Message = forwardRef(({ message, messageType, isLastMessage,  handleModalO
 
 
             <div
-              className={cn('rounded-3xl py-3 w-fit px-4 max-w-[75%] break-words', {
+              className={cn('rounded-3xl py-3 w-fit px-4 max-w-[75%] break-all', {
                 'bg-twitter-blue text-white': messageType === 'sent',
                 'bg-gray-100': messageType === 'received',
                 'rounded-br-none': isLastMessage && messageType === 'sent',

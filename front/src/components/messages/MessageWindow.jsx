@@ -12,8 +12,7 @@ import { NavLink, useParams } from 'react-router-dom';
 
 import '../../styles/messages.css'
 import { ExtAvatar } from '../User';
-import { users } from '../../constants/feedTest';
-import { evalRoom, showUsername } from '../../utils/utils';
+import { evalRoom, getJoinDate, showUsername } from '../../utils/utils';
 import { SocketContext } from '../../context/socketContext';
 import ReactLoading from 'react-loading'
 import instance from '../../constants/axios'
@@ -23,6 +22,9 @@ import { Popover, PopoverContent, PopoverHandler } from '@material-tailwind/reac
 import { DefaultModal as Modal } from '../NavModal'
 import { createToast } from '../../hooks/createToast';
 import useUserContext from '../../hooks/useUserContext';
+// import useInstance from '../../hooks/useInstance';
+// import TweetMedia from '../tweet/TweetMedia';
+import { ValidUserContext } from '../RequireValidUser';
 
 
 const MessageWindowWrapper = ({children}) => {
@@ -59,13 +61,12 @@ export const MessageWindow = () => {
 
     const { socket } = useContext(SocketContext)
     const { user } = useUserContext()
+    const  { activeUser: chatTo, isLoading } = useContext(ValidUserContext)
     const { username } = useParams()
-    const navigate = useNavigate()
+    const navigate = useNavigate()   
     
-    const [ chatTo, setChatTo] = useState(null)   
+    // const [ chatTo, setChatTo] = useState(null)   
     const [ room , setRoom ] = useState(null)
-
-    // messages and chatting to
     const [message, setMessage] = useState('')
 
     const messageWindowRef = useRef(null)
@@ -77,8 +78,9 @@ export const MessageWindow = () => {
 
     const [messages, setMessages] = useState([])
     const [windowLoaded, setWindowLoaded] = useState(false)
-    const [loading, setLoading] = useState(true)
+    const [messageLoading, setMessageLoading] = useState(true)
     const [ hasMore, setHasMore] = useState(false)
+    const [media, setMedia] = useState(null)
 
     // picker states
     const [showPicker, setShowPicker] = useState(false)
@@ -95,30 +97,50 @@ export const MessageWindow = () => {
     // check if a user is found and join the room when component mounts
     useEffect(() => {
 
-        // TODO replace with api call to find a user
-        const chatTo = users.find(user => user.username === username)
-        const returnToMessages = () => {navigate('/messages')}
+        if (!isLoading){
+            // const returnToMessages = () => { navigate('/messages') }
+            // console.log('chatToData', chatToData)
+            // console.log(chatToData)
 
-        if (!chatTo){
-            returnToMessages()
-            return
-        } 
-
-        setChatTo(chatTo)
-        setMessages([])
-        setPage(0)
-        setWindowLoaded(true)
-        const room = evalRoom(user, chatTo)
-        setRoom(room)
-        socket.emit('message:join_room', { room } )
+            // if (!chatToData?.user){
+            //     console.log('no chat to found', chatToData)
+            //     returnToMessages()
+            //     return
+            // } 
+            // setChatTo(chatToData.user)
+            setMessages([])
+            setPage(0)
+            setWindowLoaded(true)
+            const room = evalRoom(user, chatTo)
+            setRoom(room)
+            socket.emit('message:join_room', { room } )
         
-    }, [username, navigate])
+    }
+        
+    }, [username, isLoading])
+
+    const mediaRef = useRef(null)
+    const gifRef = useRef(null)
+    const handleMediaChange = async(evt) => {
+        if (evt.target.files && evt.target.files[0]) {
+          const file = evt.target.files[0];
+          const mime = file.type;
+          // simple mimetype check because file-type is giving issues even with browserify
+          if (!mime.startsWith('image')) {
+            createToast('Only Images can be sent with messages', 'warn', {limit: 1});
+            return
+          }
+          setMedia(URL.createObjectURL(file))
+    
+         
+      }
+      }
    
     useEffect(() => {
         // if there's no room, don't fetch messages
-        if (!room) return
+        if (!room || isLoading) return
         // set loading and error states for fetching messages
-        setLoading(true)
+        setMessageLoading(true)
         // fetch messages
         instance.get(`/messages/${room}`, {
             // headers: '',
@@ -139,7 +161,7 @@ export const MessageWindow = () => {
             createToast("Sorry! An error occured", 'error', className)
             }
         )
-        .finally(() => setLoading(false))
+        .finally(() => setMessageLoading(false))
 
   }, [room, page])
 
@@ -160,7 +182,7 @@ export const MessageWindow = () => {
 
     const earliestMessage = useCallback(firstMessage => {
 
-        if (loading) return
+        if (messageLoading) return
         if (observer.current) observer.current.disconnect()
 
 
@@ -176,7 +198,7 @@ export const MessageWindow = () => {
         }
         )
         if (firstMessage) observer.current.observe(firstMessage)
-    }, [loading, hasMore])
+    }, [isLoading, hasMore])
 
 
     // SOCKETS
@@ -233,10 +255,12 @@ export const MessageWindow = () => {
         if (e.keyCode===13 && !e.shiftKey || e.type === 'submit'){
             e.preventDefault();
             if (message.trim()){
-                const msgObj = {message, sender_id: user.id, receiver_id: chatTo.id, room: room, date: new Date()}
+                const msgObj = {message, sender_id: user.id, receiver_id: chatTo.id, room: room, date: new Date(), media}
+                console.log('sending message', msgObj)
                 socket.emit('message:send_message', msgObj)
                 // setMessages([ ...messages, msgObj,])
                 setMessage('')
+                setMedia(null)
                 setNewMessage(!newMessage)
             }
         }else{
@@ -267,10 +291,10 @@ export const MessageWindow = () => {
 
     return (
 
-        !windowLoaded ? 
+        isLoading ? 
         <MessageWindowWrapper>
             <div className='flex items-center justify-center w-full h-full'>
-            <ReactLoading type='spin' color='#1da1f2' height={10} width={10}/>
+            <ReactLoading type='spin' color='#1da1f2' height={30} width={30}/>
             </div>
         </MessageWindowWrapper>
 
@@ -324,9 +348,9 @@ export const MessageWindow = () => {
                         )}
                         
                         { 
-                            loading && 
+                            messageLoading && 
                                 <div className='flex items-center justify-center w-full p-6'>
-                                    <ReactLoading type='spin' color='#1da1f2' height={10} width={10}/>
+                                    <ReactLoading type='spin' color='#1da1f2' height={30} width={30}/>
                                 </div>
                         }
 
@@ -334,7 +358,7 @@ export const MessageWindow = () => {
                             <ExtAvatar size="lg" src={chatTo?.profile_pic} />
                             <p className='font-bold'>{chatTo?.name}</p>
                             <p>{showUsername(chatTo)}</p>
-                            <p>Joined {new Date(chatTo?.join_date).toLocaleDateString('en-US', {month: 'long' , year: 'numeric'})}</p>
+                            <p>Joined {getJoinDate(chatTo.created_at)}</p>
                         </div>
 
 
@@ -343,21 +367,21 @@ export const MessageWindow = () => {
 
                     <form className='flex flex-col sticky bottom-0 bg-white h-fit px-4 py-1 border-t border-t-gray-100' onSubmit={handleSend}>
                             <div className='bg-gray-100 rounded-2xl w-full  outline-none px-4 py-1'>
-                                <div className='flex flex-row justify-between items-center flex-nowrap'>
+                                <div className='flex flex-row items-center flex-nowrap'>
 
-                                    <Button variant="icon" size="icon-sm" tooltip="Media" className="pointer-events-auto">
-                                        <label htmlFor="msg_media">
-                                            <GrImage />
-                                            <input id="msg_media" name="msg_media" className="hidden" type="file" accept="image/*, video/*" />
-                                        </label>
+                                <Button variant="icon" size="icon-sm"  className="pointer-events-auto">
+                                    <label htmlFor="message_media">
+                                        <GrImage title="Media" />
+                                        <input id="message_media" name="post_media" onChange={handleMediaChange} ref={mediaRef} className="hidden" type="file" accept="image/x-png,image/png,image/gif,image/jpeg,image/jpg"/>
+                                    </label>
                                     </Button>
 
 
-                                    <Button variant="icon" size="icon-sm" tooltip="GIF">
-                                        <label htmlFor="msg_gif">
-                                            <MdOutlineGifBox  />
+                                    <Button variant="icon" size="icon-sm" >
+                                        <label htmlFor="message_gif">
+                                            <MdOutlineGifBox title="GIF" />
                                         </label>
-                                        <input id="msg_gif" name="msg_gif" className="hidden" type="file" accept="image/gif" />
+                                        <input id="message_gif" name="message_gif" onChange={handleMediaChange} ref={gifRef} className="hidden" type="file" accept="image/gif"/>
                                     </Button>
 
                                     <Popover open={showPicker} placement='top-start' handler={setShowPicker} offset={{ crossAxis: -100}}>
@@ -376,16 +400,19 @@ export const MessageWindow = () => {
                                     </Popover>
 
                                     {/* send input; ISSUE: Resize observer */}
-                                    <TextareaAutosize 
-                                    minRows={1}
-                                    maxRows={5}
-                                    maxLength={1000}
-                                    onKeyDown={handleSend}
-                                    onChange={(e) => setMessage(e.target.value)} 
-                                    placeholder='Start a new message' 
-                                    value={message} 
-                                    className='flex-3 bg-gray-100  px-4 outline-none resize-none w-full h-fit' 
-                                    />
+                                    <div className='ml-auto w-full'>
+                                        { media && <img src={media} alt="media" />}
+                                        <TextareaAutosize 
+                                        minRows={1}
+                                        maxRows={5}
+                                        maxLength={1000}
+                                        onKeyDown={handleSend}
+                                        onChange={(e) => setMessage(e.target.value)} 
+                                        placeholder='Start a new message' 
+                                        value={message} 
+                                        className='flex-3 bg-gray-100  px-4 outline-none resize-none w-full h-fit' 
+                                        />
+                                    </div>
 
                                     {/* send button */}
                                     <Button variant="icon" size="icon-sm" disabled={message?.trim().length === 0} onClick={handleSend} type="submit" tooltip="Send">

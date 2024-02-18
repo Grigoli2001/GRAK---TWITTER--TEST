@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '../components/Button'
-import Trend from '../components/Trend'
-import { trends  } from '../constants/feedTest'
+import { TrendData } from '../components/Trend'
 
-// TODO: Fix tab after
 // icons
 import { FaArrowLeftLong} from "react-icons/fa6";
 import { FiSettings } from "react-icons/fi";
@@ -17,12 +15,12 @@ const Trends = () => {
       navigate(-1)
     }
       
-    const [trending, setTrending] = useState([])
+    // const [trending, setTrending] = useState([])
 
-    useEffect(() => {
-        // fetch and set  trending
-        setTrending(trends)
-    }, [])
+    // useEffect(() => {
+    //     // fetch and set  trending
+    //     setTrending(trends)
+    // }, [])
 
   
   return (
@@ -50,11 +48,7 @@ const Trends = () => {
             <div>
             <div>
                 <h2 className='text-xl font-bold p-2'>Trends for you</h2>
-                {
-                    trending.map((trend, index) => {
-                        return <Trend key={index} index={index+1} category={trend.category} title={trend.title} numTweets={trend.tweets} />
-                    })
-                }
+                <TrendData />
             </div>
             </div>
             
