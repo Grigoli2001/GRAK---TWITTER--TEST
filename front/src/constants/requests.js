@@ -23,10 +23,10 @@ export const requests = {
 };
 
 export const followRequests = {
-  follow: "/user/follow",
-  unfollow: "/user/unfollow",
-  followers: "/user/followers",
-  following: "/user/following",
+  follow: "/users/follow",
+  unfollow: "/users/unfollow",
+  followers: "/users/followers",
+  following: "/users/following",
 };
 
 

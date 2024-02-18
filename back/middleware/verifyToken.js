@@ -17,7 +17,7 @@ const verifyToken = (req, res, next) => {
     next();
   } catch (error) {
     logger.error(error);
-    return res.status(unauthorized).json({ error: "Invalid token" });
+    return res.status(unauthorized).json({ error: "Invalid token" });s
   }
 };
 

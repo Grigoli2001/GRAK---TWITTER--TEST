@@ -26,6 +26,9 @@ import useUserContext from "../hooks/useUserContext";
  * Extends material-tailwind Avatar component
  */
 export const ExtAvatar = ({ src, ...props }) => {
+   if (src && !src.startsWith("http")) {
+    src = null;
+  }
   return (
     <Avatar
       src={src ? `${src}` : defaultAvatar}

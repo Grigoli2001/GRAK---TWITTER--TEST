@@ -115,7 +115,7 @@ export const fetchBookmarkedTweetsAsync = () => async (dispatch) => {
 
 export const fetchReTweetsAsync = () => async (dispatch) => {
   try {
-    const fetchedData = await instance.get(tweetRequests.reTweets)
+    const fetchedData = await instance.get(tweetRequests.retweets)
     dispatch(setRetweets(fetchedData.data.data.tweets));
   } catch (error) {
     console.error('Error fetching retweets:', error);
@@ -124,7 +124,7 @@ export const fetchReTweetsAsync = () => async (dispatch) => {
 
 export const fetchMyTweetsAsync = () => async (dispatch) => {
   try {
-    const fetchedData = await instance.get(tweetRequests.myTweets)
+    const fetchedData = await instance.get(tweetRequests.mytweets)
     dispatch(setMyTweets(fetchedData));
   } catch (error) {
     console.error('Error fetching my tweets:', error);

@@ -20,8 +20,6 @@ const tokenRoutes = require("../routes/token.routes");
 
 const app = express();
 const PORT = process.env.PORT;
-const followRoutes = require("../routes/follow.routes");
-
 // connect to the database
 const connectToDB = async () => {
   mongoose
@@ -56,7 +54,6 @@ const registerCoreMiddleWare = async () => {
     app.use("/tweets", tweetRoutes);
     app.use("/messages", messageRoutes);
     app.use("/profile", profileRoutes);
-    app.use("/user", followRoutes);
     app.use("/users", userRoutes);
     
     app.use(notFound);

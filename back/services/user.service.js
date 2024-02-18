@@ -2,6 +2,7 @@ const statusCodes = require("../constants/statusCode");
 const logger = require("../middleware/winston");
 const pool = require("../database/db_setup");
 const jwt = require("jsonwebtoken");
+const { allFollowers } = require("../utils/tweet.utils");
 
 
 const getAllUsers = async (req, res) => {
@@ -48,7 +49,7 @@ const searchUser = async (req, res) => {
 
 const getUserById = async (req, res) => {
   try {
-    const user = await pool.query(`SELECT id, name, username, profile_pic, created_at FROM users WHERE id = $1`, [req.user.id]);
+    const user = await pool.query(`SELECT id, name, username, email, profile_pic, created_at, bio, website, location, cover, dob FROM users WHERE id = $1`, [id]);
 
     if (!user.rowCount) {
       return res.status(statusCodes.notFound).json({ message: "User not found" });
@@ -63,7 +64,7 @@ const getUserById = async (req, res) => {
 const getUserByUsername = async (req, res) => {
   const { username } = req.body;
   try {
-    const user = await pool.query(`SELECT id, name, username, email, profile_pic, created_at FROM users WHERE username = $1`, [username]);
+    const user = await pool.query(`SELECT id, name, username, email, profile_pic, created_at, bio, website, location, cover, dob FROM users WHERE username = $1`, [username]);
 
     if (!user.rowCount) {
         return res.status(statusCodes.notFound).json({ message: "User not found" });
@@ -72,17 +73,22 @@ const getUserByUsername = async (req, res) => {
 
   } catch (err) {
     logger.error(err);
-    res.status(statusCodes.queryError).json({ message: "Error fetching followers" });
-  } finally {
-    client.release();
+    res.status(statusCodes.queryError).json({ message: "Error fetching user" });
   }
 };
 
-const getAllFollowing = async (req, res) => {
+const updateUser = async (req, res) => {
+  // const { profile_pic } = req.file 
+  console
+  const { id, name, username, bio, location, website, profile_pic, cover, dob } = req.body;
+  if (!id || !name || !username || !bio || !location || !website || !profile_pic || !cover) {
+    return res.status(statusCodes.badRequest).json({ message: "Missing fields" });
+  }
+
   try {
-    const following = await pool.query(
-      `SELECT * FROM follows WHERE user_id = $1`,
-      [req.user.id]
+    const user = await pool.query(
+      `UPDATE users SET name = $1, username = $2, bio = $3, location = $4, profile_pic = $5, website = $6, cover = $7, dob = $8 WHERE id = $9`,
+      [name, username, bio, location, profile_pic, website, cover, dob, id]
     );
 
     res.status(statusCodes.success).json({ message: "User updated" });
@@ -92,46 +98,92 @@ const getAllFollowing = async (req, res) => {
   }
 }
 
+const addFollower = async (req, res) => {
+    const { userId, followerId } = req.body;
+    
+    if (!userId || !followerId) {
+        res.status(statusCodes.badRequest).json({ message: "Missing fields" });
+    } else {
+        const client = await pool.connect();
+        try {
+        const addFollower = await client.query(
+            `INSERT INTO follows(user_id, following) VALUES ($1, $2)`,
+            [userId, followerId]
+        );
+        res.status(statusCodes.success).json({ message: "Follower added" });
+        } catch (error) {
+        logger.error("Error adding follower", error);
+        res.status(statusCodes.queryError).json({ message: "Error" });
+        } finally {
+        client.release();
+        }
+    }
+}
 
-  
-// const getAllFollowers = async (req, res) => {
-//   try {
-//     const followers = await pool.query(
-//       `SELECT * FROM follows WHERE following = $1`,
-//       [req.user.id]
-//     );
+const removeFollower = async (req, res) => {
+    const { userId, followerId } = req.body;
+    if (!userId || !followerId) {
+        res.status(statusCodes.badRequest).json({ message: "Missing fields" });
+    } else {
+        try {
+        const removeFollower = await pool.query(
+            `DELETE FROM follows WHERE user_id = $1 AND following = $2`,
+            [userId, followerId]
+        );
+        res.status(statusCodes.success).json({ message: "Follower removed" });
+        } catch (error) {
+        logger.error("Error removing follower", error);
+        res.status(statusCodes.queryError).json({ message: "Error" });
+        } 
+    }
+}
 
-//     res.status(statusCodes.success).json({ followers: followers.rows });
-//   } catch (err) {
-//     logger.error(err);
-//     res.status(statusCodes.queryError).json({ message: "Error fetching followers" });
-//   } finally {
-//     client.release();
-//   }
-// };
 
-// const getAllFollowing = async (req, res) => {
-//   try {
-//     const following = await pool.query(
-//       `SELECT * FROM follows WHERE user_id = $1`,
-//       [req.user.id]
-//     );
-//     res.status(statusCodes.success).json({ following: following.rows });
-//   } catch (err) {
-//     logger.error(err);
-//     res.status(statusCodes.queryError).json({ message: "Error fetching following" });
-//   } finally {
-//     client.release();
-//   }
-// };
 
+const getFollowing = async (req, res) => {
+    const userId = req.query.userId || req.user.id;
+    if (!userId) {
+        res.status(statusCodes.badRequest).json({ message: "Missing fields" });
+    } else {
+        try {
+       const followers = await allFollowers(userId)
+        res.status(statusCodes.success).json(followers);
+        } catch (error) {
+        logger.error("Error getting followers", error);
+        res.status(statusCodes.queryError).json({ message: "Error" });
+        }
+    }
+}
+
+const getFollowers = async (req, res) => {
+    const { followerId } = req.query;
+    if (!followerId) {
+        res.status(statusCodes.badRequest).json({ message: "Missing fields" });
+    } else {
+        try {
+        const following = await pool.query(
+            `SELECT user_id FROM follows WHERE following = $1`,
+            [followerId]
+        );
+        res.status(statusCodes.success).json(following.rows);
+        } catch (error) {
+        logger.error("Error getting following", error);
+        res.status(statusCodes.queryError).json({ message: "Error" });
+        }
+    }
+}
 
 module.exports = {
     getAllUsers,
     getUser,
     getUserById,
     getUserByUsername,
-    getAllFollowing,
-    searchUser
+    updateUser,
+    addFollower,
+    removeFollower,
+    getFollowers,
+    getFollowing,
+    // getAllFollowers,
+    // getAllFollowing,
 };
 

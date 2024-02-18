@@ -51,8 +51,6 @@ const getTweetById = async (req, res) => {
 
 const getTweetsByCategory = async (req, res) => {
     const { category } = req.params;
-    console.log(req.user)
-
 
     const categoryConditions = {
         'foryou': { userId: { $ne: req.user.id } },
@@ -97,9 +95,8 @@ const getTweetsByCategory = async (req, res) => {
 const createTweet = async (req, res) => {
     try {
 
-        const { data } = req.body;
-        console.log(data);
-        const newTweetData = JSON.parse(data);
+        // parse since its sent as form data to allow sending images
+        const newTweetData = req.body;
         console.log(newTweetData)
 
 
@@ -132,30 +129,26 @@ const createTweet = async (req, res) => {
             });
         }
 
-        if ((!tweetText && !req.file) || (req.file && tweetPoll)) {
-            return res.status(statusCode.badRequest).json({
-                status: "fail",
-                message: "tweetText or tweetMedia is required",
-            });
-        }
+        // if ((!tweetText && !req.file) || (req.file && tweetPoll)) {
+        //     throw Error("tweetText or tweetMedia is required",)
+        // }
+    
+        // if (req.file){
 
-        if (req.file) {
+        //     await import('file-type').then(async ({ fileTypeFromBuffer }) => {
+        //         const { mime } = await fileTypeFromBuffer(req.file.buffer)
+        //         if (!mime.startsWith('image') && !mime.startsWith('video')) {
+        //             throw new Error('Invalid file type, only JPEG, PNG and MP4 is allowed!');
+        //         }
 
-            await import('file-type').then(async ({ fileTypeFromBuffer }) => {
-                const { mime } = await fileTypeFromBuffer(req.file.buffer)
-                if (!mime.startsWith('image') && !mime.startsWith('video')) {
-                    throw (new Error('Invalid file type, only JPEG, PNG and MP4 is allowed!'));
-                }
-
-            })
-            newTweetData.tweetMedia = {
-                data: req.file.buffer,
-                contentType: req.file.mimetype,
-            };
-        }
+        //     })
+        //     newTweetData.tweetMedia = {
+        //         data: req.file.buffer,
+        //         contentType: req.file.mimetype,
+        //     };
+        // }
 
         // create transaction to ensure if poll fails, tweet is not created -- must convert to replica set to use transactions
-        newTweetData.userId = req.user.id;
         const tweet = new tweetModel(newTweetData);
 
         const session = await mongoose.startSession();

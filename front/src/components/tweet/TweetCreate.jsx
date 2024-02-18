@@ -30,6 +30,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import { selectMyTweets, setForYouTweets, setMyTweets } from '../../features/tweets/tweetSlice';
 import useUserContext from '../../hooks/useUserContext';
 
+import { storage } from "../../utils/firebase";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { v4 } from 'uuid';
+
 /**
  * Form for creating a tweet
  * TODO use form tag or send with axios?
@@ -115,6 +119,7 @@ const TweetCreate = ({type = 'Post', reference_id = null, currentMyTweets, curre
 
     // form tweet text
     const [tweetForm, setTweetForm] = useState({
+      userId: user.user.id,
       tweetType: type === 'Post' ? 'tweet' : (type === 'Reply' ? 'reply' : 'retweet'),
       tweetText: '',
       tweetMedia: null,
@@ -178,6 +183,23 @@ const TweetCreate = ({type = 'Post', reference_id = null, currentMyTweets, curre
     );
   }
 
+  const handleTweetImage = (image) => {
+    if (!image) return;
+
+    const storageRef = ref(storage, `tweet_media/${image.name}/${v4()}`);
+    uploadBytesResumable(storageRef, image).then((snapshot) => {
+      console.log('Uploaded a blob or file!');
+      getDownloadURL(snapshot.ref).then((downloadURL) => {
+        console.log('File available at', downloadURL);
+        setTweetForm({...tweetForm, tweetMedia: downloadURL}); 
+      }).catch((error) => {
+        console.error('Error getting download URL', error);
+      });
+    }).catch((error) => {
+      console.error('Error uploading file', error);
+    });
+  }
+
   const handleMediaChange = async(evt) => {
     if (evt.target.files && evt.target.files[0]) {
       const file = evt.target.files[0];
@@ -187,12 +209,9 @@ const TweetCreate = ({type = 'Post', reference_id = null, currentMyTweets, curre
         createToast('Only Images and videos allowed', 'warn', {limit: 1});
         return
       }
-      removePoll();
 
-      setTweetForm({
-        ...tweetForm,
-        tweetMedia: evt.target.files[0]
-      })
+      removePoll();
+      handleTweetImage(file);
     }
   }
 
@@ -227,23 +246,12 @@ const TweetCreate = ({type = 'Post', reference_id = null, currentMyTweets, curre
 
   const handleCreateTweet = () => {
     if (!canPost) return
-    disbaleAllInteractions(); 
-    let formData = new FormData();
-    const { tweetMedia , ...tweetData } = tweetForm;
-    formData.append('data', JSON.stringify(tweetData));
-    formData.append('tweetMedia', tweetForm?.tweetMedia);
-    formData.append('tweetText', tweetForm.tweetText);
-    formData.append('tweetType', tweetForm.tweetType);
-    
-    if (tweetForm.tweetSchedule !== null) {
-      formData.append('tweetSchedule', tweetForm.tweetSchedule);
-    }
+    disbaleAllInteractions();
+
+    console.log('tweetForm', tweetForm);
 
     instance
-      .post(requests.createTweets, formData, { headers: {
-        'Content-Type': 'multipart/form-data'
-      }}
-      )
+      .post(requests.createTweets, tweetForm)
       .then((response) => {
         // update redux 
         console.log('create', response.data.tweet)
@@ -252,7 +260,6 @@ const TweetCreate = ({type = 'Post', reference_id = null, currentMyTweets, curre
 
 
         // reset form
-        formData = new FormData();
         resetComponent()
         createToast(`Nice ${type}🥳`, 'success', 'success-create-post', {limit: 1})
 
@@ -308,7 +315,7 @@ const TweetCreate = ({type = 'Post', reference_id = null, currentMyTweets, curre
           openPoll ? 
             <PollCreate removePoll={removePoll}/>
             : tweetForm?.tweetMedia ?
-             <TweetMedia mediaType={'image'} src={URL.createObjectURL(tweetForm.tweetMedia)} as_form={true} removeMedia={removeMedia}/>
+             <TweetMedia mediaType={'image'} src={tweetForm.tweetMedia} as_form={true} removeMedia={removeMedia}/>
             : null
         }
     </div>

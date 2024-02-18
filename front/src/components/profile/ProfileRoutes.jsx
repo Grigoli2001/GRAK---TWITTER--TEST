@@ -13,13 +13,14 @@ import { CICameraPlus } from "../customIcons";
 
 import { cn } from "../../utils/style";
 import OptionSelector from "../OptionSelector";
-import { months, getDaysInMonth, getYears } from "../../utils/utils";
+import { months, getDaysInMonth, getYears, defaultAvatar } from "../../utils/utils";
 import instance from "../../constants/axios";
 import { requests } from "../../constants/requests";
 
 import { storage } from "../../utils/firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { v4 } from "uuid";
+import Loading from "react-loading";
 
 const PhotoModal = ({ type, backTo }) => {
   // code to get a user since it is routable & reject if user does not exist
@@ -96,8 +97,13 @@ const EditProfileModal = ({ backTo }) => {
     },
   };
 
+  const [loading, setLoading] = useState(true);
+  const [day, setDay] = useState();
+  const [month, setMonth] = useState();
+  const [year, setYear] = useState();
+  const [dayOptions, setDayOptions] = useState();
+  const years = getYears(16, 100);
 
-  const [uploadProfilePic, setUploadProfilePic] = useState(user?.profile_pic || null)
   const [formState, setFormState] = useState({
     id: user?.id,
     name: user?.name || "",
@@ -106,22 +112,74 @@ const EditProfileModal = ({ backTo }) => {
     location: user?.location || "",
     profile_pic: user?.profile_pic || "",
     website: user?.website || "",
+    cover: user?.cover || "",
+    dob: user?.dob || "",
   });
+  const [showForm, setShowForm] = useState({});
 
-  const userDob = new Date(user?.dob);
-  const years = getYears(16, 100);
-  const [day, setDay] = useState(userDob.getDate());
-  const [month, setMonth] = useState(
-    userDob.toLocaleDateString("en-US", { month: "long" })
-  );
-  const [year, setYear] = useState(isNaN(userDob.getFullYear()));
+  useEffect(() => {
+    instance.post(requests.getUser, {id: user.id}).then(res => {
+      setFormState(res.data.user)
+      setShowForm({
+        name: res.data.user.name,
+        username: res.data.user.username,
+        bio: res.data.user.bio,
+        location: res.data.user.location,
+        website: res.data.user.website,
+      })
 
-  console.log(day, month, year);
+      const date = new Date(res.data.user.dob);  
+      setDay(date.getDate());
+      setMonth(getMonthCounterpart(date.getMonth()));
+      setYear(date.getFullYear());
+      setDayOptions(getDaysInMonth(date.getFullYear(), months.indexOf(getMonthCounterpart(date.getMonth()))))
+      setLoading(false)
+    }).catch(err => {
+      console.error(err)
+    })
+  },[user.id])
 
-  // todo memoize
-  const [dayOptions, setDayOptions] = useState(
-    getDaysInMonth(year, months.indexOf(month))
-  );
+  function getMonthCounterpart(month) {
+    const monthMap = {
+        '0': 'January',
+        '1': 'February',
+        '2': 'March',
+        '3': 'April',
+        '4': 'May',
+        '5': 'June',
+        '6': 'July',
+        '7': 'August',
+        '8': 'September',
+        '9': 'October',
+        '10': 'November',
+        '11': 'December',
+        'January': '1',
+        'February': '2',
+        'March': '3',
+        'April': '4',
+        'May': '5',
+        'June': '6',
+        'July': '7',
+        'August': '8',
+        'September': '9',
+        'October': '10',
+        'November': '11',
+        'December': '12'
+    };
+
+    // If the month is a number, convert it to string and return its counterpart
+    if (!isNaN(month)) {
+        month = month.toString();
+    }
+
+    return monthMap[month];
+  }
+
+
+  const setDob = () => {
+    const dob = `${year}/${getMonthCounterpart(month)}/${day}`
+    setFormState({...formState, dob: dob})
+  }
 
   const handleUpdateForm = (e) => {
     const fieldMaxLength = formConstant[e.target.name].maxLength;
@@ -138,12 +196,11 @@ const EditProfileModal = ({ backTo }) => {
   const handleUpdateProfilePic = ( image ) => {
     if (!image) return;
     
-    const storageRef = ref(storage, `profile_pics/${image.name}_${v4()}`);
+    const storageRef = ref(storage, `profile_pics/${formState.id}/profile_image`);
     uploadBytesResumable(storageRef, image).then((snapshot) => {
       console.log("Uploaded a blob or file!", snapshot);
       getDownloadURL(snapshot.ref).then((downloadURL) => {
         console.log("File available at", downloadURL);
-        setUploadProfilePic(downloadURL)
         setFormState({ ...formState, profile_pic: downloadURL });
       }).catch((error) => {
         console.error("Error getting download URL:", error);
@@ -153,14 +210,37 @@ const EditProfileModal = ({ backTo }) => {
     });
   };
 
+  const handleUpdateCoverPic = ( image ) => {
+    console.log('cover', formState.cover)
+    if (!image) return;
+
+    const storageRef = ref(storage, `cover_pics/${formState.id}/cover_image`);
+    uploadBytesResumable(storageRef, image).then((snapshot) => {
+      console.log("Uploaded a blob or file!", snapshot);
+      getDownloadURL(snapshot.ref).then((downloadURL) => {
+        console.log("File available at", downloadURL);
+        setFormState({ ...formState, cover: downloadURL });
+        console.log('cover2', formState.cover)
+      }).catch((error) => {
+        console.error("Error getting download URL:", error);
+      });
+    }).catch((error) => {
+      console.error("Error uploading file:", error);
+    });
+  };
 
   const updateProfile = () => {
-    instance.post(requests.updateUser, formState).then(res => {
+    instance.post(requests.updateUser, formState)
+    .then(res => {
       console.log(res)
     }).catch(err => {
       console.error(err)
     })
   };
+
+  if (loading) {
+    return <p>Loading...</p>; // Render loading indicator until data is fetched
+  }
 
   return (
     <NavModal backTo={backTo}>
@@ -188,13 +268,11 @@ const EditProfileModal = ({ backTo }) => {
 
         <div className="h-48 w-full relative mb-6 bg-slate-300 col-span-full flex items-center justify-center gap-x-4 bm-8">
           <div id="cover_photo" className="h-full w-full absolute z-10">
-            {user?.cover && (
               <img
-                src={user.cover}
+                src={formState.cover ||'https://images.unsplash.com/photo-1708246116078-8169fbf71fb4?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHw4fHx8ZW58MHx8fHx8'}
                 alt="cover"
                 className="w-full h-full object-cover"
               />
-            )}
           </div>
 
           <div className="z-20 flex items-center justify-center gap-x-4">
@@ -212,6 +290,7 @@ const EditProfileModal = ({ backTo }) => {
                   className="hidden"
                   type="file"
                   accept="image/*"
+                  onChange={(e) => handleUpdateCoverPic(e.target.files[0])}
                 />
               </label>
             </Button>
@@ -262,7 +341,7 @@ const EditProfileModal = ({ backTo }) => {
 
         {/* place all fields here */}
         <div className="p-4 mt-10 grid gap-y-3">
-          {Object.keys(formState).map((field, index) => {
+          {Object.keys(showForm).map((field, index) => {
             return (
               <CustomInput
                 key={index}
@@ -285,7 +364,10 @@ const EditProfileModal = ({ backTo }) => {
                 options={dayOptions}
                 name={"day"}
                 defaultValue={day}
-                onChange={(e, newVal) => setDay(newVal)}
+                onChange={(e, newVal) => {
+                  setDay(newVal)
+                  setDob()
+                }}
               />
 
               <OptionSelector
@@ -294,7 +376,8 @@ const EditProfileModal = ({ backTo }) => {
                 defaultValue={month}
                 onChange={(e, newVal) => {
                   setMonth(newVal);
-                  setDayOptions(getDaysInMonth(year, months.indexOf(newVal)));
+                  setDayOptions(getDaysInMonth(year, months.indexOf(newVal)))
+                  setDob()
                 }}
               />
 
@@ -304,7 +387,8 @@ const EditProfileModal = ({ backTo }) => {
                 defaultValue={year}
                 onChange={(e, newVal) => {
                   setYear(newVal);
-                  setDayOptions(getDaysInMonth(newVal, months.indexOf(month)));
+                  setDayOptions(getDaysInMonth(newVal, months.indexOf(month)))
+                  setDob()
                 }}
               />
             </div>

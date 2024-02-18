@@ -19,8 +19,7 @@ const TweetSchema = new Schema({
         ref: 'Poll',
     },
     tweetMedia: {
-        data: Buffer,
-        contentType: String,
+        type: String,
     },
     reference_id: { 
         type: Schema.Types.ObjectId, 

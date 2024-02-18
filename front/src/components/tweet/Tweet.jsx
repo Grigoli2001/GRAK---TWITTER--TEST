@@ -1,5 +1,3 @@
-import { Buffer } from 'buffer';
-
 import { useEffect, useState, useContext, useReducer } from "react";
 import ReactLoading from 'react-loading'
 import { NavLink, useNavigate } from "react-router-dom";
@@ -213,15 +211,15 @@ export const BaseTweet = ({ tweetUser, post, isLast, reply, fullView}) => {
 
   const navigate = useNavigate();
 
-  const isValidMediaType = (contentType) => {
-    if (contentType?.startsWith('image/')) {
-        return 'image';
-    } else if (contentType?.startsWith('video/')) {
-        return 'video';
-    } else {
-        return null; // Invalid media type
-    }
-};
+//   const isValidMediaType = (contentType) => {
+//     if (contentType.startsWith('image/')) {
+//         return 'image';
+//     } else if (contentType.startsWith('video/')) {
+//         return 'video';
+//     } else {
+//         return null; // Invalid media type
+//     }
+// };
 
   // let base64String = '';
   // if (postState?.tweetMedia) {
@@ -320,7 +318,7 @@ export const BaseTweet = ({ tweetUser, post, isLast, reply, fullView}) => {
           </div>
           { 
           post?.tweetMedia &&
-            <TweetMedia mediaType={isValidMediaType(postState?.tweetMedia?.contentType)} src={`data:${postState?.tweetMedia?.contentType};base64,${postState?.tweetMedia?.data}`} alt="" />
+            <TweetMedia src={`${postState.tweetMedia}`} alt="" />
           }
           {
             postState?.poll && 
@@ -423,6 +421,8 @@ export const FullTweet = ({ tweetId, isLast, parent }) => {
 
 // todo change naming to currentUser to avoid confusion
 export const Tweet = ({ user, post, isLast, asMedia,  tweetId }) => {
+
+  if (!user) return null;
   
   return  tweetId ? (
       <FullTweet tweetId={tweetId} isLast={isLast} />

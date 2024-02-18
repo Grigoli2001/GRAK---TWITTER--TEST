@@ -114,8 +114,6 @@ const Profile = () => {
   const { user } = useUserContext()
   const { username } = useParams()
 
-  
-
   // checks if the user is the current user 
   const isUser = username === user.username
       
@@ -136,6 +134,7 @@ const Profile = () => {
   //  checks if a profile is found
   useEffect(() => {
     instance.post(requests.getUser, {username: username}).then(res => {
+      console.log('user', res.data)
       setUserProfile(res.data.user)
     }).catch(err => {
       console.error(err)
@@ -168,7 +167,6 @@ const Profile = () => {
     if (user.location || user.profile_pic || user.bio || user.website || user.birthday || user.cover) {
       setIsSetUp(true)
     }
-
     
     instance
     .get(followRequests.followers, {params: {followerId: userProfile.id}})
@@ -243,7 +241,7 @@ const Profile = () => {
                       userProfile.cover &&
                         <NavLink to={`/${userProfile.username}/cover`} state={{ background: location}}>
 
-                          <img src={ userProfile.cover } className="w-full h-full object-contain" alt={`${userProfile.username}'s cover`} />
+                          <img src={ userProfile.cover } className="w-full h-full object-cover" alt={`${userProfile.username}'s cover`} />
                         </NavLink>
                     }
                 </div>

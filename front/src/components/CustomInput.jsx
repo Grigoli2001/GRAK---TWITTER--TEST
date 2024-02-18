@@ -17,7 +17,7 @@ const CustomInput = ({name, handleUpdate, value, maxLength, placeholder, withTex
           "peer rounded-md outline-none border-none w-full h-full px-2 py-4 overflow-hidden",
           {
             "resize-none": asTextArea,
-          }
+          },
         )}
       />
 
@@ -29,6 +29,8 @@ const CustomInput = ({name, handleUpdate, value, maxLength, placeholder, withTex
           {
             "scale-75 -translate-x-1 -translate-y-4 text-twitter-blue font-bold":
               value?.length > 0,
+            '-translate-y-7 peer-focus:-translate-y-7' : asTextArea
+            // "-translate-y-2": asTextArea,
           }
         )}
       >
