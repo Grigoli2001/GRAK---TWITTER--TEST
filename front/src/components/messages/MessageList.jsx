@@ -34,14 +34,10 @@ const MessageList = () => {
             if (res.status === 204) throw new Error('No changes made')
             setUserList(prevUsers => prevUsers.filter(ouser => ouser.id !== otherUser.id))
             setDeletedRoom(room)
-            let className = 'success-del-room'
-            if (document.querySelector(`.${className}`)) return
-            createToast("Conversation deleted!", 'success', className)
+            createToast("Conversation deleted!", 'success', 'success-del-room',{limit:1})
         }).catch( err => {
             console.log(err)
-            let className = 'error-del-room'
-            if (document.querySelector(`.${className}`)) return // limit to one error toast
-            createToast("Sorry! An error occured", 'error', className)
+            createToast("Sorry! An error occured", 'error', 'error-del-room',{limit:1})
         })
     }
 

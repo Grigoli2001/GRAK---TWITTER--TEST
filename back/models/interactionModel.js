@@ -4,16 +4,28 @@ const interactionModel = new mongoose.Schema({
     interactionType: {
       type: String,
       required: [true, "interaction_type is required"],
-      enum: ['like', 'bookmark']
+      enum: ['like', 'bookmark', 'vote']
     },
-    tweet: {
+    tweet_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Tweet',
       required: [true, "tweet_id is required"],
     },
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
+    userId: {
+      type: Number,
       required: [true, "user_id is required"],
+    },
+    pollOption: {
+      type: Number,
+      validate: {
+        validator: function(value) {
+          if (this.interactionType === 'vote') {
+            return typeof value === 'number';
+          }
+          return true;
+        },
+        message: 'pollOption is required when interactionType is vote'
+      }
     },
     is_deleted :{
       type: Boolean,

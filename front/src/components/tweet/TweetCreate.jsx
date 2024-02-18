@@ -1,7 +1,6 @@
 import { createContext,  useEffect, useRef, useState, useContext } from 'react'
 import { UserContext } from "../../context/testUserContext";
 
-
 //  components
 import { TextareaAutosize } from '@mui/base/TextareaAutosize';
 import { PollCreate } from './Poll';
@@ -23,9 +22,10 @@ import { LuCalendarClock } from "react-icons/lu";
 import { FaGlobeAfrica, FaGlobeAmericas } from "react-icons/fa";
 import { FiAtSign } from "react-icons/fi";
 
-// test
-import { users } from '../../constants/feedTest';
 import TweetMedia from './TweetMedia';
+import { SocketContext } from '../../context/socketContext';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { createToast } from '../../hooks/createToast';
 
 /**
  * Form for creating a tweet
@@ -36,10 +36,12 @@ import TweetMedia from './TweetMedia';
 export const TweetContext = createContext(null);
 
 const TweetCreate = ({type = 'Post', reference_id = null}) => {
-  const { user } = useContext(UserContext);
-  // max length of tweet
+  const user = useContext(UserContext);
   const tweetMaxLength = 300;
   const defaultTweetText = type === 'Post' ? 'What is happening?!' : 'Post your reply';
+  const { socket } = useContext(SocketContext)
+  const location = useLocation();
+  const navigate = useNavigate();
 
   // media refs
   const mediaRef = useRef();
@@ -121,7 +123,33 @@ const TweetCreate = ({type = 'Post', reference_id = null}) => {
         tweetMedia: null
       })
     }
-    // console.log('rerender')
+
+    const resetTweetForm = () => {
+      removeMedia()
+      removePoll()
+      
+      setTextAreaPlaceholder(defaultTweetText)
+      setButtonStates(
+        {media: false,
+          gif:  false,
+          poll: false,
+          schedule: true,
+          location: true,}
+        
+      )
+      setTweetForm({
+        ...tweetForm,
+        tweetType: 'tweet',
+        tweetText: '',
+        tweetMedia: null,
+        tweetPoll: null,
+        tweetSchedule: null,
+        tweetLocation: null,
+        tweetCanReply: canReply
+      });
+      
+      
+    }
 
   // update tweetText
   const handleUpdateTweetText = (e) => {
@@ -137,8 +165,16 @@ const TweetCreate = ({type = 'Post', reference_id = null}) => {
     );
   }
 
-  const handleMediaChange = (evt) => {
+  const handleMediaChange = async(evt) => {
     if (evt.target.files && evt.target.files[0]) {
+      const file = evt.target.files[0];
+      const mime = file.type;
+      console.log(mime)
+      // simple mimetype check because file-type is giving issues even with browserify
+      if (!mime.startsWith('image') && !mime.startsWith('video')) {
+        createToast('Only Images and videos allowed', 'warn', {limit: 1});
+        return
+      }
       removePoll();
 
       setTweetForm({
@@ -150,28 +186,30 @@ const TweetCreate = ({type = 'Post', reference_id = null}) => {
 
   const [canPost, setCanPost] = useState(false); // post button state
   
-
-  // TODO: works for now but needs to be refactored
   useEffect(() => {
-    const evalCanPost = () => {
-      // if the form has text and and choices for poll
+  // if the form has text and and choices for poll
       // if the form has media only 
       // if the form has text only
-      if ((tweetForm.tweetText.length > 0 && tweetForm.tweetPoll?.valid) || tweetForm.tweetMedia || (tweetForm.tweetText.length > 0 && !tweetForm.tweetPoll)) {
-        return true
-      }
-      return false
-  }
-    setCanPost(evalCanPost());
-  }, [tweetForm])
+
+    // more readable approach
+      const { tweetText, tweetPoll, tweetMedia } = tweetForm;
+      const isTextNotEmpty = tweetText?.trim().length > 0;
+      const isPollValid = tweetPoll?.valid;
+      const isMediaPresent = !!tweetMedia;
+      const enablePostButton = (isTextNotEmpty && isPollValid) || isMediaPresent || (isTextNotEmpty && !tweetPoll);
+      console.log((isTextNotEmpty && isPollValid),isMediaPresent,(isTextNotEmpty && !tweetPoll))
+  
+      setCanPost(enablePostButton);
+  }, [tweetForm]);
+  
 
   const handleCreateTweet = () => {
-    if (!canPost) {
-      console.log(tweetForm)
-      return
-    }
-
+    if (!canPost) return
     let formData = new FormData();
+    const { tweetMedia , ...tweetData } = tweetForm;
+    formData.append('tweetMedia', tweetMedia);
+    console.log(JSON.stringify(tweetData))
+    formData.append('data', JSON.stringify(tweetData));
     formData.append('tweetMedia', tweetForm.tweetMedia);
     formData.append('tweetText', tweetForm.tweetText);
     formData.append('tweetType', tweetForm.tweetType);
@@ -191,25 +229,27 @@ const TweetCreate = ({type = 'Post', reference_id = null}) => {
       }}
       )
       .then((response) => {
+        // update redux 
         formData = new FormData();
-        window.location.reload();
+        resetTweetForm()
+        createToast('Nice post🥳', 'success', 'success-create-post', {limit: 1})
+        socket.emit('feed:notify-create-post', { user })
+        if ((location.pathname) === '/compose/tweet'){
+          if (location.state?.background){
+            return navigate(-1)
+          }else{
+           return  navigate(`/${user.username}`)
+          }
+        }
+      
       })
       .catch((error) => {
-        console.log(error);
+        createToast('An error occured', 'error');
       });
   }
 
-  // const handleEditTweet = () => {
-    // axios.patch('/api/tweets/edit', {tweetText})
-  // }
-
-
-
-  // testing
-  // const user = users[1];
-
   return (
-    <TweetContext.Provider value={{tweetForm, setTweetForm}}>
+    <TweetContext.Provider value={{ tweetForm, setTweetForm }}>
       <section
       className="w-full relative h-fit p-4 pb-0 grid grid-cols-[75px_auto] border-b border-b-solid border-gray-200"
       onClick={() => setIsInteracted(true)}
@@ -230,6 +270,7 @@ const TweetCreate = ({type = 'Post', reference_id = null}) => {
       minRows={2}
       placeholder={textAreaPlaceholder}
       name="tweetText"
+      value={tweetForm.tweetText}
       className="resize-none overflow-hidden w-full pt-0 pb-2 pr-3 ml-4 border-none outline-none break-words placeholder:text-slate-600 placeholder:text-xl"
       onChange={handleUpdateTweetText}
       />
@@ -340,8 +381,6 @@ const TweetCreate = ({type = 'Post', reference_id = null}) => {
       </div>
 
       <div className="flex gap-x-4 items-center">
-        {/* {{ textCount(none, 280) }} {% if form.post %} */}
-
 
       {/* TODO check if editing or creating */}
 

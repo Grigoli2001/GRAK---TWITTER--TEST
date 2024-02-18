@@ -1,11 +1,14 @@
-import { forwardRef, useState, useContext, useEffect } from 'react'
-import { FaPlus, FaMinus } from "react-icons/fa6";
+import { forwardRef, useState, useContext, useEffect, useMemo } from 'react'
+import { FaPlus, FaMinus, FaCircleCheck } from "react-icons/fa6";
 import OptionSelector from '../OptionSelector';
 import { Button } from '../Button';
-import  TextCounter from './TextCounter';
 import { TweetContext } from './TweetCreate'
 import CustomInput from '../CustomInput';
-import { dayOptions, hourOptions, minuteOptions } from '../../utils/utils'
+import { dayOptions, hourOptions, minuteOptions, timeAgo} from '../../utils/utils'
+import { SocketContext } from '../../context/socketContext';
+import { TWEET_ACTIONS } from './Tweet'
+import { createToast } from '../../hooks/createToast';
+import { quantityFormat } from '../../utils/utils';
 /**
  * Input For Poll 
  * TODO: clean this up
@@ -63,12 +66,13 @@ const Choice = ({choice, choices, setChoices, handleAddChoice, handleRemoveChoic
 /**
  * Create a new poll component
  * @param {function} removePoll - function to remove poll from parent component
- * TODO add animation to choiches
+ * TODO add animation to choices
  */
 
 export const PollCreate = ({removePoll}) => {
 
   const TC = useContext(TweetContext)
+  // id is used to keep track of which choice is being updated
   const [choices, setChoices] = useState([
         {
           id: 1,
@@ -80,6 +84,12 @@ export const PollCreate = ({removePoll}) => {
         }
         
     ])
+  
+  const [duration, setduration] = useState({
+    days: 1,
+    hours: 1,
+    minutes: 1
+  })
   
   // adds a choice to the choices array
   const handleAddChoice = () => {
@@ -98,18 +108,19 @@ export const PollCreate = ({removePoll}) => {
   }
 
   // checks to see if all choices have text
-  
-
-  // TODO: these work for now but need to be refactored
   useEffect(() => {
     const validateAllChoices = () => {
       return choices.every((choice) => choice.text.length > 0)
     }
-    TC.setTweetForm({...TC.tweetForm, tweetPoll: {choices: choices, valid: validateAllChoices()}})
+    TC.setTweetForm({
+      ...TC.tweetForm, 
+      tweetPoll: {
+      choices: choices, 
+      valid: validateAllChoices(),
+      duration: duration
+    }})
 
   }, [choices])
-
-
 
   return (
     <div className='flex flex-col border border-slate-200 rounded-lg [&>*]:p-2 my-2 overflow-hidden'>
@@ -126,9 +137,9 @@ export const PollCreate = ({removePoll}) => {
       <div className='border-y border-y-slate-200'>
         <span className='text-slate-600 text-sm'>Poll length</span>
         <div className='flex items-center justify-evenly gap-x-2 '>
-          <OptionSelector title={'Days'} options={dayOptions} />
-          <OptionSelector title={'Hours'} options={hourOptions}/>
-          <OptionSelector title={'Minutes'} options={minuteOptions}/>
+          <OptionSelector title={'Days'} options={dayOptions} defaultValue={duration.days} onChange={(e, newVal) => {setduration(prev => ({...prev, days: newVal}))}} />
+          <OptionSelector title={'Hours'} options={hourOptions} defaultValue={duration.hours} onChange={(e, newVal) => setduration(prev => ({...prev, hours: newVal}))}/>
+          <OptionSelector title={'Minutes'} options={minuteOptions} defaultValue={duration.minutes} onChange={(e, newVal) => setduration(prev => ({...prev, minutes: newVal}))}/>
         </div>
 
       </div>
@@ -141,13 +152,74 @@ export const PollCreate = ({removePoll}) => {
   )
 }
 
-/**
- * TODO: Poll Results Component to render within a tweet
- * Not sure what this looks like yet
- */
-export const PollResults = () => {
-  return (
-    <div>Poll Res</div>
-  )
-}
+export const TweetPoll = forwardRef(({postState, dispatch, ...props}, ref) => {
 
+  const { socket } = useContext(SocketContext)
+
+
+  useEffect(() => {
+
+    socket.emit('tweet:poll:join-room', {
+      room: postState?._id,
+    })
+
+   }, [socket])
+
+  const pollEndDate = useMemo(() => new Date(postState.poll.poll_end))
+
+  useEffect(() => {
+    const handleLivePollVote = (data) => {
+      console.log('tweet:poll:handle-live-vote', data)
+      if (data.error) {
+        createToast('An error occured while voting', 'error', 'error-vote-poll', {limit: 2})
+        return
+      }
+      console.log('tweet:poll:handle-live-vote', data)
+      // TODO update to current user
+      dispatch({type: TWEET_ACTIONS.UPDATE_POLL, payload: {...data, userVoted: data.userVoted.userId === 3 ? data.userVoted : null }})
+    }
+
+    socket.on('tweet:poll:handle-live-vote', handleLivePollVote)
+    return () => {
+      socket.off('tweet:poll:handle-live-vote', handleLivePollVote)
+    }
+
+  }, [socket, postState?.poll?.votes])
+
+  const handlePollVote = (e, optionId) => {
+    e.stopPropagation()
+    socket.emit('tweet:poll:vote', {
+      room: postState?._id,
+      option: optionId
+    })
+  }
+
+  return (
+    <>
+            {
+              !postState.userVoted  && new Date() < pollEndDate ?
+              postState?.poll?.options.map((option, index)=> (
+                  <div  key={index} onClick={(e) => handlePollVote(e, option.id)} className='flex items-center justify-center  w-full rounded-full   gap-2 border border-twitter-blue text-twitter-blue py-1 hover:bg-twitter-blue/30 cursor-pointer peer-checked:bg-twitter-blue/70'>
+                    <p>{ option.text }</p>
+                  </div>
+                ))
+                :
+                <>{
+                  postState.poll.options.map((option, index) => 
+                  <div key={index} className='flex items-center justify-between w-full gap-2 rounded-md border relative overflow-hidden py-1'>
+                      <p className='ml-2'>{ option.text }</p> 
+                      { postState.userVoted?.pollOption === option.id && <FaCircleCheck className='text-twitter-blue'/>}
+                      <p className='ml-auto mr-2'>{ option.votes }</p>
+                      <div id="poll-indicator" className='h-[90%] bg-gray-300 min-w-1  rounded-2xl absolute opacity-40 animate-[width]' style={{ width:`${(option.votes/postState.totalVotes)*100}%`}}></div>
+                  </div>
+
+                )}
+                </>
+            }
+              <div className='flex items-center gap-2'>
+                <span className='text-sm text-slate-400'> { quantityFormat(postState.totalVotes)} vote(s) </span>
+                <span className='text-sm text-slate-400'> { new Date() < pollEndDate ?  `${timeAgo(new Date(), postState.poll.poll_end)} left` : 'Final Results' }</span>
+              </div>
+    </>
+          
+  )})

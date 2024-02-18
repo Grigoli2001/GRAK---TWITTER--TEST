@@ -96,7 +96,7 @@ const Tweets = ({api, FallBackComponent, asMedia}) => {
             tweets.map((tweet) => {
               let user = users.filter((user) => tweet.userId === user.id)[0]
               return (
-                <Tweet key={tweet._id} user={user} post={tweet}/>
+                <Tweet key={tweet?._id} user={user} post={tweet}/>
               )
             })
             : 

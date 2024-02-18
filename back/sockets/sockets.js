@@ -4,6 +4,7 @@ const { registerSocketMiddleware } = require("./socket-middleware");
 
 // event listeners
 const registerMessageHandlers = require('./messageHandlers')
+const registerPollHandlers = require('./pollHandlers')
 
 const httpPort = 4000
 const initSockets = (app) => {
@@ -29,6 +30,7 @@ const initSockets = (app) => {
     });
 
     registerMessageHandlers(io, socket)
+    registerPollHandlers(io, socket)
 
   });
 
