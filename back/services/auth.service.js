@@ -203,6 +203,7 @@ const changePassword = async (req, res) => {
 };
 
 const userPreferences = async (req, res) => {
+  console.log(req.body, "req.file");
   const {
     userId,
     selectedTopics,
@@ -211,14 +212,7 @@ const userPreferences = async (req, res) => {
     userName,
     profile_pic,
   } = req.body;
-  // profile pic name
-  let profile_pic_name;
-  if (req.file !== undefined) {
-    profile_pic_name = req.file.filename;
-  } else {
-    profile_pic_name = false;
-  }
-
+  
   const client = await pool.connect();
   try {
     const user = await client.query(
@@ -228,7 +222,7 @@ const userPreferences = async (req, res) => {
         selectedCategories,
         selectedLanguages,
         userName,
-        profile_pic_name || "default_profile_pic.jpg",
+        profile_pic || "default_profile_pic.jpg",
         userId,
       ]
     );

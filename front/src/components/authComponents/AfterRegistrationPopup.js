@@ -9,6 +9,8 @@ import instance from "../../constants/axios";
 import { requests } from "../../constants/requests";
 import { useNavigate } from "react-router-dom";
 import { topics } from "../../constants/feedTest";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { storage } from "../../utils/firebase";
 import { UserDisplayer } from "../User";
 import { jwtDecode } from "jwt-decode";
 
@@ -29,6 +31,8 @@ const AfterRegistrationPopup = ({ onClose }) => {
     ? JSON.parse(localStorage.getItem("user")).token
     : null;
   const { user } = useUserContext()
+  console.log(user);
+  // const [userName, setUserName] = useState('runak');
   const [userName, setUserName] = useState(user.username);
   const [profilePic, setProfilePic] = useState(null);
   const [display, setDisplay] = useState("/uploads/default_profile_pic.jpg");
@@ -40,6 +44,25 @@ const AfterRegistrationPopup = ({ onClose }) => {
     }
   }, []);
   console.log(display);
+
+
+  const handleUpdateProfilePic = ( image ) => {
+    if (!image) return;
+    
+    const storageRef = ref(storage, `profile_pics/${user.id}/profile_image`);
+    uploadBytesResumable(storageRef, image).then((snapshot) => {
+      console.log("Uploaded a blob or file!", snapshot);
+      getDownloadURL(snapshot.ref).then((downloadURL) => {
+        console.log("File available at", downloadURL);
+        setDisplay(downloadURL);
+        setProfilePic( downloadURL );
+      }).catch((error) => {
+        console.error("Error getting download URL:", error);
+      });
+    }).catch((error) => {
+      console.error("Error uploading file:", error);
+    });
+  };
 
   const handleNext = (page) => {
     switch (page) {
@@ -94,19 +117,16 @@ const AfterRegistrationPopup = ({ onClose }) => {
 
       case 7:
         setLoading(true);
-        console.log("profilePic", profilePic);
-        const data = new FormData();
-        data.append("userId", user.id);
-        data.append("selectedTopics", selectedTopics);
-        data.append("selectedCategories", selectedCategories);
-        data.append("selectedLanguages", selectedLanguages);
-        data.append("userName", userName);
-        data.append("profile_pic", profilePic);
-
+        const data = {
+          userId: user.id,
+          selectedTopics: selectedTopics,
+          selectedCategories : selectedCategories,
+          selectedLanguages : selectedLanguages,
+          userName : userName,
+          profile_pic: profilePic,
+        };
         instance
-          .post(requests.userPreferences, data, {
-            headers: { Authorization: `Bearer ${token}` },
-          })
+          .post(requests.userPreferences, data)
           .then((res) => {
             if (res.status === 200) {
               setLoading(false);
@@ -500,7 +520,7 @@ const AfterRegistrationPopup = ({ onClose }) => {
                               setDisplay(
                                 URL.createObjectURL(e.target.files[0])
                               );
-                              setProfilePic(e.target.files[0]);
+                              handleUpdateProfilePic(e.target.files[0]);
                             }}
                           />
                           <div className="bg-gray-500/60 h-[200px] w-[200px] rounded-full absolute top-0 right-0 align-middle justify-center items-center hidden group-hover:flex">

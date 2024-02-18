@@ -113,9 +113,12 @@ const Profile = () => {
 
   const { user } = useUserContext()
   const { username } = useParams()
+  const location = useLocation()
 
   // checks if the user is the current user 
+  // console.log('user', user)
   const isUser = username === user.username
+  // console.log('isUser', isUser)
       
 
   const [ postCount, setPostCount ] = useState(null)
@@ -131,6 +134,8 @@ const Profile = () => {
   const profileContainer = useRef(null)
   const noUserProfile = useRef(null)
 
+  
+
   //  checks if a profile is found
   useEffect(() => {
     instance.post(requests.getUser, {username: username}).then(res => {
@@ -139,7 +144,7 @@ const Profile = () => {
     }).catch(err => {
       console.error(err)
     })
-  },[username])
+  },[ username, location.state ])
 
   useLayoutEffect(() => {
     document.title = `${showUsername(user)} / Twitter`
@@ -166,6 +171,7 @@ const Profile = () => {
   if(userProfile) {
     if (user.location || user.profile_pic || user.bio || user.website || user.birthday || user.cover) {
       setIsSetUp(true)
+      console.log('user is set up')
     }
     
     instance
@@ -187,7 +193,6 @@ const Profile = () => {
   }
   }, [userProfile])
 
-  const location = useLocation() // used to pass previous location to the router for the cover and profile
   const navigate = useNavigate()
   const handleBack = () => {
     navigate(-1)

@@ -211,6 +211,7 @@ const RegisterPopup = ({ onClose, user, setUser }) => {
           payload: response.data,
         });
         localStorage.setItem("justRegistered", "true");
+        console.log("Just registered");
         navigate("/after-registration");
       })
       .catch((error) => {

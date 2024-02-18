@@ -233,6 +233,7 @@ const EditProfileModal = ({ backTo }) => {
     instance.post(requests.updateUser, formState)
     .then(res => {
       console.log(res)
+      navigate(`/${formState.username}`, { state: { user: formState } })
     }).catch(err => {
       console.error(err)
     })

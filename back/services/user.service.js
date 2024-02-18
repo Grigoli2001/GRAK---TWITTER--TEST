@@ -5,6 +5,7 @@ const jwt = require("jsonwebtoken");
 const { allFollowers } = require("../utils/tweet.utils");
 
 
+
 const getAllUsers = async (req, res) => {
   try {
     const users = await pool.query("SELECT * FROM users");
@@ -21,6 +22,7 @@ const getAllUsers = async (req, res) => {
 };
 
 const getUser = async (req, res) => {
+  const { id, username } = req.body;
   if (id) {
     return getUserById(req, res);
   } else if (username) {
@@ -49,6 +51,7 @@ const searchUser = async (req, res) => {
 
 const getUserById = async (req, res) => {
   try {
+    const { id } = req.body;
     const user = await pool.query(`SELECT id, name, username, email, profile_pic, created_at, bio, website, location, cover, dob FROM users WHERE id = $1`, [id]);
 
     if (!user.rowCount) {
