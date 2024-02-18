@@ -8,6 +8,8 @@ import { Button } from '../Button';
 import TextCounter from './TextCounter';
 import { ExtAvatar }  from '../User';
 import MiniDialog from '../MiniDialog';
+import TweetMedia from './TweetMedia';
+import ReactLoading from 'react-loading'
 
 // axios
 import instance from "../../constants/axios";
@@ -22,7 +24,6 @@ import { LuCalendarClock } from "react-icons/lu";
 import { FaGlobeAfrica, FaGlobeAmericas } from "react-icons/fa";
 import { FiAtSign } from "react-icons/fi";
 
-import TweetMedia from './TweetMedia';
 import { SocketContext } from '../../context/socketContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { createToast } from '../../hooks/createToast';
@@ -57,8 +58,12 @@ const TweetCreate = ({type = 'Post', reference_id = null}) => {
   });
 
   const [textAreaPlaceholder, setTextAreaPlaceholder] = useState(defaultTweetText);
-  const [isInteracted, setIsInteracted] = useState(false); // show can reply dialog
-  const [canReply, setCanReply] = useState('everyone'); // can reply value
+  const [isInteracted, setIsInteracted] = useState(false); // show can reply dialog opener
+  const [canReply, setCanReply] = useState('everyone'); 
+  const [ loading, setLoading ] = useState(false);
+  const [ canInput, setCanInput ] = useState(true);
+  const [canPost, setCanPost] = useState(false); // post button state
+
   
   const updateCanReply = (value) => {
     setCanReply(value);
@@ -125,7 +130,7 @@ const TweetCreate = ({type = 'Post', reference_id = null}) => {
       })
     }
 
-    const resetTweetForm = () => {
+    const resetComponent = () => {
       removeMedia()
       removePoll()
       
@@ -145,15 +150,17 @@ const TweetCreate = ({type = 'Post', reference_id = null}) => {
         tweetPoll: null,
         tweetSchedule: null,
         tweetLocation: null,
-        reference_id: null,
         tweetCanReply: canReply
       });
-      
-      
+
+      setCanInput(true);
+      setCanPost(false);
+      setLoading(false);
     }
 
   // update tweetText
   const handleUpdateTweetText = (e) => {
+    if(!canInput) return
     if (e.target.value.length > tweetMaxLength) {
       e.target.value = e.target.value.slice(0, tweetMaxLength);
       return
@@ -170,7 +177,6 @@ const TweetCreate = ({type = 'Post', reference_id = null}) => {
     if (evt.target.files && evt.target.files[0]) {
       const file = evt.target.files[0];
       const mime = file.type;
-      console.log(mime)
       // simple mimetype check because file-type is giving issues even with browserify
       if (!mime.startsWith('image') && !mime.startsWith('video')) {
         createToast('Only Images and videos allowed', 'warn', {limit: 1});
@@ -185,7 +191,6 @@ const TweetCreate = ({type = 'Post', reference_id = null}) => {
     }
   }
 
-  const [canPost, setCanPost] = useState(false); // post button state
   
   useEffect(() => {
   // if the form has text and and choices for poll
@@ -198,18 +203,30 @@ const TweetCreate = ({type = 'Post', reference_id = null}) => {
       const isPollValid = tweetPoll?.valid;
       const isMediaPresent = !!tweetMedia;
       const enablePostButton = (isTextNotEmpty && isPollValid) || isMediaPresent || (isTextNotEmpty && !tweetPoll);
-      console.log((isTextNotEmpty && isPollValid),isMediaPresent,(isTextNotEmpty && !tweetPoll))
-  
       setCanPost(enablePostButton);
   }, [tweetForm]);
+
+  const disbaleAllInteractions = () => {
+    setLoading(true);
+    setCanPost(false);
+    setButtonStates({
+      media: true,
+      gif:  true,
+      poll: true,
+      schedule: true,
+      location: true,
+    })
+    setCanInput(false);
+  }
   
 
   const handleCreateTweet = () => {
     if (!canPost) return
+    disbaleAllInteractions(); 
     let formData = new FormData();
     const { tweetMedia , ...tweetData } = tweetForm;
     formData.append('data', JSON.stringify(tweetData));
-    formData.append('tweetMedia', tweetForm.tweetMedia);
+    formData.append('tweetMedia', tweetForm?.tweetMedia);
     formData.append('tweetText', tweetForm.tweetText);
     formData.append('tweetType', tweetForm.tweetType);
     
@@ -225,7 +242,7 @@ const TweetCreate = ({type = 'Post', reference_id = null}) => {
       .then((response) => {
         // update redux 
         formData = new FormData();
-        resetTweetForm()
+        resetComponent()
         createToast(`Nice ${type}🥳`, 'success', 'success-create-post', {limit: 1})
         socket.emit('feed:notify-create-post', { user })
         if ((location.pathname) === '/compose/tweet'){
@@ -235,25 +252,26 @@ const TweetCreate = ({type = 'Post', reference_id = null}) => {
            return  navigate(`/${user.username}`)
           }
         }
-      
       })
       .catch((error) => {
-        createToast('An error occured', 'error');
+        createToast('An error occured while posting', 'error', 'error-create-post', {limit: 1});
       });
   }
 
   return (
     <TweetContext.Provider value={{ tweetForm, setTweetForm }}>
+      
       <section
       className="w-full relative h-fit p-4 pb-0 grid grid-cols-[75px_auto] border-b border-b-solid border-gray-200"
-      onClick={() => setIsInteracted(true)}
+      onClick={() => !loading ?  setIsInteracted(true) : {}}
       >
 
-        {/* Spinner  for loading rquests TODO: use react loading?  */}
-        <div className="post-spinner hidden absolute bg-gray-200 opacity-50 z-10 w-full h-full items-center justify-center">
-          {/* <span className="loader z-20 opacity-100"></span> */}
-        </div>
+    { loading && 
+      <div className="absolute top-0 left-0 w-full h-full bg-white/75 z-50 flex items-center justify-center">
+            <ReactLoading type='spin' color='#1da1f2' height={30} width={30}/>
+      </div>
 
+    }
     <div className="mr-4">
     <ExtAvatar src = {user?.profile_pic} size="sm" />
     </div>
@@ -273,7 +291,7 @@ const TweetCreate = ({type = 'Post', reference_id = null}) => {
         {
           openPoll ? 
             <PollCreate removePoll={removePoll}/>
-            : tweetForm.tweetMedia ?
+            : tweetForm?.tweetMedia ?
              <TweetMedia mediaType={'image'} src={URL.createObjectURL(tweetForm.tweetMedia)} as_form={true} removeMedia={removeMedia}/>
             : null
         }

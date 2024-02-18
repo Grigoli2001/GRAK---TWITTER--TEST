@@ -8,6 +8,7 @@ export const defaultAvatar = "https://abs.twimg.com/sticky/default_profile_image
 
 export function timeAgo (date, initialDate = new Date()) {
     // returns a date in a time ago format
+    if (!date) return
 
     if (typeof date === "string") {
         date = new Date(date);
@@ -105,7 +106,7 @@ export function getJoinDate(date) {
     return new Date(date).toLocaleDateString('en-US', options);
 }
 
-export function TweetTime(date) {
+export function tweetTime(date) {
     const options = {
         day: 'numeric',
         month: 'short',

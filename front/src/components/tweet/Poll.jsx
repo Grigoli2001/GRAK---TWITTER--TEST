@@ -196,30 +196,37 @@ export const TweetPoll = forwardRef(({postState, dispatch, ...props}, ref) => {
 
   return (
     <>
-            {
-              !postState.userVoted  && new Date() < pollEndDate ?
-              postState?.poll?.options.map((option, index)=> (
-                  <div  key={index} onClick={(e) => handlePollVote(e, option.id)} className='flex items-center justify-center  w-full rounded-full   gap-2 border border-twitter-blue text-twitter-blue py-1 hover:bg-twitter-blue/30 cursor-pointer peer-checked:bg-twitter-blue/70'>
-                    <p>{ option.text }</p>
-                  </div>
-                ))
-                :
-                <>{
-                  postState.poll.options.map((option, index) => 
-                  <div key={index} className='flex items-center justify-between w-full gap-2 rounded-md border relative overflow-hidden py-1'>
-                      <p className='ml-2'>{ option.text }</p> 
-                      { postState.userVoted?.pollOption === option.id && <FaCircleCheck className='text-twitter-blue'/>}
-                      <p className='ml-auto mr-2'>{ option.votes }</p>
-                      <div id="poll-indicator" className='h-[90%] bg-gray-300 min-w-1  rounded-2xl absolute opacity-40 animate-[width]' style={{ width:`${(option.votes/postState.totalVotes)*100}%`}}></div>
-                  </div>
-
-                )}
-                </>
-            }
-              <div className='flex items-center gap-2'>
-                <span className='text-sm text-slate-400'> { quantityFormat(postState.totalVotes)} vote(s) </span>
-                <span className='text-sm text-slate-400'> { new Date() < pollEndDate ?  `${timeAgo(new Date(), postState.poll.poll_end)} left` : 'Final Results' }</span>
+      {postState.poll.options ? (
+        <>
+          {!postState.userVoted && new Date() < pollEndDate ? (
+            postState?.poll?.options?.map((option, index) => (
+              <div key={index} onClick={(e) => handlePollVote(e, option.id)} className='flex items-center justify-center w-full rounded-full gap-2 border border-twitter-blue text-twitter-blue py-1 hover:bg-twitter-blue/30 cursor-pointer peer-checked:bg-twitter-blue/70'>
+                <p>{option.text}</p>
               </div>
+            ))
+          ) : (
+            <>
+              {postState?.poll?.options?.map((option, index) => (
+                <div key={index} className='flex items-center justify-between w-full gap-2 rounded-md border relative overflow-hidden py-1'>
+                  <p className='ml-2'>{option.text}</p>
+                  {postState.userVoted?.pollOption === option.id && <FaCircleCheck className='text-twitter-blue' />}
+                  <p className='ml-auto mr-2'>{option.votes}</p>
+                  <div id="poll-indicator" className='h-[90%] bg-gray-300 min-w-1 rounded-2xl absolute opacity-40 animate-[width]' style={{ width: `${(option.votes / postState.totalVotes) * 100}%` }}></div>
+                </div>
+              ))}
+            </>
+          )}
+  
+          <div className='flex items-center gap-2'>
+            <span className='text-sm text-slate-400'>{quantityFormat(postState.totalVotes)} vote(s)</span>
+            <span className='text-sm text-slate-400'>{new Date() < pollEndDate ? `${timeAgo(new Date(), postState.poll.poll_end)} left` : 'Final Results'}</span>
+          </div>
+        </>
+      ) : (
+        <div className='flex items-center justify-center gap-2'>
+          <p className='text-slate-400'>There was an error loading this poll</p>
+        </div>
+      )}
     </>
-          
-  )})
+  );
+  })  

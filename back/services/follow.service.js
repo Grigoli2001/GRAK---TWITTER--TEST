@@ -32,7 +32,7 @@ const removeFollower = async (req, res) => {
     } else {
         const client = await pool.connect();
         try {
-        const removeFollower = await client.query(
+        await client.query(
             `DELETE FROM follows WHERE user_id = $1 AND following = $2`,
             [userId, followerId]
         );

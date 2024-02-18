@@ -1,6 +1,7 @@
 import { Buffer } from 'buffer';
 
 import { useEffect, useState, useContext, useReducer } from "react";
+import ReactLoading from 'react-loading'
 import { NavLink, useNavigate } from "react-router-dom";
 import { UserContext } from "../../context/UserContext";
 import TweetMedia, { TweetMiniMedia } from "./TweetMedia";
@@ -31,7 +32,7 @@ import { CIQuote } from "../customIcons";
 import { RiDeleteBinLine } from "react-icons/ri";
 
 // utils
-import { showUsername, timeAgo, quantityFormat } from '../../utils/utils';
+import { showUsername, timeAgo, quantityFormat, tweetTime } from '../../utils/utils';
 import { cn } from '../../utils/style';
 import { TweetPoll } from './Poll';
 import { createToast } from '../../hooks/createToast';
@@ -44,7 +45,7 @@ export const TWEET_ACTIONS = {
   UPDATE_POLL: "update_poll",
 };
 
-const TweetAction = ({
+export const TweetAction = ({
   Icon,
   ActiveIcon,
   actionCount,
@@ -124,8 +125,6 @@ function reducer( state, action ) {
 
     case TWEET_ACTIONS.UPDATE_POLL:
       // option the votes for the option
-      console.log(payload.optionId, 'in playload')
-      // return state
       return {...state,  totalVotes: payload.totalVotes,userVoted:payload.userVoted,   poll: { ...state.poll, options: state.poll.options.map(option => {
 
         if (option.id === payload.option) {
@@ -135,48 +134,20 @@ function reducer( state, action ) {
         return option
       }
       )}}
+
     default:
       return state
   }
 }
 
 
-export const BaseTweet = ({ tweetUser, post, isLast, reply }) => {
+export const BaseTweet = ({ tweetUser, post, isLast, reply, fullView}) => {
   const [postState, dispatch] = useReducer(reducer, post)
   // const [postState, setPostState] = useState(post);
   const { user } = useContext(UserContext);
-  console.log('post buffer')
-
-  // useEffect(() => {
-  //   postState?.tweet_likes.forEach(element => {
-  //     if (element.userId === currentUser) {
-  //       setPostState(prev => ({...prev, liked: true, likes: postState.tweet_likes.length}))
-  //     } else {
-  //       setPostState(prev => ({...prev, liked: false, likes: postState.tweet_likes.length}))
-  //     }
-  //   });
-
-  //   postState?.tweet_retweets.forEach(element => {
-  //     if (element.userId === currentUser) {
-  //       setPostState(prev => ({...prev, retweeted: true, retweets: postState.tweet_retweets.length}))
-  //     } else {
-  //       setPostState(prev => ({...prev, retweeted: false, retweets: postState.tweet_retweets.length}))
-  //     }
-  //   });
-
-  //   postState?.tweet_bookmarks.forEach(element => {
-  //     if (element.userId === currentUser) {
-  //       setPostState(prev => ({...prev, bookmarked: true}))
-  //     } else {
-  //       setPostState(prev => ({...prev, bookmarked: false}))
-  //     }
-  //   });
-  // }, [])
 
   const handleLike = (e) => {
     e.stopPropagation();
-
-
     instance.post(requests.likeTweet, {
       tweetId: postState._id,
       isLiked: postState.userLiked,
@@ -253,12 +224,13 @@ export const BaseTweet = ({ tweetUser, post, isLast, reply }) => {
 };
 
 let base64String = '';
-if (postState.tweetMedia) {
+if (postState?.tweetMedia) {
     base64String = Buffer.from(postState?.tweetMedia?.data).toString('base64');
 }
 
   return (
     // tweets for feed page, post is diff for single post view
+    
     <div
       onClick={() => navigate(`/${tweetUser.username}/status/${post._id}`)}
       className={cn(
@@ -268,6 +240,8 @@ if (postState.tweetMedia) {
         }
       )}
     >
+      { postState?.tweetType === 'retweet' && <span className='font-semibold gap-x-1 text-slate-400 inline-flex text-sm items-center pl-4 col-span-full'><FaRetweet/> {tweetUser.name} reposted</span> }
+
       <NavLink
         onClick={(e) => e.stopPropagation()}
         to={`/${tweetUser.username}`}
@@ -341,7 +315,7 @@ if (postState.tweetMedia) {
           )}
         </div>
 
-          <div className="text-justify break-words overflow-wrap">
+          <div className="text-justify break-all overflow-wrap">
               <p className='text-wrap'>{ postState?.tweetText } </p>
           </div>
           {
@@ -350,13 +324,24 @@ if (postState.tweetMedia) {
                 }
           {
             postState?.poll && 
-
             <TweetPoll postState={postState} dispatch={dispatch} />
-
           }
+
+          {
+            fullView && 
+              <div className="flex items-center justify-between p-1 text-slate-500 text-md">
+              {tweetTime(postState?.createdAt)}
+              {postState?.updatedAt && (
+                  <span className="text-sm font-medium italic">edited</span>
+              )}
+
+          </div>
+          }
+
+
             
           <div className="flex items-center justify-between px-4 py-2">
-            <TweetAction Icon={FaRegComment} actionCount={postState?.totalComments} title="Reply" color="blue" onClick={handleReply}/>
+            <TweetAction Icon={FaRegComment} actionCount={postState?.totalReplies} title="Reply" color="blue" onClick={handleReply}/>
             
              <MiniDialog>
               <MiniDialog.Wrapper>
@@ -398,13 +383,53 @@ if (postState.tweetMedia) {
   );
 };
 
+
+export const FullTweet = ({ tweetId, isLast, parent }) => {
+    const [tweetPost, setTweetPost] = useState({});
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+
+        instance.get(requests.getTweetById + tweetId).then(res => {
+            setTweetPost(res.data.data.tweet)
+            setLoading(false)
+        }).catch(err => {
+          console.log(err)
+        })
+        
+    }, [tweetId])
+    
+    if(tweetPost.user === undefined) {
+        return null
+    }
+
+    return loading ? (
+        <div className='flex justify-center items-start h-[80vh] mt-4'>
+          <ReactLoading type='spin' color='#1da1f2' height={30} width={30}/>
+        </div>
+      ):(
+        tweetPost?.user && 
+        <>
+        {tweetPost.reference_id ? <FullTweet tweetId={tweetPost.reference_id} parent={true} /> : null }
+        {parent ? 
+        <BaseTweet tweetUser={tweetPost.user} post={tweetPost} reply={true}/>
+        :
+        <BaseTweet tweetUser={tweetPost.user} post={tweetPost} isLast={isLast} fullView={true}  />
+}
+        </>
+    );
+};
+
 // todo change naming to currentUser to avoid confusion
-const Tweet = ({ user, post, isLast, asMedia, complete }) => {
+export const Tweet = ({ user, post, isLast, asMedia,  tweetId }) => {
   
-  return asMedia ? (
-    <TweetMiniMedia user={user} post={post} complete={complete}/>
-  ) : (
-    <BaseTweet tweetUser={user} post={post} isLast={isLast} complete={complete}/>
+  return  tweetId ? (
+      <FullTweet tweetId={tweetId} isLast={isLast} />
+    ) :
+    asMedia ? (
+      <TweetMiniMedia user={user} post={post} />
+    ) : (
+      <BaseTweet tweetUser={user} post={post} isLast={isLast}/>
   );
 };
 

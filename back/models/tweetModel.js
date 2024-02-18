@@ -5,7 +5,7 @@ const TweetSchema = new Schema({
     tweetType: {
         type: String,
         required: [true, "tweet_type is required"],
-        enum: ['tweet', 'comment', 'retweet', 'reply', 'quote']
+        enum: ['tweet','retweet', 'reply', 'quote']
     },
     tweetText: {
         type: String,

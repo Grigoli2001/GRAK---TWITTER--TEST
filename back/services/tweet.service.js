@@ -9,7 +9,7 @@ const getAllTweets = async (req, res) => {
     try {
         const tweets =  await tweetModel.aggregate([
             {
-                $match: { tweetType: 'tweet' },
+                $match: { tweetType: {$ne: 'reply'} },
             },
             {
                     $lookup: {
@@ -103,7 +103,6 @@ const getAllTweets = async (req, res) => {
                     createdAt: 1,
                     totalLikes: 1,
                     totalBookmarks: 1,
-                    totalComments: 1,
                     totalVotes: 1,
                     userLiked: 1,
                     userRetweeted: 1,
@@ -117,9 +116,10 @@ const getAllTweets = async (req, res) => {
                 },
             },
             
-        ]).sort({
-            createdAt: -1
-        });
+        ])
+        // .sort({
+        //     createdAt: -1
+        // });
         
         await Promise.all(tweets.map(async tweet => {
             if (tweet.poll) {
@@ -130,12 +130,12 @@ const getAllTweets = async (req, res) => {
 
             }
             // i am sure there is a better way to query but idek
-            const totalComments = await tweetModel.countDocuments({ reference_id: tweet._id, $or: [{ tweetType: 'comment' }, { tweetType: 'reply' }] });
+            const totalReplies = await tweetModel.countDocuments({ reference_id: tweet._id,  tweetType: 'reply' });
             const totalRetweets = await tweetModel.countDocuments({ reference_id: tweet._id, $or: [{ tweetType: 'retweet' }, { tweetType: 'quote' }] });
             const userRetweeted = await tweetModel.countDocuments({ reference_id: tweet._id, tweetType: 'retweet', userId: 3 });
 
             
-            tweet.totalComments = totalComments;
+            tweet.totalReplies = totalReplies;
             tweet.totalRetweets = totalRetweets;
             tweet.userRetweeted = userRetweeted;
 
@@ -152,6 +152,7 @@ const getAllTweets = async (req, res) => {
         //     const user = await pool.query(`SELECT id, username, name FROM users WHERE id = ${tweets[i].userId}`);
         //     tweets[i].user = user.rows[0];
         // }
+
         res.status(statusCode.success).json({
             status: "success",
             data: {
@@ -206,12 +207,12 @@ const createTweet = async (req, res) => {
     try {
 
         const { data } = req.body;
-        console.log(data);
+
+        // parse since its sent as form data to allow sending images
         const newTweetData = JSON.parse(data);
-        console.log(newTweetData)
         
 
-        // filter out any undefined o|r null values
+        // filter out any undefined or null values
         Object.entries(newTweetData).forEach(([key, value]) => {  
             if (value === undefined || value === null) {
                 delete newTweetData[key];
@@ -222,16 +223,13 @@ const createTweet = async (req, res) => {
 
 
         if (!tweetType) {
-            return res.status(statusCode.badRequest).json({
-                message: "tweetType is required",
-            });
+            throw new Error("tweetType is required");
         }
 
         const originalTweet = tweetType === 'tweet'
         if (!originalTweet && !reference_id) {
-            return res.status(statusCode.badRequest).json({
-                message: "if not original tweet, reference is required",
-            });
+            throw new Error("if not original tweet, reference is required")
+          
         }
 
         if (originalTweet && reference_id) {
@@ -241,18 +239,15 @@ const createTweet = async (req, res) => {
         }
 
         if ((!tweetText && !req.file) || (req.file && tweetPoll)) {
-            return res.status(statusCode.badRequest).json({
-                status: "fail",
-                message: "tweetText or tweetMedia is required",
-            });
+            throw Error("tweetText or tweetMedia is required",)
         }
     
         if (req.file){
-
+            // check byte headers to avoid spoof
             await import('file-type').then(async ({ fileTypeFromBuffer }) => {
                 const { mime }  = await fileTypeFromBuffer(req.file.buffer)
                 if (!mime.startsWith('image') && !mime.startsWith('video')) {
-                    throw (new Error('Invalid file type, only JPEG, PNG and MP4 is allowed!'));
+                    throw new Error('Invalid file type, only JPEG, PNG and MP4 is allowed!');
                 }
               
             })
@@ -268,8 +263,8 @@ const createTweet = async (req, res) => {
 
         const session = await mongoose.startSession();
         await session.withTransaction(async () => {
-
-        // filter out any undefined or null values
+        
+        // validate the poll 
         if (tweetPoll) {
             const poll_options = tweetPoll?.choices.filter(option => !!option);
             if (poll_options?.length < 2 || poll_options?.length > 4) {
@@ -290,23 +285,19 @@ const createTweet = async (req, res) => {
             await poll.save({ session });
 
         }
-        
-         });
 
-         if (!originalTweet){
+        if (!originalTweet){
             tweet.reference_id = reference_id
          }
 
          await tweet.save(); // enum will throw tweet type error or maybe set explicitly idk
-
-        
-
+         });
+         
         if (tweetType === 'tweet') {
             // emit socket to push notify feed
 
         }
 
-        // TODO add: to redux feed on front
         res.status(statusCode.success).json({
                 tweet,
         });

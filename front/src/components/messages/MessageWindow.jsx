@@ -16,7 +16,7 @@ import { UserContext } from '../../context/UserContext'
 import { users } from '../../constants/feedTest';
 import { evalRoom, showUsername } from '../../utils/utils';
 import { SocketContext } from '../../context/socketContext';
-import { Spinner } from "@material-tailwind/react";
+import ReactLoading from 'react-loading'
 import instance from '../../constants/axios'
 import  Picker  from '@emoji-mart/react';
 import emojiData from '@emoji-mart/data';
@@ -270,7 +270,7 @@ export const MessageWindow = () => {
         !windowLoaded ? 
         <MessageWindowWrapper>
             <div className='flex items-center justify-center w-full h-full'>
-                <Spinner color="blue" className="h-10 w-10" />
+            <ReactLoading type='spin' color='#1da1f2' height={10} width={10}/>
             </div>
         </MessageWindowWrapper>
 
@@ -322,13 +322,11 @@ export const MessageWindow = () => {
                             }
             
                         )}
-
-
                         
                         { 
                             loading && 
                                 <div className='flex items-center justify-center w-full p-6'>
-                                    <Spinner color="blue" className="h-10 w-10" />
+                                    <ReactLoading type='spin' color='#1da1f2' height={10} width={10}/>
                                 </div>
                         }
 

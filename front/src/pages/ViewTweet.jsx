@@ -1,21 +1,13 @@
 import { Button } from '../components/Button'
-
-import React, { useEffect, useState } from 'react'
 import { FaArrowLeftLong } from 'react-icons/fa6'
 import { useNavigate, useParams } from 'react-router-dom'
-import Tweet from '../components/tweet/Tweet'
-import instance from '../constants/axios'
-import { users } from '../constants/feedTest'
-import { requests } from '../constants/requests'
-import FullTweet from '../components/tweet/FullTweet'
+import { Tweet } from '../components/tweet/Tweet'
 import TweetCreate from '../components/tweet/TweetCreate'
 import Replies from '../components/tweet/Replies'
 
 
 const ViewTweet = () => {
   const { tweetId } = useParams()
-  const tweetBox = React.createRef()
-  console.log('id', tweetId)
   const navigate = useNavigate()
   const handleBack = () => {
     navigate(-1);
@@ -43,7 +35,7 @@ const ViewTweet = () => {
 
       <div className='mt-3'>
         <div>
-          <FullTweet tweetId={tweetId} complete={true} />
+          <Tweet tweetId={tweetId} />
         </div>
 
         <div>
