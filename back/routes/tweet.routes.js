@@ -12,6 +12,7 @@ const upload = multer({
 
 router.get('/', tweetService.getAllTweets);
 router.get('/:id', tweetService.getTweetById);
+router.get('/category/:category', tweetService.getTweetsByCategory);
 router.post('/create', upload.single('tweetMedia'), tweetService.createTweet);
 router.get('/replies/:id', tweetService.getReplies);
 // router.put('/:id', tweetService.updateTweet);

@@ -1,108 +1,64 @@
-import React, { useContext, useEffect, useState } from 'react'  
-import { UserContext } from '../../context/UserContext'
-import  Tweet  from './Tweet'
-import { users, followedTweets, forYouTweets } from '../../constants/feedTest'
-import instance from '../../constants/axios';
-import { requests, followRequests } from '../../constants/requests';
+import React, { useEffect, useState } from 'react';
+import ReactLoading from 'react-loading';
+import { useSelector } from 'react-redux';
+import {
+  selectBookmarkedTweets,
+  selectFollowingTweets,
+  selectForYouTweets,
+  selectLikedTweets,
+  selectMyTweets,
+  selectReTweets,
+} from '../../features/tweets/tweetSlice';
+import FollowingTweets from './Feeds/FollowingTweets';
+import ForYouTweets from './Feeds/ForYouTweets';
+import BookmarkedTweets from './Feeds/BookmarkedTweets';
+import MyTweets from './Feeds/MyTweets';
+import LikedTweets from './Feeds/LikedTweets';
+import Retweets from './Feeds/Retweets';
 
-import ReactLoading from "react-loading";
-
-const Tweets = ({api, FallBackComponent, asMedia}) => {
-
-    /**
-     * Tweets Container Template
-     * TODO: add loading state
-     * TODO: add error state
-     * TODO: add functionality to fetch tweets from api
-     */
-  
-    const [tweets, setTweets] = useState([])
-    const [loading, setLoading] = useState(true)
-    let { user } = useContext(UserContext)
-
-
-    const followingCollection = async () => {
-      try {
-        const response = await instance.get(followRequests.following, { params: { userId: user.id } });
-        // return response.data.data.following;
-        return response.data.map(follower => follower.following)
-      } catch (error) {
-        console.error(error);
-        throw error;
-      }
-    }
-
-    // api will determine the user for now use the context
-
-    const getAllTweets = async () => {
-      try {
-        const response = await instance.get(requests.getTweets);
-        setLoading(false);
-        return response.data.data.tweets;
-      } catch (error) {
-        console.error(error);
-        throw error;
-      }
-    };
-
-
-    useEffect(() => {
-      const fetchData = async () => {
-        try {
-          const allTweets = await getAllTweets();
-          switch (api) {
-            case 'following':
-              const followCollection = await followingCollection();
-              setTweets(allTweets.filter((tweet) => followCollection.includes(String(tweet.userId))));
-              break;
-            case 'for-you':
-              setTweets(allTweets)
-              break;
-            case 'bookmarks':
-              let bookmarked = ([...forYouTweets]).filter((tweet) => tweet.bookmarked)
-              setTweets(bookmarked)
-              break;
-            case 'myposts':
-              let myPosts = ([...forYouTweets]).filter((tweet) => tweet.userId === user.id)
-              setTweets(myPosts)
-              break;
-            case 'media':
-              let media = ([...forYouTweets]).filter((tweet) => tweet.media)
-              setTweets(media)
-              break;
-
-            default:
-              {}
-              break;
-          }
-        } catch (error) {
-          console.error(error);
-        } 
-      }
-
-      
-      fetchData();
-    }, [api])
-  
-    return (
-      <div className={ asMedia && 'grid grid-cols-3 gap-1' }>
-        {
-        loading ? (
-          <div className='flex justify-center items-start h-[80vh] mt-4'>
-            <ReactLoading type='spin' color='#1da1f2' height={30} width={30}/>
-          </div>
-        ) : (
-          tweets.length ? 
-            tweets.map((tweet) => {
-              return (
-                <Tweet key={tweet?._id} user={tweet?.user} post={tweet}/>
-              )
-            })
-            : 
-              (FallBackComponent ?? null)
-        )}
-      </div>
-    )
+const useTweetsSelector = (api) => {
+  switch (api) {
+    case 'following':
+      console.log('following');
+      return FollowingTweets;
+    case 'for-you':
+      console.log('for-you');
+      return ForYouTweets;
+    case 'bookmarks':
+      console.log('bookmarks');
+      return BookmarkedTweets;
+    case 'mytweets':
+      console.log('mytweets');
+      return MyTweets;
+    case 'likes':
+      console.log('likes');
+      return LikedTweets;
+    case 'retweets':
+      console.log('retweets');
+      return Retweets;
+    default:
+      console.log('default');
+      return ForYouTweets;
   }
+};
 
-  export default Tweets;
+const Tweets = ({ api, FallBackComponent, asMedia }) => {
+  const [loading, setLoading] = useState(false);
+  const TweetComponent = useTweetsSelector(api);
+
+ 
+
+  return (
+    <div className={asMedia && 'grid grid-cols-3 gap-1'}>
+      {loading ? (
+        <div className='flex justify-center items-start h-[80vh] mt-4'>
+          <ReactLoading type='spin' color='#1da1f2' height={30} width={30} />
+        </div>
+      ) : (
+        <TweetComponent />
+      )}
+    </div>
+  );
+};
+
+export default Tweets;

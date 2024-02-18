@@ -2,6 +2,7 @@ const statusCodes = require("../constants/statusCode");
 const logger = require("../middleware/winston");
 const pool = require("../database/db_setup");
 const jwt = require("jsonwebtoken");
+const { allFollowers } = require("../utils/tweet.utils");
 
 const addFollower = async (req, res) => {
     const { userId, followerId } = req.body;
@@ -30,9 +31,8 @@ const removeFollower = async (req, res) => {
     if (!userId || !followerId) {
         res.status(statusCodes.badRequest).json({ message: "Missing fields" });
     } else {
-        const client = await pool.connect();
         try {
-        await client.query(
+        const removeFollower = await pool.query(
             `DELETE FROM follows WHERE user_id = $1 AND following = $2`,
             [userId, followerId]
         );
@@ -40,29 +40,23 @@ const removeFollower = async (req, res) => {
         } catch (error) {
         logger.error("Error removing follower", error);
         res.status(statusCodes.queryError).json({ message: "Error" });
-        } finally {
-        client.release();
-        }
+        } 
     }
 }
 
+
+
 const getFollowing = async (req, res) => {
-    const { userId } = req.query;
+    const userId = req.query.userId || req.user.id;
     if (!userId) {
         res.status(statusCodes.badRequest).json({ message: "Missing fields" });
     } else {
-        const client = await pool.connect();
         try {
-        const followers = await client.query(
-            `SELECT following FROM follows WHERE user_id = $1`,
-            [userId]
-        );
-        res.status(statusCodes.success).json(followers.rows);
+       const followers = await allFollowers(userId)
+        res.status(statusCodes.success).json(followers);
         } catch (error) {
         logger.error("Error getting followers", error);
         res.status(statusCodes.queryError).json({ message: "Error" });
-        } finally {
-        client.release();
         }
     }
 }
@@ -72,9 +66,8 @@ const getFollowers = async (req, res) => {
     if (!followerId) {
         res.status(statusCodes.badRequest).json({ message: "Missing fields" });
     } else {
-        const client = await pool.connect();
         try {
-        const following = await client.query(
+        const following = await pool.query(
             `SELECT user_id FROM follows WHERE following = $1`,
             [followerId]
         );
@@ -82,8 +75,6 @@ const getFollowers = async (req, res) => {
         } catch (error) {
         logger.error("Error getting following", error);
         res.status(statusCodes.queryError).json({ message: "Error" });
-        } finally {
-        client.release();
         }
     }
 }

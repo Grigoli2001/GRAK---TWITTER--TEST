@@ -27,6 +27,8 @@ import { FiAtSign } from "react-icons/fi";
 import { SocketContext } from '../../context/socketContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { createToast } from '../../hooks/createToast';
+import { useDispatch, useSelector } from 'react-redux';
+import { selectMyTweets, setMyTweets } from '../../features/tweets/tweetSlice';
 
 /**
  * Form for creating a tweet
@@ -43,6 +45,7 @@ const TweetCreate = ({type = 'Post', reference_id = null}) => {
   const { socket } = useContext(SocketContext)
   const location = useLocation();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   // media refs
   const mediaRef = useRef();
@@ -63,6 +66,8 @@ const TweetCreate = ({type = 'Post', reference_id = null}) => {
   const [ loading, setLoading ] = useState(false);
   const [ canInput, setCanInput ] = useState(true);
   const [canPost, setCanPost] = useState(false); // post button state
+
+  const mytweets = useSelector(selectMyTweets);
 
   
   const updateCanReply = (value) => {
@@ -241,11 +246,17 @@ const TweetCreate = ({type = 'Post', reference_id = null}) => {
       )
       .then((response) => {
         // update redux 
+        // dispatch(setMyTweets({...mytweets, response.data.data.tweet}));
+
+
+        // reset form
         formData = new FormData();
         resetComponent()
         createToast(`Nice ${type}🥳`, 'success', 'success-create-post', {limit: 1})
+
+        // notify users
         socket.emit('feed:notify-create-post', { user })
-        if ((location.pathname) === '/compose/tweet'){
+      if ((location.pathname) === '/compose/tweet'){
           if (location.state?.background){
             return navigate(-1)
           }else{

@@ -27,3 +27,16 @@ export const followRequests = {
   followers: "/user/followers",
   following: "/user/following",
 };
+
+
+export const tweetRequests = {
+  allTweets: "/tweets",
+  forYou: "/tweets/category/foryou",
+  following: "/tweets/category/following",
+  likes: "/tweets/category/likes",
+  mytweets: "/tweets/category/mytweets",
+  bookmarks: "/tweets/category/bookmarks",
+  retweets: "/tweets/category/retweets",
+  replies: "/tweets/category/replies",
+}
+  

@@ -7,16 +7,20 @@ import reportWebVitals from "./reportWebVitals";
 import { AppStateProvider } from "./context/appStateProvider";
 import { ToastContainer } from "react-toastify";
 import { GoogleOAuthProvider } from "@react-oauth/google";
+import { Provider } from "react-redux";
+import store from "./store/store";
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
     <BrowserRouter>
+    <Provider store={store}>
       <AppStateProvider>
         <GoogleOAuthProvider clientId="1092637215532-ktlj13jh7d5t1410n32pklpk6ubh9vo8.apps.googleusercontent.com">
           <App />
         </GoogleOAuthProvider>
         <ToastContainer />
       </AppStateProvider>
+    </Provider>
     </BrowserRouter>
   </React.StrictMode>
 );

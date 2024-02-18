@@ -3,157 +3,17 @@ const pollModel = require('../models/pollModel');
 const Interaction = require('../models/interactionModel');
 const statusCode = require('../constants/statusCode');
 const mongoose = require('mongoose');
+const ObjectId = mongoose.Types.ObjectId;
 const pool = require("../database/db_setup");
-// todo add page size for scroll and filters t
+const { tweetQuery, allFollowers } = require('../utils/tweet.utils');
+
+
+
 const getAllTweets = async (req, res) => {
     try {
-        const tweets =  await tweetModel.aggregate([
-            {
-                $match: { tweetType: {$ne: 'reply'} },
-            },
-            {
-                    $lookup: {
-                        from: 'polls',  
-                        localField: 'poll',
-                        foreignField: '_id',
-                        as: 'poll',
-                },
-            },
-            {
-                $lookup: {
-                    from: "interactions",
-                    localField: "_id",
-                    foreignField: "tweet_id",
-                    as: "interactions",
-                },
-            },
-            
-            {
-                $addFields: {
-                    poll: { $arrayElemAt: ["$poll", 0] },
-                    
-                    totalLikes: {
-                        $size: {
-                            $filter: {
-                                input: "$interactions",
-                                as: "interaction",
-                                cond: { $and: [{ $eq: ["$$interaction.interactionType", "like"] },  { $eq: ["$$interaction.is_deleted", false] },]}
-                            },
-                        },
-                    },
-                    totalBookmarks: {
-                        $size: {
-                            $filter: {
-                                input: "$interactions",
-                                as: "interaction",
-                                cond: { $and: [{ $eq: ["$$interaction.interactionType", "bookmark"] },  { $eq: ["$$interaction.is_deleted", false] },]}
+        const tweets = await tweetQuery({tweetType: 'tweet'},req.user.id)
 
-                            },
-                        },
-                    },
-                    totalVotes: {
-                        $size: {
-                            $filter: {
-                                input: "$interactions",
-                                as: "interaction",
-                                cond: { $eq: ["$$interaction.interactionType", "vote"] },
-                            },
-                        },
-                    },
-
-                    // swap to user id from token
-                    
-                    userLiked: {
-                        $size: {
-                            $filter: {
-                                input: "$interactions",
-                                as: "interaction",
-                                cond: { $and: [{ $eq: ["$$interaction.interactionType", "like"] },  { $eq: ["$$interaction.is_deleted", false] }, { $eq: ["$$interaction.userId", 3] }] },
-                            },
-                        },
-                    },
-                    userBookmarked: {  
-                        $size: {
-                            $filter: {
-                                input: "$interactions",
-                                as: "interaction",
-                                cond: { $and: [{ $eq: ["$$interaction.interactionType", "bookmarked"] }, { $eq: ["$$interaction.is_deleted", false] }, { $eq: ["$$interaction.userId", 3] }] },
-                            },
-                        } 
-                    },
-                    userVoted:{
-                        $arrayElemAt : [{
-                            $filter: {
-                                input: "$interactions",
-                                as: "interaction",
-                                cond: { $and: [{ $eq: ["$$interaction.interactionType", "vote"] }, { $eq: ["$$interaction.userId", 3] }] },
-                        
-                        },
-                    }, 0]
-                    },
-                
-                },
-            },
-            {
-                $project: {
-                    tweetType: 1,
-                    tweetText: 1,
-                    tweetMedia: 1,
-                    userId: 1,
-                    createdAt: 1,
-                    totalLikes: 1,
-                    totalBookmarks: 1,
-                    totalVotes: 1,
-                    userLiked: 1,
-                    userRetweeted: 1,
-                    userBookmarked: 1,
-                    userVoted: 1,
-                    poll: {
-                        options: 1,
-                        poll_end: 1,
-                    }
-
-                },
-            },
-            
-        ])
-        // .sort({
-        //     createdAt: -1
-        // });
-        
-        await Promise.all(tweets.map(async tweet => {
-            if (tweet.poll) {
-                await Promise.all(tweet.poll.options.map(async (option) => {
-                    const votes = await Interaction.countDocuments({ tweet_id: tweet._id, interactionType: 'vote', pollOption: option.id });
-                    option.votes = votes;
-                }));
-
-            }
-            // i am sure there is a better way to query but idek
-            const totalReplies = await tweetModel.countDocuments({ reference_id: tweet._id,  tweetType: 'reply' });
-            const totalRetweets = await tweetModel.countDocuments({ reference_id: tweet._id, $or: [{ tweetType: 'retweet' }, { tweetType: 'quote' }] });
-            const userRetweeted = await tweetModel.countDocuments({ reference_id: tweet._id, tweetType: 'retweet', userId: 3 });
-
-            
-            tweet.totalReplies = totalReplies;
-            tweet.totalRetweets = totalRetweets;
-            tweet.userRetweeted = userRetweeted;
-
-            if (!tweet.user){
-                const user = await pool.query(`SELECT id, username, name, profile_pic FROM users WHERE id = ${tweet.userId}`);
-                tweet.user = user.rows[0];
-            }
-
-        })
-        );
-        // const tweets = await tweetModel.find({referencing_by: { $exists: false }}, null, { sort: { createdAt: -1 }});
-
-        // for (let i = 0; i < tweets.length; i++) {
-        //     const user = await pool.query(`SELECT id, username, name FROM users WHERE id = ${tweets[i].userId}`);
-        //     tweets[i].user = user.rows[0];
-        // }
-
-        res.status(statusCode.success).json({
+        return res.status(statusCode.success).json({
             status: "success",
             data: {
                 tweets,
@@ -161,7 +21,7 @@ const getAllTweets = async (req, res) => {
         });
     } catch (err) {
         console.log(err);
-        res.status(statusCode.badRequest).json({
+        return res.status(statusCode.badRequest).json({
             status: "fail",
             message: err,
         });
@@ -169,8 +29,8 @@ const getAllTweets = async (req, res) => {
 };
 
 const getTweetById = async (req, res) => {
-    const tweet = await tweetModel.findOne({ _id: req.params.id });
-
+    const tweets = await tweetQuery({ _id: new ObjectId(req.params.id) },req.user.id)
+    const tweet = tweets[0]
     if (!tweet) {
         return res.status(statusCode.badRequest).json({
             status: "fail",
@@ -178,29 +38,59 @@ const getTweetById = async (req, res) => {
         });
     }
 
-    const user = await pool.query(`SELECT id, username, name, profile_pic FROM users WHERE id = ${tweet.userId}`);
-    tweet.user = user.rows[0];
+    console.log('tweet by id', tweet)
 
-    if (!tweet) {
-        return res.status(statusCode.badRequest).json({
-            status: "fail",
-            message: "No tweet found with that ID",
-        });
-    }
 
-    if(user.rowCount === 0) {
-       return res.status(statusCode.badRequest).json({
-            status: "fail",
-            message: "No user found with that ID",
-        });
-    } else{
     return res.status(statusCode.success).json({
         status: "success",
         data: {
             tweet,
         },
-    });
-}
+    })
+};
+
+const getTweetsByCategory = async (req, res) => {
+    const { category } = req.params;
+
+
+    const categoryConditions = {
+        'foryou': { userId: { $ne: req.user.id } },
+        'following': {},
+        'likes': { userLiked: 1 },
+        'bookmarks': { userBookmarked: 1 },
+        'retweets': { tweetType: 'retweet', userId: req.user.id },
+        'mytweets': { userId: req.user.id },
+    }
+
+        if(!categoryConditions[category]) return res.status(statusCode.badRequest).json({
+            status: "fail",
+            message: "Invalid category",
+        });
+        let tweets;
+        try{
+
+        if(category  === 'following'){
+            const following = await allFollowers(req.user.id);
+            const followingIds = following.map(follower => follower.following);
+            console.log(followingIds)
+            tweets = await tweetQuery({userId : { $in: followingIds} },req.user.id)
+        } else {
+            tweets = await tweetQuery(categoryConditions[category],req.user.id);
+        }
+        return res.status(statusCode.success).json({
+            status: "success",
+            data: {
+                tweets,
+            },
+        
+        });
+    } catch (err) {
+        console.log(err);
+        return res.status(statusCode.badRequest).json({
+            status: "fail",
+            message: err,
+        });
+    }
 };
 
 const createTweet = async (req, res) => {
@@ -210,16 +100,17 @@ const createTweet = async (req, res) => {
 
         // parse since its sent as form data to allow sending images
         const newTweetData = JSON.parse(data);
+        console.log(newTweetData)
         
 
-        // filter out any undefined or null values
+        // filter out any undefined o|r null values
         Object.entries(newTweetData).forEach(([key, value]) => {  
             if (value === undefined || value === null) {
                 delete newTweetData[key];
             }
         });
 
-        const { tweetType, tweetText, tweetPoll,  reference_id } = newTweetData;
+        const { tweetType, tweetText, tweetPoll, reference_id } = newTweetData;
 
 
         if (!tweetType) {
@@ -243,13 +134,13 @@ const createTweet = async (req, res) => {
         }
     
         if (req.file){
-            // check byte headers to avoid spoof
+
             await import('file-type').then(async ({ fileTypeFromBuffer }) => {
-                const { mime }  = await fileTypeFromBuffer(req.file.buffer)
+                const { mime } = await fileTypeFromBuffer(req.file.buffer)
                 if (!mime.startsWith('image') && !mime.startsWith('video')) {
                     throw new Error('Invalid file type, only JPEG, PNG and MP4 is allowed!');
                 }
-              
+
             })
             newTweetData.tweetMedia = {
                 data: req.file.buffer,
@@ -263,8 +154,8 @@ const createTweet = async (req, res) => {
 
         const session = await mongoose.startSession();
         await session.withTransaction(async () => {
-        
-        // validate the poll 
+
+        // filter out any undefined or null values
         if (tweetPoll) {
             const poll_options = tweetPoll?.choices.filter(option => !!option);
             if (poll_options?.length < 2 || poll_options?.length > 4) {
@@ -285,21 +176,24 @@ const createTweet = async (req, res) => {
             await poll.save({ session });
 
         }
+        
+         });
 
-        if (!originalTweet){
+         if (!originalTweet){
             tweet.reference_id = reference_id
-         }
+        }
 
          await tweet.save(); // enum will throw tweet type error or maybe set explicitly idk
-         });
-         
+
+        
+
         if (tweetType === 'tweet') {
             // emit socket to push notify feed
 
         }
 
         res.status(statusCode.success).json({
-                tweet,
+            tweet,
         });
 
     } catch (err) {
@@ -364,9 +258,8 @@ const deleteTweet = async (req, res) => {
 };
 
 const getReplies = async (req, res) => {
-    console.log(req.params.id);
     try {
-        const replies = await tweetModel.find({tweetType : "reply", reference_id : req.params.id});
+        const replies = await tweetQuery({ reference_id: new ObjectId(req.params.id), tweetType: 'reply' },req.user.id);
         if (!replies) {
             return (
                 res.status(404).json({
@@ -414,18 +307,18 @@ const likeTweet = async (req, res) => {
 
         const currentLikeInteraction = await Interaction.findOne({ tweet_id: tweetId, userId: userId, interactionType: 'like' });
         let likeInteraction;
-        if (currentLikeInteraction){
-            const outOfSync = ((isLiked && currentLikeInteraction.is_deleted ) || (!isLiked && !currentLikeInteraction.is_deleted))
+        if (currentLikeInteraction) {
+            const outOfSync = ((isLiked && currentLikeInteraction.is_deleted) || (!isLiked && !currentLikeInteraction.is_deleted))
             // if the user has liked and but it is already is_deleted only need to trigger a color not number to reflect that it is deleted and vice versa --usedb to sync -- ithink
-            
-            if (outOfSync){
+
+            if (outOfSync) {
                 return res.status(statusCode.success).json({
                     is_liked: !currentLikeInteraction.is_deleted,
                 })
-            }else {
+            } else {
                 likeInteraction = await Interaction.findOneAndUpdate({ tweet_id: req.body.tweetId, userId: req.body.userId, interactionType: 'like' }, { is_deleted: !currentLikeInteraction.is_deleted }, { new: true });
-        }
-        }else{
+            }
+        } else {
             likeInteraction = new Interaction({ tweet_id: req.body.tweetId, userId: req.body.userId, interactionType: 'like' });
         }
 
@@ -437,14 +330,14 @@ const likeTweet = async (req, res) => {
     } catch (err) {
         res.status(statusCode.badRequest).json({
             status: "fail",
-            message: "error liking the tweet" +  err.message
+            message: "error liking the tweet" + err.message
         });
     }
 }
 
 const bookmarkTweet = async (req, res) => {
     try {
-        const { tweetId, isBookmarked  } = req.body
+        const { tweetId, isBookmarked } = req.body
         console.log(tweetId, isBookmarked)
         const tweet = await tweetModel.findById(tweetId);
         if (!tweet) {
@@ -459,17 +352,17 @@ const bookmarkTweet = async (req, res) => {
         const userId = 3; // replace with user id from token
         const currentBoomarkInteraction = await Interaction.findOne({ tweet_id: tweetId, userId: userId, interactionType: 'bookmark' });
         let bookmarkedInteraction;
-        if (currentBoomarkInteraction){
-            const outOfSync = ((isBookmarked && currentBoomarkInteraction.is_deleted ) || (!isBookmarked && !currentBoomarkInteraction.is_deleted))
-            
-            if (outOfSync){
+        if (currentBoomarkInteraction) {
+            const outOfSync = ((isBookmarked && currentBoomarkInteraction.is_deleted) || (!isBookmarked && !currentBoomarkInteraction.is_deleted))
+
+            if (outOfSync) {
                 return res.status(statusCode.success).json({
                     is_bookmarked: !currentBoomarkInteraction.is_deleted,
                 })
-            }else {
+            } else {
                 bookmarkedInteraction = await Interaction.findOneAndUpdate({ tweet_id: tweetId, userId: userId, interactionType: 'bookmark' }, { is_deleted: !currentBoomarkInteraction.is_deleted }, { new: true });
-        }
-        }else{
+            }
+        } else {
             bookmarkedInteraction = new Interaction({ tweet_id: tweetId, userId: userId, interactionType: 'bookmark' });
         }
 
@@ -482,7 +375,7 @@ const bookmarkTweet = async (req, res) => {
     } catch (err) {
         res.status(statusCode.badRequest).json({
             status: "fail",
-            message: "error bookmarking the tweet" +  err.message
+            message: "error bookmarking the tweet" + err.message
         });
     }
 }
@@ -927,6 +820,7 @@ module.exports = {
     updateTweet,
     deleteTweet,
     likeTweet,
+    getTweetsByCategory,
     // retweetTweet,
     bookmarkTweet,
     getReplies,
