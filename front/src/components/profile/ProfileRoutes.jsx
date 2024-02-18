@@ -17,6 +17,10 @@ import { months, getDaysInMonth, getYears } from "../../utils/utils";
 import instance from "../../constants/axios";
 import { requests } from "../../constants/requests";
 
+import { storage } from "../../utils/firebase";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { v4 } from "uuid";
+
 const PhotoModal = ({ type, backTo }) => {
   // code to get a user since it is routable & reject if user does not exist
 
@@ -53,12 +57,12 @@ const PhotoModal = ({ type, backTo }) => {
       >
         {type === "cover" ? (
           <img
-            src={user.cover}
+            src={user?.cover}
             alt="cover"
             className="w-full max-h-full object-cover"
           />
         ) : (
-          <ExtAvatar src={user.profile_pic} className="w-48 h-48" />
+          <ExtAvatar src={user?.profile_pic} className="w-48 h-48" />
         )}
       </div>
     </NavModal>
@@ -92,15 +96,19 @@ const EditProfileModal = ({ backTo }) => {
     },
   };
 
+
+  const [uploadProfilePic, setUploadProfilePic] = useState(user?.profile_pic || null)
   const [formState, setFormState] = useState({
-    name: user.name,
-    username: user.username,
-    bio: user.bio,
-    location: user.location,
-    website: user.website,
+    id: user?.id,
+    name: user?.name || "",
+    username: user?.username || "",
+    bio: user?.bio || "",
+    location: user?.location || "",
+    profile_pic: user?.profile_pic || "",
+    website: user?.website || "",
   });
 
-  const userDob = new Date(user.dob);
+  const userDob = new Date(user?.dob);
   const years = getYears(16, 100);
   const [day, setDay] = useState(userDob.getDate());
   const [month, setMonth] = useState(
@@ -127,8 +135,31 @@ const EditProfileModal = ({ backTo }) => {
     });
   };
 
+  const handleUpdateProfilePic = ( image ) => {
+    if (!image) return;
+    
+    const storageRef = ref(storage, `profile_pics/${image.name}_${v4()}`);
+    uploadBytesResumable(storageRef, image).then((snapshot) => {
+      console.log("Uploaded a blob or file!", snapshot);
+      getDownloadURL(snapshot.ref).then((downloadURL) => {
+        console.log("File available at", downloadURL);
+        setUploadProfilePic(downloadURL)
+        setFormState({ ...formState, profile_pic: downloadURL });
+      }).catch((error) => {
+        console.error("Error getting download URL:", error);
+      });
+    }).catch((error) => {
+      console.error("Error uploading file:", error);
+    });
+  };
+
+
   const updateProfile = () => {
-    // make a request to update user profile
+    instance.post(requests.updateUser, formState).then(res => {
+      console.log(res)
+    }).catch(err => {
+      console.error(err)
+    })
   };
 
   return (
@@ -157,7 +188,7 @@ const EditProfileModal = ({ backTo }) => {
 
         <div className="h-48 w-full relative mb-6 bg-slate-300 col-span-full flex items-center justify-center gap-x-4 bm-8">
           <div id="cover_photo" className="h-full w-full absolute z-10">
-            {user.cover && (
+            {user?.cover && (
               <img
                 src={user.cover}
                 alt="cover"
@@ -185,7 +216,7 @@ const EditProfileModal = ({ backTo }) => {
               </label>
             </Button>
 
-            {user.cover && (
+            {user?.cover && (
               <Button
                 variant="icon"
                 size="icon-sm"
@@ -213,12 +244,14 @@ const EditProfileModal = ({ backTo }) => {
                     className="hidden"
                     type="file"
                     accept="image/*"
+                    onChange={(e) => handleUpdateProfilePic(e.target.files[0])}
                   />
                 </label>
               </Button>
             </div>
             <ExtAvatar
-              user={user.profile_pic}
+              user={user?.profile_pic}
+              src={formState?.profile_pic || null}
               size="lg"
               className={
                 "rounded-[50%] bg-white p-1 h-28 w-28 object-cover shadow-inner"

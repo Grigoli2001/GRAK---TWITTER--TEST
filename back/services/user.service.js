@@ -50,28 +50,15 @@ const getUserById = async (req, res) => {
 }
 
 const getUserByUsername = async (req, res) => {
-    const { username } = req.body;
-    try {
-        const user = await pool.query(`SELECT id, name, username, email, profile_pic, created_at FROM users WHERE username = $1`, [username]);
-
-        if (!user.rowCount) {
-            return res.status(statusCodes.notFound).json({ message: "User not found" });
-        }
-        res.status(statusCodes.success).json({ user: user.rows[0] });
-    } catch (err) {
-        logger.error(err);
-        res.status(statusCodes.queryError).json({ message: "Error fetching user" });
-    }
-    }
-
-const getAllFollowers = async (req, res) => {
+  const { username } = req.body;
   try {
-    const followers = await pool.query(
-      `SELECT * FROM follows WHERE following = $1`,
-      [req.user.id]
-    );
+    const user = await pool.query(`SELECT id, name, username, email, profile_pic, created_at FROM users WHERE username = $1`, [username]);
 
-    res.status(statusCodes.success).json({ followers: followers.rows });
+    if (!user.rowCount) {
+        return res.status(statusCodes.notFound).json({ message: "User not found" });
+    }
+    res.status(statusCodes.success).json({ user: user.rows[0] });
+
   } catch (err) {
     logger.error(err);
     res.status(statusCodes.queryError).json({ message: "Error fetching followers" });
@@ -86,14 +73,46 @@ const getAllFollowing = async (req, res) => {
       `SELECT * FROM follows WHERE user_id = $1`,
       [req.user.id]
     );
-    res.status(statusCodes.success).json({ following: following.rows });
+
+    res.status(statusCodes.success).json({ message: "User updated" });
   } catch (err) {
     logger.error(err);
-    res.status(statusCodes.queryError).json({ message: "Error fetching following" });
-  } finally {
-    client.release();
+    res.status(statusCodes.queryError).json({ message: "Error updating user" });
   }
-};
+}
+
+
+  
+// const getAllFollowers = async (req, res) => {
+//   try {
+//     const followers = await pool.query(
+//       `SELECT * FROM follows WHERE following = $1`,
+//       [req.user.id]
+//     );
+
+//     res.status(statusCodes.success).json({ followers: followers.rows });
+//   } catch (err) {
+//     logger.error(err);
+//     res.status(statusCodes.queryError).json({ message: "Error fetching followers" });
+//   } finally {
+//     client.release();
+//   }
+// };
+
+// const getAllFollowing = async (req, res) => {
+//   try {
+//     const following = await pool.query(
+//       `SELECT * FROM follows WHERE user_id = $1`,
+//       [req.user.id]
+//     );
+//     res.status(statusCodes.success).json({ following: following.rows });
+//   } catch (err) {
+//     logger.error(err);
+//     res.status(statusCodes.queryError).json({ message: "Error fetching following" });
+//   } finally {
+//     client.release();
+//   }
+// };
 
 
 module.exports = {
@@ -101,7 +120,8 @@ module.exports = {
     getUser,
     getUserById,
     getUserByUsername,
-    getAllFollowers,
-    getAllFollowing,
+    updateUser,
+    // getAllFollowers,
+    // getAllFollowing,
 };
 

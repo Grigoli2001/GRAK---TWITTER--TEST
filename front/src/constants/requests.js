@@ -5,8 +5,9 @@ export const requests = {
   logout: "/auth/logout",
   sendOTP: "/auth/sendOTP",
 
-  getAllUsers: "/users",
-  getUser: "/user",
+  getAllUsers: "/users/all",
+  getUser: "/users",
+  updateUser: "/users/update",
   change_password: "/auth/change_password",
   createTweets: "/tweets/create",
   getTweetById: "/tweets/",

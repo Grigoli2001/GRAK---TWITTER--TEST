@@ -69,6 +69,7 @@ function App() {
   const justRegistered = localStorage.getItem("justRegistered");
   return (
       <SocketProvider>
+        <UserProvider>
         <Routes location={ background || location } >
 
             <Route element={<PublicRoute />}>
@@ -119,6 +120,8 @@ function App() {
                       {['replies', 'highlights', 'media', 'likes'].map((path)=> 
                           <Route key={path} path={path} element={<Profile />}  />
                       )}
+
+                      <Route path="status/:tweetId" element={<ViewTweet />} />
                     </Route>
 
                     {/* modal Routes  */}
@@ -166,6 +169,16 @@ function App() {
                     <Route path="accessibility" element={<AccessibilitySettings />} />
                     <Route path="monetization" element={<MonetizationSettings />} />
                     <Route path="creator" element={<CreatorSettings />} />
+                    <Route path="account/info" element={<AccountInfo />} />
+                    <Route path="account/change" element={<AccountChangePassword />} />
+                    <Route path="account/archive" element={<ArchiveInfo />} />
+                    <Route path="account/deactivate" element={<DeactivateAccount />} />
+                    <Route path="security/security" element={<SecurityInfo />} />
+                    <Route path="security/2fa" element={<TwoFactorAuth />} />
+                    <Route path="security/connected" element={<ConnectedAccounts />} />
+                    <Route path="security/delegate" element={<DelegateInfo />} />
+                    <Route path="notifications/filters" element={<FilterInformation />} />
+                    <Route path="notifications/preferences" element={<Preferences />} />
                   </Route>
               </Route>
 
@@ -192,7 +205,7 @@ function App() {
             </Routes>
           
         }
-
+        </UserProvider>
         </SocketProvider>   
   );
 }

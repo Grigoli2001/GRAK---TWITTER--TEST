@@ -5,6 +5,7 @@ import ConfirmPassword from '../../components/ConfirmPassword'
 
 function AccountChangePassword(props) {
     const [disabled, setDisabled] = useState(true)
+    const [password, setPassword] = useState('')
     const [newPassword, setNewPassword] = useState('')
     const [authenticated, setAuthenticated] = useState(false)
     const [loading, setLoading] = useState(true)
@@ -14,6 +15,14 @@ function AccountChangePassword(props) {
         >
         <ConfirmPassword includeWidgets={[]} name="Change your password" />
         <div className="flex flex-col items-start justify-center p-4 border-t border-l-gray-200 border-b">
+        <input 
+            type="password" 
+            placeholder="Old Password" 
+            className="w-full p-4 border border-l-gray-200 rounded-md my-4 placeholder:text-gray-500"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)} />
+        </div>
+        <div className="flex flex-col items-start justify-center p-4 border-l-gray-200 border-b">
         <input 
             type="password" 
             placeholder="New Password" 

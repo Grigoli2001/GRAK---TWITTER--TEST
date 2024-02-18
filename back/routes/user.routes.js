@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const userServices = require('../services/user.service')
+const userServices = require('../services/user.service');
+const { route } = require('./tweet.routes');
 
-router.get('/', userServices.getAllUsers);
+router.get('/all', userServices.getAllUsers);
 router.post('/', userServices.getUser);
-router.get('/followers', userServices.getAllFollowers);
-router.get('/following', userServices.getAllFollowing);
+router.post('/update', userServices.updateUser);
 
 module.exports = router;

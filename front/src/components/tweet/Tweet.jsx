@@ -220,14 +220,14 @@ export const BaseTweet = ({ tweetUser, post, isLast, reply, fullView}) => {
     } else if (contentType.startsWith('video/')) {
         return 'video';
     } else {
-        return 'gif'; // Invalid media type
+        return null; // Invalid media type
     }
 };
 
-let base64String = '';
-if (postState?.tweetMedia) {
-    base64String = Buffer.from(postState?.tweetMedia?.data).toString('base64');
-}
+  // let base64String = '';
+  // if (postState?.tweetMedia) {
+  //   base64String = Buffer.from(postState?.tweetMedia?.data).toString('base64');
+  // }
 
   return (
     // tweets for feed page, post is diff for single post view
@@ -319,10 +319,10 @@ if (postState?.tweetMedia) {
           <div className="text-justify break-all overflow-wrap">
               <p className='text-wrap'>{ postState?.tweetText } </p>
           </div>
-          {
-                    postState?.tweetMedia &&
-                    <TweetMedia mediaType={isValidMediaType(postState?.tweetMedia?.contentType)} src={`data:${postState?.tweetMedia?.contentType};base64,${base64String}`} alt="" />
-                }
+          { 
+          post?.tweetMedia &&
+            <TweetMedia mediaType={isValidMediaType(postState?.tweetMedia?.contentType)} src={`data:${postState?.tweetMedia?.contentType};base64,${postState?.tweetMedia?.data}`} alt="" />
+          }
           {
             postState?.poll && 
             <TweetPoll postState={postState} dispatch={dispatch} />

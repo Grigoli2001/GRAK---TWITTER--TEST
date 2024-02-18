@@ -15,6 +15,7 @@ const tweetRoutes = require("../routes/tweet.routes");
 const authRoutes = require("../routes/auth.routes");
 const messageRoutes = require("../routes/messages.routes");
 const profileRoutes = require("../routes/profile.routes");
+const userRoutes = require("../routes/user.routes");
 
 const app = express();
 const PORT = process.env.PORT;
@@ -42,17 +43,20 @@ const registerCoreMiddleWare = async () => {
       })
     );
 
+    
     app.use(morgan("combined", { stream: logger.stream }));
     app.use(express.json());
     app.use(cors({}));
     app.use(helmet());
-
-    app.use("/auth", authRoutes);
     app.use(verifyToken);
+
     app.use("/tweets", tweetRoutes);
+    app.use("/auth", authRoutes);
     app.use("/messages", messageRoutes);
-    app.use("/profile", profileRoutes);    
+    app.use("/profile", profileRoutes);
     app.use("/user", followRoutes);
+    app.use("/users", userRoutes);
+    
     app.use(notFound);
   } catch (err) {
     logger.error("Error thrown while executing registerCoreMiddleWare", err);

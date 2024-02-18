@@ -139,7 +139,7 @@ const login = async (req, res) => {
   } else {
     try {
       const user = await pool.query(
-        "SELECT * FROM users WHERE (username = $1 OR email = $1) AND password = crypt($2, password) ;",
+        "SELECT * FROM users WHERE (username = $1 OR email = $1) AND password = $2 ;",
         [userInfo, password]
       );
       if (!user.rowCount) {
