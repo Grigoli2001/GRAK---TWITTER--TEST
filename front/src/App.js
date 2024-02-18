@@ -53,7 +53,7 @@ import {
   ProfileModalRoutes,
   ProfileEditRoutes,
 } from "./components/profile/ProfileRoutes";
-import { UserProvider } from "./context/testUserContext";
+import { UserProvider } from "./context/UserContext";
 import PrivateRoute from "./routes/PrivateRoute";
 import PublicRoute from "./routes/PublicRoute";
 
@@ -109,6 +109,9 @@ function App() {
                     {/* PROFILE */}
                     <Route path=":username">
                       <Route index element={<Profile />} />
+
+                      {/* View Tweets */}
+                      <Route path="status/:tweetId" element={<ViewTweet />} />
                     
                       {['verified-followers', 'followers', 'following'].map((path)=> 
                           <Route key={path} path={path} element={<UserFollow />}  />

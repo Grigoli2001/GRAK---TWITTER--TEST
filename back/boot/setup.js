@@ -47,9 +47,9 @@ const registerCoreMiddleWare = async () => {
     app.use(cors({}));
     app.use(helmet());
 
-    app.use("/tweets", tweetRoutes);
     app.use("/auth", authRoutes);
     app.use(verifyToken);
+    app.use("/tweets", tweetRoutes);
     app.use("/messages", messageRoutes);
     app.use("/profile", profileRoutes);    
     app.use("/user", followRoutes);

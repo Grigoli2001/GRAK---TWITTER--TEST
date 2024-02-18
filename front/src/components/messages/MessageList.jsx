@@ -11,7 +11,7 @@ import { users } from '../../constants/feedTest'
 import '../../styles/messages.css'
 import { FaEllipsis } from 'react-icons/fa6';
 import { Popover, PopoverHandler, PopoverContent } from '@material-tailwind/react'
-import { UserContext } from '../../context/testUserContext';
+import { UserContext } from '../../context/UserContext';
 import { evalRoom } from '../../utils/utils';
 import instance from '../../constants/axios';
 // import { FaExclamationCircle } from 'react-icons/fa';

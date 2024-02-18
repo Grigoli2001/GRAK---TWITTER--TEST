@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react'  
-import { UserContext } from '../../context/testUserContext'
+import { UserContext } from '../../context/UserContext'
 import  Tweet  from './Tweet'
 import { users, followedTweets, forYouTweets } from '../../constants/feedTest'
 import instance from '../../constants/axios';
@@ -94,9 +94,8 @@ const Tweets = ({api, FallBackComponent, asMedia}) => {
         ) : (
           tweets.length ? 
             tweets.map((tweet) => {
-              let user = users.filter((user) => tweet.userId === user.id)[0]
               return (
-                <Tweet key={tweet?._id} user={user} post={tweet}/>
+                <Tweet key={tweet?._id} user={tweet?.user} post={tweet}/>
               )
             })
             : 

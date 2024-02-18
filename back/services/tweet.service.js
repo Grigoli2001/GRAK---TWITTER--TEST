@@ -8,7 +8,9 @@ const pool = require("../database/db_setup");
 const getAllTweets = async (req, res) => {
     try {
         const tweets =  await tweetModel.aggregate([
-
+            {
+                $match: { tweetType: 'tweet' },
+            },
             {
                     $lookup: {
                         from: 'polls',  
@@ -138,7 +140,7 @@ const getAllTweets = async (req, res) => {
             tweet.userRetweeted = userRetweeted;
 
             if (!tweet.user){
-                const user = await pool.query(`SELECT id, username, name FROM users WHERE id = ${tweet.userId}`);
+                const user = await pool.query(`SELECT id, username, name, profile_pic FROM users WHERE id = ${tweet.userId}`);
                 tweet.user = user.rows[0];
             }
 
@@ -150,7 +152,6 @@ const getAllTweets = async (req, res) => {
         //     const user = await pool.query(`SELECT id, username, name FROM users WHERE id = ${tweets[i].userId}`);
         //     tweets[i].user = user.rows[0];
         // }
-
         res.status(statusCode.success).json({
             status: "success",
             data: {
@@ -176,7 +177,7 @@ const getTweetById = async (req, res) => {
         });
     }
 
-    const user = await pool.query(`SELECT id, username, name FROM users WHERE id = ${tweet.userId}`);
+    const user = await pool.query(`SELECT id, username, name, profile_pic FROM users WHERE id = ${tweet.userId}`);
     tweet.user = user.rows[0];
 
     if (!tweet) {
@@ -205,10 +206,12 @@ const createTweet = async (req, res) => {
     try {
 
         const { data } = req.body;
+        console.log(data);
         const newTweetData = JSON.parse(data);
+        console.log(newTweetData)
         
 
-        // filter out any undefined or null values
+        // filter out any undefined o|r null values
         Object.entries(newTweetData).forEach(([key, value]) => {  
             if (value === undefined || value === null) {
                 delete newTweetData[key];
@@ -260,7 +263,7 @@ const createTweet = async (req, res) => {
         }
 
         // create transaction to ensure if poll fails, tweet is not created -- must convert to replica set to use transactions
-        newTweetData.userId = 3; // replace with user id from token
+        newTweetData.userId = req.user.id;
         const tweet = new tweetModel(newTweetData);
 
         const session = await mongoose.startSession();
@@ -372,7 +375,7 @@ const deleteTweet = async (req, res) => {
 const getReplies = async (req, res) => {
     console.log(req.params.id);
     try {
-        const replies = await tweetModel.find({'referencing_by.reference_type' : "reply", 'referencing_by.reference_id' : req.params.id});
+        const replies = await tweetModel.find({tweetType : "reply", reference_id : req.params.id});
         if (!replies) {
             return (
                 res.status(404).json({
@@ -383,7 +386,7 @@ const getReplies = async (req, res) => {
         }
 
         for (let i = 0; i < replies.length; i++) {
-            const user = await pool.query(`SELECT id, username, name FROM users WHERE id = ${replies[i].userId}`);
+            const user = await pool.query(`SELECT id, username, name, profile_pic FROM users WHERE id = ${replies[i].userId}`);
             replies[i].user = user.rows[0];
         }
 

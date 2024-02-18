@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react'  
-import { UserContext } from '../../context/testUserContext'
+import { UserContext } from '../../context/UserContext'
 import  Tweet  from './Tweet'
 import { users, followedTweets, forYouTweets } from '../../constants/feedTest'
 import instance from '../../constants/axios';

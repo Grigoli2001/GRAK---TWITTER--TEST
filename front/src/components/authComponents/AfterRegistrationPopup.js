@@ -12,7 +12,7 @@ import { useNavigate } from "react-router-dom";
 import { topics } from "../../constants/feedTest";
 import { UserDisplayer } from "../User";
 import { jwtDecode } from "jwt-decode";
-import { UserContext } from "../../context/testUserContext";
+import { UserContext } from "../../context/UserContext";
 
 const AfterRegistrationPopup = ({ onClose }) => {
   const [loading, setLoading] = useState(false);

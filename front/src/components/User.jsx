@@ -12,7 +12,7 @@ import { MdVerified } from "react-icons/md";
 import { showUsername, defaultAvatar } from "../utils/utils";
 import { NavLink } from "react-router-dom";
 import { FollowButton } from "./FollowButton";
-import { UserContext } from "../context/testUserContext";
+import { UserContext } from "../context/UserContext";
 import {
   Popover,
   PopoverContent,
@@ -79,7 +79,7 @@ export const UserBlock = ({
           }
         )}
       >
-        <ExtAvatar src={user.avatar} size={avatarSize} />
+        <ExtAvatar src={user.profile_pic} size={avatarSize} />
 
         <div className="min-w-0 max-w-full">
           <span className="flex items-center">
@@ -138,7 +138,7 @@ export const UserCard = ({ user, children }) => {
           className=" font-normal text-black bg-white shadow-all-round p-3 rounded-lg z-10 cursor-pointer"
         >
           <div className="flex flex-col items-start">
-            <ExtAvatar src={user.avatar} size="md" />
+            <ExtAvatar src={user.profile_pic} size="md" />
             <h2 className="font-bold">{user.name}</h2>
             <p className="text-xs text-slate-400">{showUsername(user)}</p>
             <p className="">{user.bio}</p>

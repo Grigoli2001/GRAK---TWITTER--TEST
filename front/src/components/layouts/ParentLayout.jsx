@@ -1,7 +1,7 @@
 import React from 'react'
 import SideNav from '../SideNav';
 import { Outlet } from 'react-router-dom';
-import { UserProvider } from '../../context/testUserContext';
+import { UserProvider } from '../../context/UserContext';
 
 const ParentLayout = () => {
   return (

@@ -1,5 +1,5 @@
 import { createContext,  useEffect, useRef, useState, useContext } from 'react'
-import { UserContext } from "../../context/testUserContext";
+import { UserContext } from "../../context/UserContext";
 
 //  components
 import { TextareaAutosize } from '@mui/base/TextareaAutosize';
@@ -105,12 +105,13 @@ const TweetCreate = ({type = 'Post', reference_id = null}) => {
 
     // form tweet text
     const [tweetForm, setTweetForm] = useState({
-      tweetType: 'tweet',
+      tweetType: type === 'Post' ? 'tweet' : (type === 'Reply' ? 'reply' : 'retweet'),
       tweetText: '',
       tweetMedia: null,
       tweetPoll: null,
       tweetSchedule: null,
       tweetLocation: null,
+      reference_id: reference_id ? reference_id : null,
       tweetCanReply: canReply
     });
 
@@ -139,12 +140,12 @@ const TweetCreate = ({type = 'Post', reference_id = null}) => {
       )
       setTweetForm({
         ...tweetForm,
-        tweetType: 'tweet',
         tweetText: '',
         tweetMedia: null,
         tweetPoll: null,
         tweetSchedule: null,
         tweetLocation: null,
+        reference_id: null,
         tweetCanReply: canReply
       });
       
@@ -207,17 +208,10 @@ const TweetCreate = ({type = 'Post', reference_id = null}) => {
     if (!canPost) return
     let formData = new FormData();
     const { tweetMedia , ...tweetData } = tweetForm;
-    formData.append('tweetMedia', tweetMedia);
-    console.log(JSON.stringify(tweetData))
     formData.append('data', JSON.stringify(tweetData));
     formData.append('tweetMedia', tweetForm.tweetMedia);
     formData.append('tweetText', tweetForm.tweetText);
     formData.append('tweetType', tweetForm.tweetType);
-    formData.append('userId', user.id);
-    if(type === 'Reply' && reference_id !== null) {
-    formData.append('reference_type', 'reply');
-    formData.append('reference_id', reference_id);
-    }
     
     if (tweetForm.tweetSchedule !== null) {
       formData.append('tweetSchedule', tweetForm.tweetSchedule);
@@ -232,7 +226,7 @@ const TweetCreate = ({type = 'Post', reference_id = null}) => {
         // update redux 
         formData = new FormData();
         resetTweetForm()
-        createToast('Nice post🥳', 'success', 'success-create-post', {limit: 1})
+        createToast(`Nice ${type}🥳`, 'success', 'success-create-post', {limit: 1})
         socket.emit('feed:notify-create-post', { user })
         if ((location.pathname) === '/compose/tweet'){
           if (location.state?.background){
@@ -261,7 +255,7 @@ const TweetCreate = ({type = 'Post', reference_id = null}) => {
         </div>
 
     <div className="mr-4">
-    <ExtAvatar src = {user?.avatar} size="sm" />
+    <ExtAvatar src = {user?.profile_pic} size="sm" />
     </div>
 
     <div className="flex flex-col">
@@ -354,7 +348,7 @@ const TweetCreate = ({type = 'Post', reference_id = null}) => {
         <Button variant="icon" size="icon-sm" disabled={buttonStates.media} className="pointer-events-auto">
           <label htmlFor="post_media">
             <GrImage title="Media" />
-            <input id="post_media" name="post_media" onChange={handleMediaChange} ref={mediaRef} className="hidden" type="file" accept="image/*, video/*"/>
+            <input id="post_media" name="post_media" onChange={handleMediaChange} ref={mediaRef} className="hidden" type="file" accept="image/x-png,image/png,image/gif,image/jpeg,image/jpg, video/*"/>
           </label>
         </Button>
 

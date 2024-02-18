@@ -2,7 +2,7 @@ import { Buffer } from 'buffer';
 
 import { useEffect, useState, useContext, createRef } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { UserContext } from "../../context/testUserContext";
+import { UserContext } from "../../context/UserContext";
 import TweetMedia, { TweetMiniMedia } from "./TweetMedia";
 import { ExtAvatar, UserCard } from "../User";
 import { Button } from "../Button";
@@ -98,8 +98,6 @@ const TweetAction = ({
 };
 
 const BaseTweetView = ({tweetUser, postState, setPostState, isLast, complete }) => {
-    // switch with actual current user
-    const currentUser = 123;
     const { user } = useContext(UserContext);
     const childTweetRef = createRef();
 
@@ -187,7 +185,6 @@ const BaseTweetView = ({tweetUser, postState, setPostState, isLast, complete }) 
 
     const handleReply = (e) => {
         e.stopPropagation();
-        console.log("replied");
     };
 
     const handleBookmark = (e) => {
@@ -274,7 +271,7 @@ const BaseTweetView = ({tweetUser, postState, setPostState, isLast, complete }) 
                                         to={`/${tweetUser.username}`}
                                         className="mr-3 mt-1 self-start"
                                     >
-                                        <ExtAvatar src={tweetUser?.avatar} size="sm" />
+                                        <ExtAvatar src={tweetUser?.profile_pic} size="sm" />
                                     </NavLink>
                                     <div>
                                         <div className='flex items-center gap-x-2  font-bold hover:underline text-ellipsis text-nowrap max-w-[300px] overflow-hidden'>
@@ -408,7 +405,7 @@ const FullTweet = ({ tweetId, isLast, asMedia, complete, parent }) => {
     ) : (
         tweetPost?.user && 
         <>
-        {tweetPost.referencing_by ? <FullTweet tweetId={tweetPost.referencing_by.reference_id} parent={true} /> : null }
+        {tweetPost.reference_id ? <FullTweet tweetId={tweetPost.reference_id} parent={true} /> : null }
         {parent ? 
         <BaseTweet tweetUser={tweetPost.user} post={tweetPost} reply={true}/>
         :

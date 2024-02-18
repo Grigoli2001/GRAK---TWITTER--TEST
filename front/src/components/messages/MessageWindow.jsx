@@ -12,7 +12,7 @@ import { NavLink, useParams } from 'react-router-dom';
 
 import '../../styles/messages.css'
 import { ExtAvatar } from '../User';
-import { UserContext } from '../../context/testUserContext'
+import { UserContext } from '../../context/UserContext'
 import { users } from '../../constants/feedTest';
 import { evalRoom, showUsername } from '../../utils/utils';
 import { SocketContext } from '../../context/socketContext';
@@ -333,7 +333,7 @@ export const MessageWindow = () => {
                         }
 
                         <div className="flex flex-col items-center justify-center pt-20 pb-8 mx-auto text-sm border-b border-b-gray-200 w-full">
-                            <ExtAvatar size="lg" src={chatTo?.avatar} />
+                            <ExtAvatar size="lg" src={chatTo?.profile_pic} />
                             <p className='font-bold'>{chatTo?.name}</p>
                             <p>{showUsername(chatTo)}</p>
                             <p>Joined {new Date(chatTo?.join_date).toLocaleDateString('en-US', {month: 'long' , year: 'numeric'})}</p>

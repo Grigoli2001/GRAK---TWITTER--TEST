@@ -1,8 +1,8 @@
 import React, { useContext, useEffect, useLayoutEffect, useState, useRef } from 'react'
 import { useParams, useNavigate, NavLink, useLocation, Outlet } from 'react-router-dom'
-import { showUsername, quantiyFormat, getJoinDate } from '../../utils/utils'
+import { showUsername, quantityFormat, getJoinDate } from '../../utils/utils'
 import { users } from '../../constants/feedTest'
-import { UserContext } from '../../context/testUserContext'
+import { UserContext } from '../../context/UserContext'
 import { ExtAvatar } from '../../components/User'
 import { Button } from '../../components/Button'
 import { FollowButton } from '../../components/FollowButton'
@@ -165,7 +165,7 @@ const Profile = () => {
   // test
 
   if(userProfile) {
-    if (user.location || user.avatar || user.bio || user.website || user.birthday || user.cover) {
+    if (user.location || user.profile_pic || user.bio || user.website || user.birthday || user.cover) {
       setIsSetUp(true)
     }
 

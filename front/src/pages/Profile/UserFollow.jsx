@@ -7,7 +7,7 @@ import { TabsList  } from '@mui/base/TabsList';
 import { TabPanel  } from '@mui/base/TabPanel';
 import { UserDisplayer } from '../../components/User'
 import { users } from '../../constants/feedTest'
-import { UserContext } from '../../context/testUserContext'
+import { UserContext } from '../../context/UserContext'
 
 
 // icons

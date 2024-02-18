@@ -1,6 +1,6 @@
 import { useState, useContext, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { UserContext } from "../../context/testUserContext";
+import { UserContext } from "../../context/UserContext";
 
 import NavModal from "../NavModal";
 import CustomInput from "../CustomInput";
@@ -218,7 +218,7 @@ const EditProfileModal = ({ backTo }) => {
               </Button>
             </div>
             <ExtAvatar
-              user={user.avatar}
+              user={user.profile_pic}
               size="lg"
               className={
                 "rounded-[50%] bg-white p-1 h-28 w-28 object-cover shadow-inner"

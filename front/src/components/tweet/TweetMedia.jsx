@@ -36,7 +36,8 @@ export const TweetMiniMedia = ({post, user}) => {
 
 
 const TweetMedia = ({mediaType, src, alt, as_form, removeMedia}) => {
-
+    console.log(mediaType === 'image' || mediaType === 'gif' )
+    console.log('src', src)
   return (
        
 

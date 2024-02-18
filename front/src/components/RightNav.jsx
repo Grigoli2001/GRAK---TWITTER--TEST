@@ -3,7 +3,7 @@ import SearchBar from './SearchBar'
 import { UserDisplayer } from './User'
 import Trend from './Trend'
 import { NavLink, useLocation } from 'react-router-dom'
-import { UserContext } from '../context/testUserContext'
+import { UserContext } from '../context/UserContext'
 // test
 import { trends } from '../constants/feedTest'
 

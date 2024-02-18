@@ -2,7 +2,7 @@ import React, { useEffect, useContext } from 'react'
 import { useNavigate, NavLink } from 'react-router-dom'
 import { Button } from '../components/Button'
 import Tweets from '../components/tweet/Tweets'
-import { UserContext } from '../context/testUserContext'
+import { UserContext } from '../context/UserContext'
 
 // icons
 import { FaArrowLeftLong} from "react-icons/fa6";

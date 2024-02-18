@@ -24,7 +24,7 @@ import "../styles/SideNavExtra.css";
 import { cn } from "../utils/style";
 
 // Testing
-import { UserContext } from "../context/testUserContext";
+import { UserContext } from "../context/UserContext";
 
 // context
 import useAppStateContext from "../hooks/useAppStateContext";
@@ -57,9 +57,10 @@ const SideNavTab = ({ text, icon, notif, url }) => {
     );
 };
 
-export const ProfileTab = ({ user }) => {
+export const ProfileTab = () => {
 // I added logout because I need for testing
   const { dispatch } = useAppStateContext();
+  const { user} = useContext(UserContext);
   const navigate = useNavigate();
   const handleLogout = () => {
     dispatch({

@@ -2,7 +2,7 @@ import { Buffer } from 'buffer';
 
 import { useEffect, useState, useContext, useReducer } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { UserContext } from "../../context/testUserContext";
+import { UserContext } from "../../context/UserContext";
 import TweetMedia, { TweetMiniMedia } from "./TweetMedia";
 import { ExtAvatar, UserCard } from "../User";
 import { Button } from "../Button";
@@ -145,6 +145,7 @@ export const BaseTweet = ({ tweetUser, post, isLast, reply }) => {
   const [postState, dispatch] = useReducer(reducer, post)
   // const [postState, setPostState] = useState(post);
   const { user } = useContext(UserContext);
+  console.log('post buffer')
 
   // useEffect(() => {
   //   postState?.tweet_likes.forEach(element => {
@@ -212,6 +213,8 @@ export const BaseTweet = ({ tweetUser, post, isLast, reply }) => {
 
   const handleReply = (e) => {
     e.stopPropagation();
+    // TODO open popup for reply
+    navigate(`/${tweetUser.username}/status/${postState._id}`)
 
   };
 
@@ -239,20 +242,20 @@ export const BaseTweet = ({ tweetUser, post, isLast, reply }) => {
 
   const navigate = useNavigate();
 
-  const isValidMediaType = async (contentType) => {
+  const isValidMediaType = (contentType) => {
     if (contentType.startsWith('image/')) {
-      return 'image';
+        return 'image';
     } else if (contentType.startsWith('video/')) {
-      return 'video';
+        return 'video';
     } else {
-      return null; // Invalid media type
+        return 'gif'; // Invalid media type
     }
-  };
+};
 
-  let base64String = '';
-  if (postState.tweetMedia) {
+let base64String = '';
+if (postState.tweetMedia) {
     base64String = Buffer.from(postState?.tweetMedia?.data).toString('base64');
-  }
+}
 
   return (
     // tweets for feed page, post is diff for single post view
@@ -270,7 +273,7 @@ export const BaseTweet = ({ tweetUser, post, isLast, reply }) => {
         to={`/${tweetUser.username}`}
         className="mr-4 mt-3 self-start"
       >
-        <ExtAvatar src={tweetUser?.avatar} size="sm" />
+        <ExtAvatar src={tweetUser?.profile_pic} size="sm" />
 
         
       </NavLink>
@@ -341,10 +344,10 @@ export const BaseTweet = ({ tweetUser, post, isLast, reply }) => {
           <div className="text-justify break-words overflow-wrap">
               <p className='text-wrap'>{ postState?.tweetText } </p>
           </div>
-          { 
-          post?.tweetMedia && 
-            <TweetMedia mediaType={isValidMediaType(post?.tweetMedia?.contentType)} src={`data:${post?.tweetMedia?.contentType};base64,${base64String}`} alt="" />
-          }
+          {
+                    postState?.tweetMedia &&
+                    <TweetMedia mediaType={isValidMediaType(postState?.tweetMedia?.contentType)} src={`data:${postState?.tweetMedia?.contentType};base64,${base64String}`} alt="" />
+                }
           {
             postState?.poll && 
 
