@@ -30,7 +30,6 @@ const deleteMessage = async (req, res) => {
 
     try {
         let { msg_id } = req.body
-        // console.log(msg_id, req.body)
 
         if (!msg_id) {
             throw new Error('msg_id is required')

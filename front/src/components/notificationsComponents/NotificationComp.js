@@ -87,6 +87,10 @@ export const NotificationComp = ({ NotificationType }) => {
     getNotifications(user.id, setNotifications);
   };
 
+
+  const handleNavigateMessage = (username) => {
+    navigate(`/messages/${username}`);};
+
   const renderNotifications = () => {
     return (
       <div>
@@ -121,7 +125,7 @@ export const NotificationComp = ({ NotificationType }) => {
                       notification.triggeredByUser?.username
                     )
                   }
-                  src={`/uploads/${notification.triggeredByUser?.profile_pic}`}
+                  src={`${notification.triggeredByUser?.profile_pic ?? '/static/default_profile_pic.png'}`}
                   alt="profile pic"
                   className="h-10 w-10 rounded-full mr-5 hover:cursor-pointer"
                 />
@@ -157,16 +161,26 @@ export const NotificationComp = ({ NotificationType }) => {
                   : ""}
                 {" - "}
                 <span
-                  className="hover:underline"
+                  className="hover:underline ml-2 cursor-pointer"
                   onClick={() =>
-                    handleNavigateTweet(
-                      notification.tweetId?._id,
-                      notification.triggeredByUser?.username
-                    )
+                    notification.tweetId?._id
+                      ? handleNavigateTweet(
+                          notification.tweetId?._id,
+                          notification.triggeredByUser?.username
+                        )
+                      : notification.notificationType === "message"
+                      ? handleNavigateMessage(
+                          notification.triggeredByUser?.username
+                        )
+                      : null
                   }
                 >
-                  "{notification.tweetId?.tweetText?.slice(0, 20)}..."{" "}
-                </span>
+                  {notification.tweetId
+                    ? `  - ${notification.tweetId?.tweetText?.slice(0, 20)}..."`
+                    : notification.notificationType === "message"
+                    ? "Inbox"
+                    : null}{" "}
+                    </span>
               </p>
             </div>
           </div>
@@ -200,7 +214,9 @@ export const NotificationComp = ({ NotificationType }) => {
                         notification.triggeredByUser?.username
                       )
                     }
-                    src={`/uploads/${notification.triggeredByUser?.profile_pic}`}
+                    src={`${
+                      notification.triggeredByUser?.profile_pic ?? 
+                      "/static/default_profile_pic.png"}`}
                     alt="profile pic"
                     className="h-10 w-10 rounded-full mr-5 hover:cursor-pointer"
                   />
@@ -249,14 +265,11 @@ export const NotificationComp = ({ NotificationType }) => {
 
   return (
     <div className="min-h-[520px] flex flex-col justify-between">
-      {notifications.length === 0 ? (
+       {notifications.length === 0 ? (
         <div className="flex justify-center items-center h-96">
           <p className="text-2xl">No Notifications</p>
         </div>
-      ) : (
-        ""
-      )}
-      {NotificationType === "all"
+      ) : NotificationType === "all"
         ? renderNotifications()
         : NotificationType === "verified"
         ? renderVerifiedNotifications()

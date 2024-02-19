@@ -115,7 +115,7 @@ const Tweets = ({ api, params, FallBackComponent, asMedia  }) => {
 
   if (error) {
     console.log('Error fetching for you tweets:', error);
-    createToast('error sadsad' + error, 'error')
+    createToast('An occurred while fetching the tweets', 'error')
     return FallBackComponent
   }
 

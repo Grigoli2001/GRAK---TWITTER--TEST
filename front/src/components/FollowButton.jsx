@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useContext } from 'react'
 import { Button } from './Button'
 import { cn } from '../utils/style'
 
 import instance from '../constants/axios'
 import { followRequests } from '../constants/requests'
 import { createToast } from '../hooks/createToast'
-
+import { SocketContext } from "../context/socketContext"
 
 /**
  * Follow button component which takes followed prop
@@ -15,6 +15,7 @@ export const FollowButton = ({followed ,setFollowerCount, followerid, userid, ..
 
     const [isFollowed, setIsFollowed] = useState(followed)
     const [isHovered, setIsHovered] = useState(false)
+    const { socket } = useContext(SocketContext);
     
     const handleFollow = (evt) => {
         evt.stopPropagation()
@@ -31,9 +32,14 @@ export const FollowButton = ({followed ,setFollowerCount, followerid, userid, ..
         })
         .then(res => {  
             setIsFollowed(true)
+            socket?.emit("notification:new", {
+                userId: followerid,
+                triggeredByUserId: userid,
+                notificationType: "follow",
+            });
             if (setFollowerCount) setFollowerCount((prev) => prev + 1)
         })
-        .catch(err => createToast('We couldnt process this request at the moment'+ err.message,'error', 'error-follow', {limit:1}))
+        .catch(err => createToast('We couldnt process this request at the moment','error', 'error-follow', {limit:1}))
     }
 
     const handleUnFollow = (evt) => {
@@ -51,7 +57,7 @@ export const FollowButton = ({followed ,setFollowerCount, followerid, userid, ..
         .post(followRequests.unfollow, {userId: userid, followerId: followerid})
         .then(res =>{ 
             setIsFollowed(false); 
-            if (setFollowerCount) setFollowerCount((prev) => prev - 1)
+            if (setFollowerCount) setFollowerCount((prev) => prev <= 0 ? 0 : prev - 1)
         })
         .catch(err => console.error(err))
     }

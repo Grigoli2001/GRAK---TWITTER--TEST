@@ -22,6 +22,8 @@ import { Popover, PopoverContent, PopoverHandler } from '@material-tailwind/reac
 import { DefaultModal as Modal } from '../NavModal'
 import { createToast } from '../../hooks/createToast';
 import useUserContext from '../../hooks/useUserContext';
+import { useDispatch } from "react-redux";
+import { addNotif } from '../../features/tweets/navNotifSlice';
 // import useInstance from '../../hooks/useInstance';
 // import TweetMedia from '../tweet/TweetMedia';
 import { ValidUserContext } from '../RequireValidUser';
@@ -92,7 +94,7 @@ export const MessageWindow = () => {
 
     const [modalOpen, setModalOpen] = useState(false)
     const [messageToDelete, setMessageToDelete] = useState(null)
-
+    const reduxDispatch = useDispatch()
 
     // check if a user is found and join the room when component mounts
     useEffect(() => {
@@ -131,8 +133,6 @@ export const MessageWindow = () => {
             return
           }
           setMedia(URL.createObjectURL(file))
-    
-         
       }
       }
    
@@ -156,9 +156,7 @@ export const MessageWindow = () => {
             }
         })
         .catch (err => {
-            let className = 'error-load-messages'
-            if (document.querySelector(`${className}`)) return // limit to one error toast
-            createToast("Sorry! An error occured", 'error', className)
+            createToast("Sorry! An error occured", 'error', 'error-get-messages', {limit: 1})
             }
         )
         .finally(() => setMessageLoading(false))
@@ -255,7 +253,7 @@ export const MessageWindow = () => {
         if (e.keyCode===13 && !e.shiftKey || e.type === 'submit'){
             e.preventDefault();
             if (message.trim()){
-                const msgObj = {message, sender_id: user.id, receiver_id: chatTo.id, room: room, date: new Date(), media}
+                const msgObj = {message, sender_id: user.id, receiver_id: chatTo.id, room: room, username: user.username, date: new Date(), media}
                 console.log('sending message', msgObj)
                 socket.emit('message:send_message', msgObj)
                 // setMessages([ ...messages, msgObj,])

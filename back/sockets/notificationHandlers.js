@@ -7,9 +7,12 @@ module.exports = (io, socket) => {
   socket.on("notification:new", async (data) => {
     // find author of the tweet by tweet id
     try {
-      const tweet = await tweetModel.findOne({ _id: data.tweetId });
-      const author = tweet?._doc?.userId;
-      data.userId = author;
+
+      if (data.tweetId) {
+        const tweet = await tweetModel.findOne({ _id: data.tweetId });
+        const author = tweet?._doc?.userId;
+        data.userId = author;
+      }
       logger.info("notification:new", data);
       // Simulate minimal req and res objects
       const req = { body: data };

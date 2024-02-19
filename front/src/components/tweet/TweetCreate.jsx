@@ -39,7 +39,6 @@ import { v4 } from 'uuid';
 
 import { TWEET_ACTIONS, Tweet } from './Tweet';
 import { useQueryClient } from '@tanstack/react-query';
-import useDebounce from '../../hooks/useDebounce';
 
 /**
  * Form for creating a tweet
@@ -225,7 +224,8 @@ const TweetCreate = ({type = 'Post', reference_id = null, quote, editTweet, edit
 
   const handleTweetImage = (image, mime) => {
     if (!image || !mime) return;
-    // disbaleAllInteractions()
+    const prevButtonStates = buttonStates
+    disableAllInteractions()
     const storageRef = ref(storage, `tweet_media/${image.name}/${v4()}`);
     uploadBytesResumable(storageRef, image)
       .then((snapshot) => {
@@ -242,7 +242,13 @@ const TweetCreate = ({type = 'Post', reference_id = null, quote, editTweet, edit
       .catch((error) => {
         console.error("Error uploading file", error);
       })
-      .finally(() => {})
+      .finally(() => {
+        setButtonStates(prevButtonStates)
+        setCanInput(true)
+        setLoading(false)
+      }
+
+      )
   };
 
   const handleMediaChange = async (evt) => {
@@ -283,7 +289,7 @@ const TweetCreate = ({type = 'Post', reference_id = null, quote, editTweet, edit
     setCanPost(enablePostButton);
   }, [tweetForm]);
 
-  const disbaleAllInteractions = () => {
+  const disableAllInteractions = () => {
     setLoading(true);
     setCanPost(false);
     setButtonStates({
@@ -315,12 +321,11 @@ const TweetCreate = ({type = 'Post', reference_id = null, quote, editTweet, edit
       return response.data
     },
     onMutate: (variables) => {
-      const prebuttonStates = {...buttonStates};
-      disbaleAllInteractions();
+      const prebuttonStates = buttonStates;
+      disableAllInteractions();
       return prebuttonStates
     },
     onSuccess: (data) => {
-      console.log('create', data)
       // queryClient.setQueryData([tweetRequests.forYou, { userId: user.id }], (oldData) => {
       //   console.log('oldData', oldData)
       //   console.log('data', data)
@@ -351,7 +356,8 @@ const TweetCreate = ({type = 'Post', reference_id = null, quote, editTweet, edit
       createToast('An error occured while posting', 'error', 'error-create-post', {limit: 1});
       setButtonStates(context)
     },
-    onSettled: () => {
+    onSettled: (error, variables, context) => {
+      setButtonStates(context)
       setCanInput(true)
     }
   })
@@ -411,7 +417,7 @@ const TweetCreate = ({type = 'Post', reference_id = null, quote, editTweet, edit
 
 
 
-  //   disbaleAllInteractions(); 
+  //   disableAllInteractions(); 
 
 //     try {
 //       reduxDispatch(addToForYouAsync(tweetForm))
@@ -495,7 +501,7 @@ const TweetCreate = ({type = 'Post', reference_id = null, quote, editTweet, edit
         onClick={() => (!loading ? setIsInteracted(true) : {})}
       >
 
-    { createTweetMutation.isLoading && 
+    { (createTweetMutation.isLoading || loading) && 
       <div className="absolute top-0 left-0 w-full h-full bg-white/75 z-50 flex items-center justify-center">
             <ReactLoading type='spin' color='#1da1f2' height={30} width={30}/>
       </div>

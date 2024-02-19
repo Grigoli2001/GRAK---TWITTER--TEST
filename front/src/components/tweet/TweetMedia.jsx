@@ -49,20 +49,20 @@ const TweetMedia = ({mediaType, src, alt, as_form, removeMedia}) => {
                         variant="icon"
                         size="icon-sm"
                         tooltip="Close Media"
-                        className="absolute top-4 right-4 text-white !bg-black/50">
+                        className="absolute top-4 right-4 text-white z-[10] !bg-black/50">
                             <FaXmark/>
                         </Button>
 
                 }
                 {
                     mediaType?.startsWith('image')  && 
-                    <img className="h-full w-full bg-black object-cover" src={src} alt={alt} />
+                    <img className="h-full w-full bg-black object-cover z-1" src={src} alt={alt} />
                 }
 
                 { 
                     mediaType?.startsWith('video') && 
 
-                        <ReactPlayer url={src} controls={true} width="250" height="250" className="h-full w-full"/>
+                        <ReactPlayer url={src} controls={true} width="250" height="250" className="h-full w-full z-1"/>
                         
                 }
 

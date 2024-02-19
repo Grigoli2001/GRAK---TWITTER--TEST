@@ -9,8 +9,7 @@ router.get('/username/:username', userServices.getUserByUsername);
 router.get('/user', userServices.getUserSimple);
 router.get('/follow-data', userServices.getFollowData);
 
-// should be patch ?
-router.post('/update', userServices.updateUser);
+router.patch('/update', userServices.updateUser);
 router.post("/follow", userServices.addFollower);
 router.post("/unfollow", userServices.removeFollower);
 

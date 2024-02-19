@@ -8,8 +8,6 @@ import { FollowButton } from '../../components/FollowButton'
 import  { Tab } from '../../components/Tabs';
 import { Tabs, TabsList, TabPanel } from '@mui/base';
 import Tweets from '../../components/tweet/Tweets'
-// import  useInstance  from '../../hooks/useInstance'
-// import instance from '../../constants/axios'
 import ReactLoading from 'react-loading'
 import { requests } from '../../constants/requests'
 
@@ -19,7 +17,6 @@ import { FaArrowLeftLong, FaLink, FaRegEnvelope} from "react-icons/fa6";
 import { IoLocationOutline } from "react-icons/io5";
 import { UserDisplayer } from '../../components/User'
 import {  tweetRequests } from '../../constants/requests'
-// import { useQuery } from '@tanstack/react-query'
 import { ValidUserContext } from '../../components/RequireValidUser'
 import { createToast } from '../../hooks/createToast'
 
@@ -70,7 +67,7 @@ const SetupProfileCheck = ({ img, text, predicate, onClick}) => {
   )
 }
 
-// user here is deetailed proofile
+// user here is detailed proofile
 const OtherPostRepliesFallBack = ({user, isUser, isSetUp, type}) => {
 
   const navigate = useNavigate()
@@ -147,42 +144,6 @@ const Profile = () => {
   const profileContainer = useRef(null)
   const noUserProfile = useRef(null)
 
-  
-
-  //  checks if a profile is found
-  // const { data,  loading } = useQuery({
-  //   queryKey: ['user', username],
-  //   queryFn: async () => {
-  //     const response = await instance.get(`users/username/${username}`)
-  //     return response.data
-  //   },
-  //   onSuccess: (data) => {
-  //     console.log(data, 'query for profile')
-  //     if (data?.user) {
-  //       setUserProfile(userProfile)
-  //       setLikesIsPublic(userProfile.likes_is_public)
-  //       setIsUser(userProfile.id === user?.id)
-  //       setFollowerCount(userProfile.followers_count)
-  //       setIsSetUp(userProfile.location || userProfile.profile_pic || userProfile.bio || userProfile.website || userProfile.birthday || userProfile.cover)
-  //     }
-  //   },
-  //   onError: (error) => { 
-  //     console.log(error, 'error fetching profile')
-  //   },
-  //   onSettled: () => {
-  //      console.log('settled')
-  //     setHasLoaded(true)
-  //   }
-    
-  // })
-
-  // useEffect(() => {
-  //   if (userProfile) {
-  //     setIsUser(userProfile.id === user?.id)
-  //     setFollowerCount(userProfile.followers_count)
-  //   }
-  // }, [userProfile, user])
-
   useLayoutEffect(() => {
       const profileRect = profileContainer?.current?.getBoundingClientRect()
 
@@ -201,8 +162,7 @@ const Profile = () => {
         // setLikesIsPublic(userProfile.likes_is_public) // not implemented
         setIsUser(userProfile.id === user?.id)
         setFollowerCount(userProfile.followers_count)
-        console.log('location', userProfile.location, 'profile_pic', userProfile.profile_pic, 'bio', userProfile.bio, 'website', userProfile.website, 'dob', userProfile.dob, 'cover', userProfile.cover)
-        setIsSetUp(userProfile.location || (userProfile.profile_pic && userProfile.profile_pic !== 'default_profile_pic.jpg') || userProfile.bio || userProfile.website || userProfile.dob || userProfile.cover)
+        setIsSetUp(userProfile.location || (userProfile.profile_pic && userProfile.profile_pic !== 'default_profile_pic.png') || userProfile.bio || userProfile.website || userProfile.dob || userProfile.cover)
   }
   }, [userProfile])
 

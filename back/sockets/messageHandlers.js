@@ -21,8 +21,8 @@ module.exports = (io, socket) =>  {
 
         try {
 
-            const { sender_id, receiver_id, room, message, date } = data
-            if (!sender_id || !receiver_id || !room || !message || !date) {
+            const { sender_id, receiver_id, room, message, date, username } = data
+            if (!sender_id || !receiver_id || !room || !message || !date || !username ) {
                 throw new Error('sender_id, receiver_id, room, message, date are required')
             }
             if (message.length > 1000) {
@@ -39,12 +39,14 @@ module.exports = (io, socket) =>  {
             // DID NOT IMPLEMENT SENDING IMAGE
             
             await newMessage.save()
+            // ideally get username from db instead of socket 
             data._id = newMessage._id
             // use io instead of socket to also send to sender for _id for deletion and checking last message
             io.to(data.room).emit('message:received_message', data)
 
             // emit notification to receiver which should connect to the room on login
-            io.to(data.receiver_id).emit('notification:new', { title: "Messages"})
+            io.to(data.receiver_id).emit('nav:notif:new', {category:'messages', value: 1, username})
+            io.to(data.receiver_id).emit('notification:new', {userId: data.receiver_id, triggeredByUserId: sender_id, notificationType: 'message'})
 
         } catch (error) {
             console.log('message:error_send_message', error)

@@ -481,6 +481,7 @@ const getReplies = async (req, res) => {
         });
 
     } catch (err) {
+        console.log(err)
         res.status(statusCode.notFound).json({
             status: "fail",
             message: "error finding the tweet", err,

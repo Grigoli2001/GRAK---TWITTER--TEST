@@ -1,7 +1,6 @@
 import { useRef, useCallback } from 'react'  
 import { quantityFormat } from '../utils/utils'
 import { Popover, PopoverContent, PopoverHandler } from '@material-tailwind/react'
-import  useInstance  from '../hooks/useInstance'
 import ReactLoading from 'react-loading'
 
 
@@ -12,10 +11,10 @@ import { tweetRequests } from '../constants/requests';
 import { NavLink } from 'react-router-dom';
 import instance from '../constants/axios';
 import {  useInfiniteQuery } from '@tanstack/react-query';
+import { topics } from '../constants/feedTest'
 
 /**
  * Trend component for trends widget and explore page
- * TODO: add nav to trend from here
  */
 
 const Trend = ({index, category, title, numTweets, isWidget}) => {
@@ -101,9 +100,14 @@ const Trend = ({index, category, title, numTweets, isWidget}) => {
     return (
       <>
        
-            {trends && trends.map((trend, index) => (
-                <Trend key={index} index={index + 1} category={trend.category} title={'#'+trend.tag} numTweets={trend.count} isWidget={true} />
-              ))}
+            {trends && trends.map((trend, index) =>{ 
+              // gen random category
+              const categoryIndex =  Math.floor(Math.random() * topics.length);
+              const category = topics[categoryIndex].category
+              return (
+                <Trend key={index} index={index + 1} category={category} title={'#'+trend.tag} numTweets={trend.count} isWidget={true} />
+              )}
+              )}
               {isFetchingNextPage && <div className='flex justify-center items-center'><ReactLoading type="spin" color="#1da1f2" height={30} width={30} /></div>}
       </>
     );

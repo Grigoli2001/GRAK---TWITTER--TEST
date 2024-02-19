@@ -225,7 +225,7 @@ const EditProfileModal = ({ backTo }) => {
   const updateProfile = () => {
     console.log(year, month, day, 'date')
     const dob = new Date(`${year}-${months.indexOf(month) + 1}-${day}`).toISOString();
-    instance.post(requests.updateUser, {...formState, dob})
+    instance.patch(requests.updateUser, {...formState, dob})
     .then(res => {
       createToast('Profile updated', 'success', 'profile-updated', {limit: 1})
       queryClient.invalidateQueries(['user', user.username])

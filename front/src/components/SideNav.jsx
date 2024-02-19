@@ -201,7 +201,8 @@ const SideNav = () => {
 
   useEffect(() => {
     const handleNewNotification = (notif) => {
-      console.log('nav notif new received', notif)
+      // console.log(notif, location.pathname, '/messages/' + notif?.username, notif.category === 'messages' && location.pathname === '/messages/' + notif?.username)
+      // if (notif.category === 'messages' && location.pathname === '/messages/' + notif?.username) return // does not work
       reduxDispatch(addNotif({ notif }))
     }
     socket?.on('nav:notif:new', handleNewNotification)

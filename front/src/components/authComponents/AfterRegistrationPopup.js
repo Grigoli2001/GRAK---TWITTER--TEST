@@ -34,7 +34,7 @@ const AfterRegistrationPopup = ({ onClose }) => {
   // const [userName, setUserName] = useState('runak');
   const [userName, setUserName] = useState(user.username);
   const [profilePic, setProfilePic] = useState(null);
-  const [display, setDisplay] = useState("/uploads/default_profile_pic.jpg");
+  const [display, setDisplay] = useState("/static/default_profile_pic.png");
   const justRegistered = localStorage.getItem("justRegistered");
   const Navigate = useNavigate();
   useEffect(() => {

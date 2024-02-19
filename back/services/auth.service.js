@@ -55,7 +55,7 @@ const signup = async (req, res) => {
         isGetmoreMarked,
         isConnectMarked,
         isPersonalizedMarked,
-        "default_profile_pic.jpg",
+        "default_profile_pic.png",
       ];
 
       const addUser = await client.query(
@@ -229,7 +229,7 @@ const userPreferences = async (req, res) => {
         selectedCategories,
         selectedLanguages,
         userName,
-        profile_pic || "default_profile_pic.jpg",
+        profile_pic || "default_profile_pic.png",
         userId,
       ]
     );
