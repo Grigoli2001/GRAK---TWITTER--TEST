@@ -117,7 +117,7 @@ We have used MySQL to store the user and follower data. The queries to create th
         password VARCHAR(255) NOT NULL,
         dob DATE,
         profile_pic VARCHAR(255),
-        cover_pic VARCHAR(255),
+        cover VARCHAR(255),
         isGetmoreMarked BOOLEAN,
         isConnectMarked BOOLEAN,
         isPersonalizedMarked BOOLEAN,
