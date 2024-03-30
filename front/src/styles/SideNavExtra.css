@@ -1,0 +1,39 @@
+.speech-bubble {
+    --bbColor: white;
+    --bbArrowSize: 1em;
+    --bbPadding: 1em;
+    background: var(--bbColor);
+    /* border-radius: 2rem; */
+    /* padding: 1rem; */
+    /* border: 1px solid black; */
+    /* position: absolute; */
+    bottom: 80%;
+    font-size: small;
+    margin-bottom: var(--bbArrowSize);
+  }
+  
+  .speech-bubble::before {
+    content: "";
+    position: absolute;
+    /* background: black; */
+    box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.75);
+    left: calc(50% - var(--width) / 2);
+    clip-path: polygon(12.5% 0, 87.5% 0, 50% 100%);
+    --width: calc(var(--bbArrowSize) / 2 * 3);
+    height: var(--bbArrowSize);
+    width: var(--width);
+    top: 100%;
+  }
+  
+  .speech-bubble::after {
+    content: "";
+    position: absolute;
+    background: rgb(255, 255, 255);
+    left: calc(50% - var(--width) / 2);
+    clip-path: polygon(12.5% 1%, 87.5% 1%, 50% 100%);
+    --width: calc(var(--bbArrowSize) / 2 * 3);
+    height: var(--bbArrowSize);
+    width: var(--width);
+    top: calc(100% - 2px);
+  
+  }
