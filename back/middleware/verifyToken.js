@@ -1,24 +1,31 @@
-const jwt = require("jsonwebtoken");
-const { unauthorized } = require("../constants/statusCode");
-const logger = require("./winston");
+const jwt = require('jsonwebtoken');
+const redisClient = require('../database/redis_setup');
+const { unauthorized } = require('../constants/statusCode');
+const logger = require('./winston');
 
 const verifyToken = (req, res, next) => {
-  const token = req.header("Authorization");
+    const token = req.header('Authorization');
 
-  if (!token) {
-    return res.status(unauthorized).json({ error: "Unauthorized" });
-  }
+    if (!token) {
+        return res.status(unauthorized).json({ error: 'Unauthorized' });
+    }
 
-  try {
-    const decoded = jwt.verify(token.split(" ")[1], process.env.JWT_SECRET_KEY);
-    req.user = decoded;
+    const tokenValue = token.split(' ')[1];
 
+    try {
+        const decoded = jwt.verify(tokenValue, process.env.JWT_SECRET_KEY);
+        req.user = decoded;
 
-    next();
-  } catch (error) {
-    logger.error(error);
-    return res.status(unauthorized).json({ error: "Invalid token" });s
-  }
+        redisClient.get(req.user.userId.toString(), (err, result) => {
+            if (err || result !== tokenValue) {
+                return res.status(unauthorized).json({ error: 'Invalid token' });
+            }
+            next();
+        });
+    } catch (error) {
+        logger.error(error);
+        return res.status(unauthorized).json({ error: 'Invalid token' });
+    }
 };
 
 module.exports = verifyToken;

@@ -13,21 +13,21 @@ const makeUsername = (name) => {
   return username;
 };
 
-const checkExisting = async (client, data, column) => {
+const checkExisting = async (session, data, column) => {
   try {
+    let query = "";
+    let parameters = {};
+
     if (column) {
-      const { rows } = await client.query(
-        "SELECT $1 FROM users WHERE $2 = $3;",
-        [1, column, data]
-      );
-      return rows.length > 0;
+      query = `MATCH (u:User) WHERE u.${column} = $data RETURN u`;
+      parameters = { data };
     } else {
-      const { rows } = await client.query(
-        "SELECT $1 FROM users WHERE username = $2 OR email = $2;",
-        [1, data]
-      );
-      return rows.length > 0;
+      query = "MATCH (u:User) WHERE u.username = $data OR u.email = $data RETURN u";
+      parameters = { data };
     }
+
+    const result = await session.run(query, parameters);
+    return result.records.length > 0;
   } catch (error) {
     logger.error(`Error while checking existing ${column}:`, error);
     return true;
@@ -45,28 +45,28 @@ const generateOTP = () => {
 
 const sendEmail = async (to, subject, text) => {
   const transporter = nodemailer.createTransport({
-    service: "gmail",
+    host: process.env.EMAIL_SERVICE,
+    port: process.env.EMAIL_PORT, // or the appropriate port provided by Brevo
+    secure: false, // true for 465, false for other ports
     auth: {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASSWORD,
     },
-    tls: {
-      rejectUnauthorized: false,
-    },
   });
 
   const mailOptions = {
-    from: process.env.SMTP_USER,
+    from: process.env.EMAIL,
     to: to,
     subject: subject,
     text: text,
   };
 
   try {
+    console.log(text);
     await transporter.sendMail(mailOptions);
     return true;
   } catch (error) {
-    logger.error("Error while sending email:", error);
+    console.error("Error while sending email:", error);
     return false;
   } finally {
     transporter.close();

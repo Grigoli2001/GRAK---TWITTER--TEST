@@ -4,7 +4,7 @@ const Interaction = require("../models/interactionModel");
 const statusCode = require("../constants/statusCode");
 const mongoose = require("mongoose");
 const ObjectId = mongoose.Types.ObjectId;
-const pool = require("../database/db_setup");
+const session = require("../database/neo4j_setup.js"); 
 const { tweetQuery, allFollowers, getUserById, checkTweetText } = require('../utils/tweet.utils');
 
 const getAllTweets = async (req, res) => {
@@ -27,8 +27,6 @@ const getAllTweets = async (req, res) => {
 };
 
 const getTweetById = async (req, res) => {
-
-
     try {
         const { id } = req.params;
         const tweets = await tweetQuery({matchOptions: { _id: new ObjectId(id) }, currentUID:req.user.id})
@@ -61,70 +59,85 @@ const getTweetById = async (req, res) => {
 }
 
 const getTweetsByCategory = async (req, res) => {
-
     try {
 
-    const { category } = req.params;
-    const { userId, page } = req.query;
+        const { category } = req.params;
+        const { userId, page } = req.query;
 
-    if (!category || !userId) {
-        return res.status(statusCode.badRequest).json({
-            message: "category is required and userId in query",
-        });
-    }
-    let resolvePage = parseInt(page) ?? 0
-    const userid = parseInt(userId)
+        if (!category || !userId) {
+            return res.status(statusCode.badRequest).json({
+                message: "category is required and userId in query",
+            });
+        }
+        let resolvePage = parseInt(page) ?? 0
+        const userid = parseInt(userId)
 
-    const categoryConditions = {
-        'foryou': {},
-        'following': {},
-        'likes': { userLiked: 1 },
-        'bookmarks': { userBookmarked: 1 },
-        'replies': { $or: [ {tweetType: 'retweet'}, {tweetType: 'retweet'} ], userId: userid },
-        'mytweets': { userId: userid },
-        'highlights': { userId: userid, is_highlighted: true },
-        'mymedia': { userId: userid, tweetMedia: { $exists: true } },
-    }
-
+        const categoryConditions = {
+            'foryou': {},
+            'following': {},
+            'likes': { userLiked: 1 },
+            'bookmarks': { userBookmarked: 1 },
+            'replies': { $or: [ {tweetType: 'retweet'}, {tweetType: 'retweet'} ], userId: userid },
+            'mytweets': { userId: userid },
+            'highlights': { userId: userid, is_highlighted: true },
+            'mymedia': { userId: userid, tweetMedia: { $exists: true } },
+        }
 
         if(!categoryConditions[category]) return res.status(statusCode.badRequest).json({
             message: "Invalid category",
         });
+
         let tweets;
         try{
 
-        if(category  === 'following' || category === 'foryou'){
-            const following = await allFollowers(userid);
-            const followingIds = following.map(follower => follower.following);
-            if (category === 'following'){
-                tweets = await tweetQuery({matchOptions:{userId : { $in: followingIds} }, currentUID:req.user.id, page:resolvePage})
-            }else{
-                tweets = await tweetQuery({matchOptions: {userId : { $nin: followingIds} }, currentUID:req.user.id, page:resolvePage})
+            if(category  === 'following' || category === 'foryou'){
+                const following = await allFollowers(userid);
+                const followingIds = following.map(follower => follower.following);
+                if (category === 'following'){
+                    // Neo4j Cypher query for following tweets
+                    const result = await session.run(
+                        `MATCH (t:Tweet)-[:POSTED_BY]->(u:User)
+                        WHERE u.id IN $followingIds
+                        RETURN t`
+                        , { followingIds }
+                    );
+                    tweets = result.records.map(record => record.get('t'));
+                }else{
+                    // Neo4j Cypher query for foryou tweets
+                    const result = await session.run(
+                        `MATCH (t:Tweet)-[:POSTED_BY]->(u:User)
+                        WHERE NOT u.id IN $followingIds
+                        RETURN t`
+                        , { followingIds }
+                    );
+                    tweets = result.records.map(record => record.get('t'));
+                }
+            } else {
+                // Neo4j Cypher query for other categories
+                const result = await session.run(
+                    `MATCH (t:Tweet)-[:POSTED_BY]->(u:User)
+                    WHERE t.tweetType = $tweetType AND $categoryConditions
+                    RETURN t`
+                    , { tweetType: category, categoryConditions }
+                );
+                tweets = result.records.map(record => record.get('t'));
             }
-        } else {
-            tweets = await tweetQuery({
-                matchOptions: categoryConditions[category], 
-                currentUID:userid, 
-                page:resolvePage, 
-                sort:category==='replies' ? 1 : -1, 
-                sortByInteraction: category === 'likes' ? 'like' : category === 'bookmarks'?'bookmark' : null
-            });
-            }
-        return res.status(statusCode.success).json({
+
+            return res.status(statusCode.success).json({
                 tweets,
-        });
+            });
+        } catch (err) {
+            console.log(err);
+            return res.status(statusCode.badRequest).json({
+                message: err,
+            });
+        }
     } catch (err) {
         console.log(err);
-        return res.status(statusCode.badRequest).json({
+        return res.status(statusCode.queryError).json({
             message: err,
         });
-    }
-} catch (err) {
-    console.log(err);
-    return res.status(statusCode.queryError).json({
-        message: err,
-    });
-};
+    };
 }
 
 const createTweet = async (req, res) => {
@@ -190,132 +203,59 @@ const createTweet = async (req, res) => {
             if (checkRetweet) {
                 console.log('retweet exists')
                 return res.status(statusCode.badRequest).json({
-                    message: "You have already retweeted this tweet",
+                    message: "retweet already exists",
                 });
             }
-        }
-
-       const resolveTweetText = checkTweetText(tweetText);
-        if (resolveTweetText === false) {
-            return res.status(statusCode.badRequest).json({
-                message: "tweetText is too long or invalid",
-            });
-        }
-        newTweetData.tweetText = resolveTweetText;
-
-
-        // if (req.file) {
-
-        //     await import('file-type').then(async ({ fileTypeFromBuffer }) => {
-        //         const { mime } = await fileTypeFromBuffer(req.file.buffer)
-        //         if (!mime.startsWith('image') && !mime.startsWith('video')) {
-        //             throw new Error('Invalid file type, only JPEG, PNG and MP4 is allowed!');
-        //         }
-        //     })
-
-            // do firebase here
-
-            // newTweetData.tweetMedia = {
-            //     data: req.file.buffer,
-            //     contentType: req.file.mimetype,
-            // };
-        // }
-
-        let originalTweet;
-        if (reference_id) {
-            // console.log('ref id', reference_id)
-            originalTweet = await tweetModel.findOne({ _id: reference_id,  $or: [
-                { is_deleted: false }, 
-                { is_deleted: { $exists: false } }
-            ] });
-            if (!originalTweet) {
-                console.log('no original tweet')
+        } else if (tweetType === 'reply') {
+            console.log('reply')
+            const checkReply = await tweetModel.findOne({ _id: reference_id, tweetType: 'tweet', userId: req.user.id, is_deleted: false});
+            if (!checkReply) {
+                console.log('not reply')
                 return res.status(statusCode.badRequest).json({
-                    status: "fail",
-                    message: "No tweet found with that reference ID",
+                    message: "replying to a tweet that doesn't exist",
                 });
-            } 
-        }
-
-       
-
-        // create transaction to ensure if poll fails, tweet is not created -- must convert to replica set to use transactions
-        newTweetData.userId = req.user.id
-        const tweet = new tweetModel(newTweetData);
-        
-
-        const session = await mongoose.startSession();
-        await session.withTransaction(async () => {
-
-            // filter out any undefined or null values
-            if (tweetPoll) {
-                const poll_options = tweetPoll?.choices.filter(option => !!option);
-                if (poll_options?.length < 2 || poll_options?.length > 4) {
-                    throw Error("Poll must have between 2 and 4 options");
-                } else if (poll_options.some(option => !option.text || option.text.length > 25)) {
-                    throw Error("Invalid poll data")
-                } else if (!tweetPoll.duration || tweetPoll.duration.days < 1 || tweetPoll.duration.hours < 1 || tweetPoll.duration.minutes < 1 ||
-                    tweetPoll.duration.days > 7 || tweetPoll.duration.hours > 24 || tweetPoll.duration.minutes > 60) {
-                    throw Error("Invalid poll duration")
-                }
-                const pollExpiration = new Date(Date.now() + (tweetPoll.duration.days * 24 * 60 * 60 * 1000) + (tweetPoll.duration.hours * 60 * 60 * 1000) + (tweetPoll.duration.minutes * 60 * 1000));
-
-                const poll = new pollModel({ options: poll_options, poll_end: pollExpiration });
-                tweet.poll = poll._id;
-                poll.tweet_id = tweet._id;
-                await poll.save({ session });
-
             }
-
-            
-                    if (!originalTweet) {
-                        tweet.reference_id = reference_id;
-                    }
-                
-                    await tweet.save({ session }); // enum will throw tweet type error or maybe set explicitly idk
-
-        });
-
-        const user = await getUserById(req.user.id);
-        
-        let tweetData = tweet.toObject();
-        // Adding since front end is different query
-        tweetData.user = user
-        tweetData.totalLikes = 0,
-        tweetData.totalBookmarks=0,
-        tweetData.totalVotes=0,
-        tweetData.userLiked=0,
-        tweetData.userRetweeted = 0,
-        tweetData.userBookmarked=0,
-        tweetData.userVoted=0,
-        tweetData.totalReplies = 0;
-        tweetData.totalRetweets = 0;
-        tweetData.userRetweeted = 0;
-        if (originalTweet) {
-            tweetData.reference = originalTweet;
         }
 
-        res.status(statusCode.success).json({
-            tweet: tweetData,
+        if (tweetText && !checkTweetText(tweetText)) {
+            console.log('invalid tweet text')
+            return res.status(statusCode.badRequest).json({
+                message: "invalid tweet text",
+            });
+        }
+
+        //NEO4J
+        const query = `
+            MATCH (user:User {id: $userId})
+            CREATE (tweet:Tweet {
+                tweetType: $tweetType,
+                tweetText: $tweetText,
+                createdAt: TIMESTAMP(),
+                is_deleted: false
+            })<-[:POSTED_BY]-(user)
+            RETURN tweet
+        `;
+
+        const params = {
+            userId: req.user.id,
+            tweetType,
+            tweetText,
+        };
+
+        const result = await session.run(query, params);
+        const createdTweet = result.records[0].get('tweet').properties;
+
+        return res.status(statusCode.created).json({
+            status: 'success',
             data: {
-                is_retweeted: tweetType === 'retweet',
-            }
+                tweet: createdTweet,
+            },
         });
-
     } catch (err) {
-        console.log(err);
-        if (err.name === 'ValidationError') {
-            res.status(statusCode.badRequest).json({
-                status: "fail",
-                message: "Invalid data provided",
-                errors: err.errors,
-            });
-        } else {
-            res.status(statusCode.queryError).json({
-                status: "error",
-                message: err.message || "Some error occurred while creating the tweet.",
-            });
-        }
+        console.error(err);
+        return res.status(statusCode.internalServerError).json({
+            message: err,
+        });
     }
 };
 
@@ -470,15 +410,14 @@ const getReplies = async (req, res) => {
         }
         
         const replies = await tweetQuery({matchOptions:{ reference_id: new ObjectId(req.params.id), tweetType: 'reply' }, currentUID: req.user.id});
-        for (let i = 0; i < replies.length; i++) {
-        const user = await pool.query(
-            `SELECT id, username, name, profile_pic FROM users WHERE id = ${replies[i].userId}`
+        const users = await Promise.all(replies.map(async (reply) => {
+        const user = await session.run(
+            `MATCH (u:User {id: $userId}) RETURN u.id AS id, u.username AS username, u.name AS name, u.profile_pic AS profile_pic`,
+            { userId: reply.userId }
         );
-        replies[i].user = user.rows[0];
-        }
-        return res.status(statusCode.success).json({
-                replies
-        });
+                
+            return user.records[0].toObject();
+        }));
 
     } catch (err) {
         console.log(err)

@@ -21,4 +21,5 @@ router.get("/logout", authServices.logout);
 router.post("/sendOTP", authServices.sendOTP);
 router.post("/change_password", authServices.changePassword);
 router.post("/user_preferences", authServices.userPreferences);
+
 module.exports = router;

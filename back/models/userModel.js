@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const UserSchema = new mongoose.Schema({
     userId: {
         type: Number,
-        required: [true, "user_id is required"],
+        required: true,
     },
     bookMarks: [{
         tweetId: String,

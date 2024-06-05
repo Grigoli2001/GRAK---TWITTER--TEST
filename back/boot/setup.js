@@ -20,6 +20,7 @@ const tokenRoutes = require("../routes/token.routes");
 const notificationRoutes = require("../routes/notification.routes");
 const app = express();
 const PORT = process.env.PORT;
+
 // connect to the database
 const connectToDB = async () => {
   mongoose

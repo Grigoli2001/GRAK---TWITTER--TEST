@@ -1,0 +1,29 @@
+version: '3'
+services:
+  app:
+    build: .
+    ports:
+      - '3002:3002'
+    environment:
+      - PORT=3002
+      - MONGO_URI=mongodb://mongo:27018/twitter
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=Ck0RsFBbnEWd0-nMSeXPsqbegammzu1DqfAWSrLy8nI
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=
+  mongo:
+    image: mongo
+    ports:
+      - '27018:27018'
+  neo4j:
+    image: neo4j
+    ports:
+      - '7687:7687'
+    environment:
+      - NEO4J_AUTH=neo4j/neo4jpassword
+  redis:
+    image: redis
+    ports:
+      - '6379:6379'

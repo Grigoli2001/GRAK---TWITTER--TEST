@@ -14,7 +14,7 @@ const initSockets = (app) => {
 
   const io = new Server(http, {
     cors: {
-      origin: "http://localhost:3000",
+      origin: "http://localhost:3002",
       methods: ["GET", "POST"],
     },
   });

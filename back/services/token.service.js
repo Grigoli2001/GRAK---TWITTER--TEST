@@ -1,6 +1,6 @@
 const { verifyRefreshToken } = require("../utils/auth.utils");
 const { generateToken } = require("../utils/auth.utils");
-const pool = require("../database/db_setup");
+const pool = require("../database/neo4j_setup");
 const statusCodes = require("../constants/statusCode");
 
 const refreshToken = async (req, res) => {
