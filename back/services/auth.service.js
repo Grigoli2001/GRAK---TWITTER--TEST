@@ -113,13 +113,11 @@ const login = async (req, res) => {
     const token = generateToken(user.rows[0]);
     const refreshToken = generateRefreshToken(user.rows[0]);
 
-    return res
-      .status(statusCodes.success)
-      .json({
-        token: token,
-        refresh: refreshToken,
-        username: user.rows[0].username,
-      });
+    return res.status(statusCodes.success).json({
+      token: token,
+      refresh: refreshToken,
+      username: user.rows[0].username,
+    });
   }
 
   // Normal login
@@ -146,13 +144,11 @@ const login = async (req, res) => {
       const token = generateToken(user.rows[0]);
       const refreshToken = generateRefreshToken(user.rows[0]);
 
-      return res
-        .status(statusCodes.success)
-        .json({
-          token: token,
-          refresh: refreshToken,
-          username: user.rows[0].username,
-        });
+      return res.status(statusCodes.success).json({
+        token: token,
+        refresh: refreshToken,
+        username: user.rows[0].username,
+      });
     } catch (error) {
       logger.error(error);
       return res
@@ -174,7 +170,9 @@ const sendOTP = async (req, res) => {
   const otp = generateOTP();
   const subject = "OTP for verification";
   const text = `Your OTP is ${otp}`;
+  console.log(otp);
   const mailSent = await sendEmail(email, subject, text);
+  console.log(mailSent);
   if (mailSent) {
     return res
       .status(statusCodes.success)

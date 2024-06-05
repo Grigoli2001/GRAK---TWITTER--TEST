@@ -45,28 +45,28 @@ const generateOTP = () => {
 
 const sendEmail = async (to, subject, text) => {
   const transporter = nodemailer.createTransport({
-    service: "gmail",
+    host: process.env.EMAIL_SERVICE,
+    port: process.env.EMAIL_PORT, // or the appropriate port provided by Brevo
+    secure: false, // true for 465, false for other ports
     auth: {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASSWORD,
     },
-    tls: {
-      rejectUnauthorized: false,
-    },
   });
 
   const mailOptions = {
-    from: process.env.SMTP_USER,
+    from: process.env.EMAIL,
     to: to,
     subject: subject,
     text: text,
   };
 
   try {
+    console.log(text);
     await transporter.sendMail(mailOptions);
     return true;
   } catch (error) {
-    logger.error("Error while sending email:", error);
+    console.error("Error while sending email:", error);
     return false;
   } finally {
     transporter.close();
