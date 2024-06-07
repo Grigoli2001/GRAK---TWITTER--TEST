@@ -140,7 +140,7 @@ const login = async (req, res) => {
       "MATCH (u:User) WHERE (u.username = $1 OR u.email = $1) RETURN u;",
       { 1: userInfo }
     );
-    console.log(user.records[0]._fields[0].properties);
+
     if (!user.records.length) {
       return res
         .status(statusCodes.notFound)
@@ -156,6 +156,7 @@ const login = async (req, res) => {
 
     req.session.user = {
       email: user.records[0]._fields[0].properties.email,
+      _id: user.records[0]._fields[0].identity.low,
     };
 
     const token = generateToken(user.records[0]._fields[0].properties);
@@ -250,9 +251,11 @@ const userPreferences = async (req, res) => {
       6: profile_pic,
     };
     const user = await session.run(
-      "MATCH (u:User) WHERE u.id = $1 SET u.selectedTopics = $2, u.selectedCategories = $3, u.selectedLanguages = $4, u.username = $5, u.profile_pic = $6 RETURN u;",
+      `MATCH (u:User) WHERE ID(u) = $1 SET u.selectedTopics = $2, u.selectedCategories = $3, u.selectedLanguages = $4, u.username = $5, u.profile_pic = $6 RETURN u;`,
       params
     );
+
+    console.log(user.records.length);
     if (user.records.length) {
       return res
         .status(statusCodes.success)
