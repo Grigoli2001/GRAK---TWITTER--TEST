@@ -1,12 +1,13 @@
 const { Server } = require("socket.io");
 const { createServer } = require("http");
 const { registerSocketMiddleware } = require("./socket-middleware");
+const logger = require("../middleware/winston");
 
 // event listeners
 const registerMessageHandlers = require("./messageHandlers");
 const registerPollHandlers = require("./pollHandlers");
 const registerNotificationHandlers = require("./notificationHandlers");
-const registerFeedHandlers = require("./feedHandlers"); 
+const registerFeedHandlers = require("./feedHandlers");
 
 const httpPort = 4000;
 const initSockets = (app) => {
@@ -50,7 +51,7 @@ const initSockets = (app) => {
   });
 
   http.listen(httpPort, () => {
-    console.log(`listening on ${httpPort}`);
+    logger.info(`Sockets listening on port:${httpPort}`);
   });
 };
 

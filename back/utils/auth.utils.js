@@ -2,6 +2,7 @@ const jwt = require("jsonwebtoken");
 const otpGenerator = require("otp-generator");
 const nodemailer = require("nodemailer");
 const logger = require("../middleware/winston");
+const bcrypt = require("bcrypt");
 
 const makeUsername = (name) => {
   const username =
@@ -13,21 +14,18 @@ const makeUsername = (name) => {
   return username;
 };
 
-const checkExisting = async (client, data, column) => {
+const checkExisting = async (session, data, column) => {
   try {
+    let query, params;
     if (column) {
-      const { rows } = await client.query(
-        "SELECT $1 FROM users WHERE $2 = $3;",
-        [1, column, data]
-      );
-      return rows.length > 0;
+      query = `MATCH (u:User) WHERE u.${column} = $data RETURN u LIMIT 1`;
+      params = { data };
     } else {
-      const { rows } = await client.query(
-        "SELECT $1 FROM users WHERE username = $2 OR email = $2;",
-        [1, data]
-      );
-      return rows.length > 0;
+      query = `MATCH (u:User) WHERE u.username = $data OR u.email = $data RETURN u LIMIT 1`;
+      params = { data };
     }
+    const result = await session.run(query, params);
+    return result.records.length > 0;
   } catch (error) {
     logger.error(`Error while checking existing ${column}:`, error);
     return true;
@@ -104,6 +102,14 @@ const verifyRefreshToken = (token) => {
   return jwt.verify(token, process.env.REFRESH_SECRET_KEY);
 };
 
+const hashPassword = async (password) => {
+  return await bcrypt.hash(password, 10);
+};
+
+const comparePassword = async (password, hash) => {
+  return await bcrypt.compare(password, hash);
+};
+
 module.exports = {
   makeUsername,
   checkExisting,
@@ -112,4 +118,6 @@ module.exports = {
   generateToken,
   generateRefreshToken,
   verifyRefreshToken,
+  hashPassword,
+  comparePassword,
 };

@@ -1,12 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
-import { FcGoogle } from "react-icons/fc";
 import { FaApple } from "react-icons/fa";
 import { Button } from "@material-tailwind/react";
 import RegisterPopup from "../components/authComponents/RegisterPopup";
 import LoginPopup from "../components/authComponents/LoginPopup";
 import LoginFooter from "../components/authComponents/LoginFooter";
 import Google from "../components/authComponents/Google";
-import { ToastContainer } from "react-toastify";
 const LoginPage = () => {
   const [isRegisterPopupOpen, setIsRegisterPopupOpen] = useState(false);
   const [isLoginPopupOpen, setIsLoginPopupOpen] = useState(false);

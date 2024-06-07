@@ -13,14 +13,13 @@ const db_config = {
 let db_connection;
 
 function startConnection() {
-
   db_connection = new pg.Pool(db_config);
 
   db_connection.connect((err, client) => {
     if (!err) {
       logger.info("PostgreSQL Connected");
     } else {
-      console.log(err)
+      console.log(err);
       logger.error("PostgreSQL Connection Failed");
       startConnection();
     }

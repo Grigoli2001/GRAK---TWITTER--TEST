@@ -9,7 +9,6 @@ const logger = require("../middleware/winston");
 const notFound = require("../middleware/notFound");
 const initSockets = require("../sockets/sockets");
 const verifyToken = require("../middleware/verifyToken");
-
 // routes
 const tweetRoutes = require("../routes/tweet.routes");
 const authRoutes = require("../routes/auth.routes");
