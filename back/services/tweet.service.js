@@ -5,7 +5,8 @@ const statusCode = require("../constants/statusCode");
 const mongoose = require("mongoose");
 const ObjectId = mongoose.Types.ObjectId;
 // const pool = require("../database/db_setup");
-const { tweetQuery, allFollowers, getUserById, checkTweetText } = require('../utils/tweet.utils');
+const { tweetQuery, checkTweetText } = require('../utils/tweet.utils');
+const { getUserFullDetails, allFollowers } = require('../utils/user.utils');
 
 const getAllTweets = async (req, res) => {
   try {
@@ -276,7 +277,7 @@ const createTweet = async (req, res) => {
 
         });
 
-        const user = await getUserById(req.user.id);
+        const user = await getUserFullDetails(req.user.id, 'id');
         
         let tweetData = tweet.toObject();
         // Adding since front end is different query
@@ -471,10 +472,11 @@ const getReplies = async (req, res) => {
         
         const replies = await tweetQuery({matchOptions:{ reference_id: new ObjectId(req.params.id), tweetType: 'reply' }, currentUID: req.user.id});
         for (let i = 0; i < replies.length; i++) {
-        const user = await pool.query(
-            `SELECT id, username, name, profile_pic FROM users WHERE id = ${replies[i].userId}`
-        );
-        replies[i].user = user.rows[0];
+         const user = await getUserFullDetails(replies[i].userId, 'id');
+        // const user = await pool.query(
+        //     `SELECT id, username, name, profile_pic FROM users WHERE id = ${replies[i].userId}`
+        // );
+            replies[i].user = user;
         }
         return res.status(statusCode.success).json({
                 replies

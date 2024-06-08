@@ -3,12 +3,18 @@ const { getDriver } = require("../database/neo4j_setup");
 const logger = require("../middleware/winston");
 // const pool = require("../database/db_setup");
 // const jwt = require("jsonwebtoken");
+var neo4j = require('neo4j-driver');
 const tweetModel = require("../models/tweetModel");
+const { getUserFullDetails } = require("../utils/user.utils");
 // const { post } = require("../routes/auth.routes");
 // const { allFollowers } = require("../utils/tweet.utils");
 
 
 
+   // const user = await pool.query(`SELECT id, name, username, email, dob, profile_pic, created_at, cover FROM users WHERE username = $1`, [username]);
+    // if (!user.rowCount) {
+    //   return res.status(statusCodes.notFound).json({ message: "User not found" });
+    // }
 const getUserSimple = async (req, res) => {
 
   try{
@@ -19,33 +25,27 @@ const getUserSimple = async (req, res) => {
   } else if (username) {
     const session = getDriver().session();  
     const result = await session.run(
-      `MATCH (u:User) WHERE u.username = $1 RETURN u`,
+      `MATCH (u:User) WHERE u.username = $username RETURN u`,
       { 1: username }
     );
     const user = result.records.map(record => record.get('u').properties)?.[0];
     if (!user) {
       return res.status(statusCodes.notFound).json({ message: "User not found" });
     }
-    // const user = await pool.query(`SELECT id, name, username, email, dob, profile_pic, created_at, cover FROM users WHERE username = $1`, [username]);
-    // if (!user.rowCount) {
-    //   return res.status(statusCodes.notFound).json({ message: "User not found" });
-    // }
+
     return res.status(statusCodes.success).json({ user});
 
   } else {
     res.status(statusCodes.badRequest).json({ message: "Missing fields" });
   }
   } catch (err) {
-    logger.error(err);
+    // logger.error(err);
+    console.log(err)
     res.status(statusCodes.serverError).json({ message: "Error fetching user" });
   };
 }
 
-const getUsers = async (req, res) => {
-  const { q } = req.query;
 
-  try {
-    let qformat = `%${q.trim()}%`;
 
     // const users = await pool.query(`
     // SELECT id, name, username, email, profile_pic, created_at 
@@ -57,43 +57,74 @@ const getUsers = async (req, res) => {
     // if (!users?.rowCount) {
     //   return res.status(statusCodes.notFound).json({ message: "No users found" });
     // }
+const getUsers = async (req, res) => {
+  const { q } = req.query;
 
-    // TODO: fetch data w/o password
+  try {
+    let qformat = `${q.trim()}`;
+
     const session = getDriver().session();
     const result = await session.run(
-      `MATCH (u:User) WHERE u.username CONTAINS $1 OR u.name CONTAINS $2 RETURN u LIMIT 6`,
-      { 1: qformat, 2: qformat }
+      `MATCH (u:User) WHERE u.id <> $current_userid AND (u.username  CONTAINS $query_user OR u.name CONTAINS $query_user) 
+      RETURN 
+      {
+        id: u.id, 
+        name: u.name, 
+        username: u.username, 
+        email: u.email, 
+        profile_pic: u.profile_pic, 
+        created_at: u.created_at
+        } as u
+      ORDER BY u.username LIMIT 6`,
+      { current_userid: req.user.id, query_user: qformat }
     );
-    const users = result.records.map(record => record.get('u').properties);
-
-    res.status(statusCodes.success).json({ users });
+    const users = result.records.map(record => record.get('u'));
+    console.log(users, 'users')
+    return res.status(statusCodes.success).json({ users });
   } catch (err) {
+    console.log(err)
     logger.error(err);
-    res.status(statusCodes.serverError).json({ message: "Error fetching users" });
+   return  res.status(statusCodes.serverError).json({ message: "Error fetching users" });
   }
 }
 
 
+  // const user = await pool.query(`SELECT id, name, username, email, profile_pic, created_at, bio, website, location, cover, dob FROM users WHERE id = $1`, [id]);
+
+  // if (!user.rowCount) {
+  //   return res.status(statusCodes.notFound).json({ message: "User not found" });
+  // }
 const getUserById = async (req, res) => {
   try {
     const { id } = req.query;
-    // const user = await pool.query(`SELECT id, name, username, email, profile_pic, created_at, bio, website, location, cover, dob FROM users WHERE id = $1`, [id]);
 
-    // if (!user.rowCount) {
-    //   return res.status(statusCodes.notFound).json({ message: "User not found" });
-    // }
     const session = getDriver().session();
     const result = await session.run(
-      `MATCH (u:User) WHERE u.id = $1 RETURN u`,
-      { 1: id }
+      `MATCH (u:User) WHERE u.id = $userid
+      RETURN
+      {
+        id: u.id, 
+        name: u.name, 
+        username: u.username, 
+        email: u.email, 
+        profile_pic: u.profile_pic, 
+        created_at: u.created_at, 
+        bio: u.bio, 
+        website: u.website, 
+        location: u.location, 
+        cover: u.cover, 
+        dob: u.dob
+      } as u
+     `,
+      { userid: id }
     );
-    const userData = result.records.map(record => record.get('u').properties)?.[0];
+    const user = result.records.map(record => record.get('u'))?.[0];
     if (!user) {
       return res.status(statusCodes.notFound).json({ message: "User not found" });
     }
-    const { password, ...user } = userData;
     return res.status(statusCodes.success).json({ user });
   } catch (err) {
+    console.log(err)
     logger.error(err);
     res.status(statusCodes.serverError).json({ message: "Error fetching user" });
   }
@@ -110,10 +141,8 @@ const getUserByUsername = async (req, res) => {
       })
     }
 
-
+    
     // const userData = await pool.query(`SELECT id, name, username, email, profile_pic, created_at, bio, website, location, cover, dob FROM users WHERE username = $1`, [username]);
-
-
     // const userData = await pool.query(`
     // SELECT u.id, name, username, email, profile_pic, u.created_at, cover, website, location, bio, dob,
     // COUNT(DISTINCT f1.following) AS following_count,
@@ -140,32 +169,37 @@ const getUserByUsername = async (req, res) => {
     //     return res.status(statusCodes.notFound).json({ message: "User not found" });
     // }
 
-        const session = getDriver().session();
-        const result = await session.run(
-          `MATCH (u:User) WHERE u.username = $1 
-          RETURN  u
-          `,
-          { 1: username }
-        );
-        const userData = result.records.map(record => record.get('u').properties)?.[0];
-        const { password, ...user } = userData;
-        console.log(userData, 'userData')
+    //     const session = getDriver().session();
+    //     const result = await session.run(
+    //       `MATCH (u:User) WHERE u.username = $1 
+    //       RETURN  u
+    //       `,
+    //       { 1: username }
+    //     );
+    //     const userData = result.records.map(record => record.get('u').properties)?.[0];
+    //     const { password, ...user } = userData;
+    //     console.log(userData, 'userData')
 
-        if (!userData.length) {
-          return res.status(statusCodes.notFound).json({ message: "User not found" });
-        }
-    // console.log(user, 'user')
-        return res.status(statusCodes.success).json({ user });
+    //     if (!userData.length) {
+    //       return res.status(statusCodes.notFound).json({ message: "User not found" });
+    //     }
+    // // console.log(user, 'user')
+    //     return res.status(statusCodes.success).json({ user });
 
         // console.log(userData.rows[0], 'userData')
 
       //   let user = userData.rows[0];
-      //   let postcount = await tweetModel.countDocuments({ userId: user.id,  $or: [
-      //     { is_deleted: false }, 
-      //     { is_deleted: { $exists: false } }
-      // ]});
-      // user.post_count = postcount;
-      // return res.status(statusCodes.success).json({ user });
+
+      const user = getUserFullDetails(username, 'username');
+    if (!user) {
+      return res.status(statusCodes.notFound).json({ message: "User not found" });
+    }
+        let postcount = await tweetModel.countDocuments({ userId: user.id,  $or: [
+          { is_deleted: false }, 
+          { is_deleted: { $exists: false } }
+      ]});
+      user.post_count = postcount;
+      return res.status(statusCodes.success).json({ user });
 
   } catch (err) {
     console.log(err)
@@ -180,15 +214,18 @@ const getExploreUsers = async (req, res) => {
     const { limit, page } = req.query
     const session = getDriver().session();
 
-    
+    console.log(typeof(parseInt(limit)), 'limit')
+
+    const intLimit = parseInt(limit) ?? 3;
+    const intPage = parseInt(page) ?? 0;
+    const intSkip = intPage * intLimit;
 
     const result = await session.run(
-      `MATCH (u:User) WHERE u.id <> $1 AND NOT (u)-[:FOLLOWS]->(:User {id: $1}) RETURN u ORDER BY rand()`,
-      { 1: 1 }
+      `MATCH (u:User) WHERE u.id <> $userid AND NOT (u)-[:FOLLOWS]->(:User {id: $userid})  RETURN u ORDER BY rand() SKIP $skip LIMIT $limit`,
+      { userid: 1, limit: neo4j.int(intLimit), skip: neo4j.int(intSkip)}
     ); 
     const users = result.records.map(record => record.get('u').properties);
     // console.log(users, 'users')
-      res.status(statusCodes.success).json({ users });
     // const exploreUsers = await pool.query(
     //   `SELECT 
     //     u.id, username, bio, profile_pic,name,
@@ -209,7 +246,7 @@ const getExploreUsers = async (req, res) => {
     //   LIMIT $2`,
     //   [req.user.id, limit ?? 3]
     // );
-    res.status(statusCodes.success).json({ users });
+    return res.status(statusCodes.success).json({ users });
   } catch (err) {
     // logger.error(err);
     console.log(err)
@@ -245,10 +282,34 @@ const updateUser = async (req, res) => {
     );
     res.status(statusCodes.success).json({ message: "User updated" });
   } catch (err) {
+    console.log(err)
     logger.error(err);
     res.status(statusCodes.serverError).json({ message: "Error updating user" });
   }
 }
+
+
+
+  // const query = `
+  // SELECT f1.user_id, users.id, username, name, profile_pic,
+  // COUNT(DISTINCT f2.user_id) AS followers_count,
+  // COUNT(DISTINCT f1.following) AS following_count,
+  // CASE WHEN users.id IN (SELECT following from follows where user_id= $1) THEN 1 ELSE 0 END as is_followed
+  // FROM follows f1
+  // JOIN users 
+  // ON f1.${followType === 'following' ? 'following' : 'user_id'} = users.id
+  // FULL OUTER JOIN follows f2 ON f1.${followType === 'following' ? 'following' : 'user_id'} = f2.${followType === 'following' ? 'user_id' : 'following'}
+  // WHERE f1.${followType === 'following' ? 'user_id' : 'following'} = $1
+  // ${resolveVerified}
+  // GROUP BY f1.user_id, users.id, username, name, profile_pic
+  // ORDER BY users.username
+  // OFFSET $2 ROWS FETCH NEXT $3 ROWS ONLY
+  // `
+  // ;
+  // const follow_data = await pool.query(
+  //     query,
+  //     [userId, toSkip, resolveLimit] // default limit is 20 
+  // );
 
 const getFollowData = async (req, res) => {
 
@@ -263,34 +324,19 @@ const getFollowData = async (req, res) => {
       const pageSize = parseInt(page) ??  0;
       const resolveLimit = parseInt(limit) ?? 20;
       const toSkip = pageSize * resolveLimit;
-      const resolveVerified = verified === 'true' ? 'AND users.verified = true' : '';
-
-
-      // const query = `
-      // SELECT f1.user_id, users.id, username, name, profile_pic,
-      // COUNT(DISTINCT f2.user_id) AS followers_count,
-      // COUNT(DISTINCT f1.following) AS following_count,
-      // CASE WHEN users.id IN (SELECT following from follows where user_id= $1) THEN 1 ELSE 0 END as is_followed
-      // FROM follows f1
-      // JOIN users 
-      // ON f1.${followType === 'following' ? 'following' : 'user_id'} = users.id
-      // FULL OUTER JOIN follows f2 ON f1.${followType === 'following' ? 'following' : 'user_id'} = f2.${followType === 'following' ? 'user_id' : 'following'}
-      // WHERE f1.${followType === 'following' ? 'user_id' : 'following'} = $1
-      // ${resolveVerified}
-      // GROUP BY f1.user_id, users.id, username, name, profile_pic
-      // ORDER BY users.username
-      // OFFSET $2 ROWS FETCH NEXT $3 ROWS ONLY
-      // `
-      // ;
-      // const follow_data = await pool.query(
-      //     query,
-      //     [userId, toSkip, resolveLimit] // default limit is 20 
-      // );
+      const resolveVerified = verified === 'true' ? 'AND u.verified = true' : '';
+      const resolveFollowType = followType === 'followers' ? '<-[:FOLLOWS]-' : '-[:FOLLOWS]->';
 
       const session = getDriver().session();
       const result = await session.run(
-        `MATCH (u:User)-[:FOLLOWS]->(f:User) WHERE u.id = $1 RETURN f`,
-        { 1: userId }
+        `MATCH (u:User)${resolveFollowType}(f:User) WHERE u.id = $userId ${resolveVerified} 
+        OPTIONAL MATCH (f)<-[:FOLLOWS]-(follower:User)
+        OPTIONAL MATCH (f)-[:FOLLOWS]->(following:User)
+        WITH f, count(DISTINCT follower) AS followers_count, count(DISTINCT following) AS following_count
+        RETURN f, followersCount, followingCount
+        SKIP $toSkip
+        LIMIT $resolveLimit`,
+        { userId: userId, toSkip: toSkip, resolveLimit: resolveLimit }
       );
       const follow_data = result.records.map(record => record.get('f').properties);
       console.log(follow_data, 'follow_data')
@@ -302,6 +348,10 @@ const getFollowData = async (req, res) => {
 }
 
 
+   // await pool.query(
+        //   `INSERT INTO follows(user_id, following) VALUES ($1, $2)`,
+        //   [req.user.id, followerId]
+      //  );
 
 const addFollower = async (req, res) => {
     const { followerId } = req.body;
@@ -310,12 +360,7 @@ const addFollower = async (req, res) => {
 
         if ( !followerId) {
           return res.status(statusCodes.badRequest).json({ message: "Missing fields" });
-        } 
-        // await pool.query(
-        //   `INSERT INTO follows(user_id, following) VALUES ($1, $2)`,
-        //   [req.user.id, followerId]
-      //  );
-        
+        }    
         const session = getDriver().session();
         await session.run(
           `MATCH (u:User {id: $1}), (f:User {id: $2}) MERGE (u)-[:FOLLOWS]->(f)`,
@@ -324,10 +369,16 @@ const addFollower = async (req, res) => {
 
         res.status(statusCodes.success).json({ message: "Follower added" });
         } catch (error) {
+          console.log(error)
         logger.error("Error adding follower", error);
         res.status(statusCodes.serverError).json({ message: "Error" });
       } 
 }
+
+  // await pool.query(
+        //     `DELETE FROM follows WHERE user_id = $1 AND following = $2`,
+        //     [req.user.id, followerId]
+        // );
 
 const removeFollower = async (req, res) => {
     const { followerId } = req.body;
@@ -336,10 +387,7 @@ const removeFollower = async (req, res) => {
           if (!followerId) {
           return res.status(statusCodes.badRequest).json({ message: "Missing follow id" });
       } 
-        // await pool.query(
-        //     `DELETE FROM follows WHERE user_id = $1 AND following = $2`,
-        //     [req.user.id, followerId]
-        // );
+      
         const session = getDriver().session();
         await session.run(
           `MATCH (u:User {id: $1})-[r:FOLLOWS]->(f:User {id: $2}) DELETE r`,
@@ -347,6 +395,7 @@ const removeFollower = async (req, res) => {
         );
         res.status(statusCodes.success).json({ message: "Follower removed" });
         } catch (error) {
+          console.log(error)  
         logger.error("Error removing follower", error);
         res.status(statusCodes.serverError).json({ message: "Error" });
         } 
@@ -361,7 +410,5 @@ module.exports = {
     addFollower,
     removeFollower,
     getFollowData
-    // getAllFollowers,
-    // getAllFollowing,
 };
 

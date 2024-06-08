@@ -44,7 +44,8 @@ const connectToNeo4j =  async () => {
   console.log(URI, USER, PASSWORD)
 
   try {
-    driver = neo4j.driver(URI, neo4j.auth.basic(USER, PASSWORD))
+    driver = neo4j.driver(URI, neo4j.auth.basic(USER, PASSWORD), 
+  { disableLosslessIntegers: true })
     const serverInfo = await driver.getServerInfo()
     if (!serverInfo) {
       throw new Error("Server info not found")

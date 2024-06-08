@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const userServices = require('../services/user.service');
-const { route } = require('./tweet.routes');
 
 router.get('/explore-users', userServices.getExploreUsers);
 router.get('', userServices.getUsers);

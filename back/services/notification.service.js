@@ -48,7 +48,7 @@ const getNotifications = async (req, res) => {
       .lean();
 
     for (let i = 0; i < notifications.length; i++) {
-      const user = await getUserById(notifications[i].triggeredByUserId);
+      const user = await getUserById(notifications[i].triggeredByUserId, "id");
       notifications[i].triggeredByUser = user;
     }
     return res.status(statusCode.success).json({ notifications });

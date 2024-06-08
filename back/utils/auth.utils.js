@@ -3,6 +3,7 @@ const otpGenerator = require("otp-generator");
 const nodemailer = require("nodemailer");
 const logger = require("../middleware/winston");
 const bcrypt = require("bcrypt");
+const { v4: uuidv4 } = require("uuid");
 
 const makeUsername = (name) => {
   const username =
@@ -13,6 +14,11 @@ const makeUsername = (name) => {
 
   return username;
 };
+
+function generateNumberUUID() {
+  const uuid = uuidv4().replace(/-/g, ''); // generate UUID and remove hyphens
+  return uuid;
+}
 
 const checkExisting = async (session, data, column) => {
   try {
@@ -120,4 +126,5 @@ module.exports = {
   verifyRefreshToken,
   hashPassword,
   comparePassword,
+  generateNumberUUID,
 };

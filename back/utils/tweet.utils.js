@@ -1,37 +1,8 @@
 const tweetModel = require("../models/tweetModel");
 const pollModel = require("../models/pollModel");
 const Interaction = require("../models/interactionModel");
-// const pool = require("../database/db_setup");
+const { getUserFullDetails } = require("./user.utils");
 
-const getUserById = async (currentUID) => {
-  const currentUIDasInt = parseInt(currentUID);
-  const user = await pool.query(
-    `SELECT u.id, name, username, email, profile_pic, u.created_at,
-    COUNT(DISTINCT f1.following) AS following_count,
-    COUNT(DISTINCT f2.user_id) AS followers_count,
-    CASE 
-      WHEN u.id IN (SELECT following from follows where user_id= $1) 
-      THEN 1 
-      ELSE 0 
-      END 
-      AS is_followed
-    FROM 
-        users u
-    LEFT JOIN 
-        follows f1 ON u.id = f1.user_id
-    LEFT JOIN 
-        follows f2 ON u.id = f2.following
-    WHERE u.id = $1
-    GROUP BY 
-        u.id  `,
-    [currentUIDasInt]
-  );
-
-  if (!user.rowCount) {
-    throw new Error("User not found");
-  }
-  return user.rows[0];
-};
 // constant page size ; consider moving to global file
 const PAGE_SIZE = 20;
 const tweetQuery = async ({
@@ -278,13 +249,13 @@ const tweetQuery = async ({
 
       if (!tweet.user) {
         try {
-          tweet.user = await getUserById(tweet.userId);
+          tweet.user = await getUserFullDetails(tweet.userId, "id");
         } catch (e) {
           console.log(e);
         }
       }
       if (tweet.reference && !tweet.reference.user) {
-        tweet.reference.user = await getUserById(tweet.reference.userId);
+        tweet.reference.user = await getUserFullDetails(tweet.reference.userId, "id");
       }
     })
   );
@@ -308,17 +279,14 @@ const checkTweetText = (tweetText) => {
   return resolveTweetText;
 };
 
-const allFollowers = async (userId) => {
-  const followers = await pool.query(
-    `SELECT following FROM follows WHERE user_id = $1`,
-    [userId]
-  );
-  return followers.rows;
-};
+  // const followers = await pool.query(
+  //   `SELECT following FROM follows WHERE user_id = $1`,
+  //   [userId]
+  // );
+
+
 
 module.exports = {
   tweetQuery,
-  allFollowers,
-  getUserById,
   checkTweetText,
 };

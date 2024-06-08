@@ -11,6 +11,9 @@ module.exports = (io, socket) => {
       if (data.tweetId) {
         const tweet = await tweetModel.findOne({ _id: data.tweetId });
         const author = tweet?._doc?.userId;
+        if (!author) {
+          throw new Error("Author not found");
+        }
         data.userId = author;
       }
       logger.info("notification:new", data);
@@ -20,8 +23,8 @@ module.exports = (io, socket) => {
         status: (statusCode) => ({
           json: (response) => {
             logger.info("Notification created");
-            io.to(author).emit("notification:created", response.notification);
-            console.log("author  ", author, "  emitted");
+            io.to(data.userId).emit("notification:created", response.notification);
+            // console.log("author  ", author, "  emitted");
           },
         }),
       };
@@ -32,9 +35,10 @@ module.exports = (io, socket) => {
         res
       );
 
-      socket.to(author).emit("notification:created", notification);
+      // Todo: fix this
+      socket.to(data.userId).emit("notification:created", notification);
     } catch (err) {
-      logger.error("Error in handler" + err);
+      logger.error("Error in handler " + err);
     }
   });
 };

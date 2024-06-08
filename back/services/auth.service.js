@@ -11,6 +11,7 @@ const {
   generateRefreshToken,
   hashPassword,
   comparePassword,
+  generateNumberUUID
 } = require("../utils/auth.utils");
 
 const signup = async (req, res) => {
@@ -52,12 +53,14 @@ const signup = async (req, res) => {
       isConnectMarked,
       isPersonalizedMarked,
       profile_pic: "default_profile_pic.png",
+      id: generateNumberUUID()
     };
 
     const addUser = await session.run(
       `CREATE (u:User {
               email: $email, 
               name: $name, 
+              id: $id,
               username: $username, 
               password: $hashedPassword, 
               dob: $dob, 
@@ -244,6 +247,7 @@ const changePassword = async (req, res) => {
 };
 
 const userPreferences = async (req, res) => {
+  
   const {
     userId,
     selectedTopics,
