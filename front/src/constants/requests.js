@@ -3,14 +3,14 @@ export const requests = {
   signup: "/auth/signup",
   check: "/auth/check",
   logout: "/auth/logout",
-  sendOTP: "/auth/sendOTP",
+  sendOTP: "/auth/sendotp",
 
   getUsers: "/users",
   getUser: "/users/user",
   updateUser: "/users/update",
-  change_password: "/auth/change_password",
+  change_password: "/auth/change-password",
   changeUsername: "/profile/changeUsername",
-  userPreferences: "/auth/user_preferences",
+  userPreferences: "/auth/user-preferences",
 
   exploreUsers: "/users/explore-users",
   getActiveChats: '/messages/active-chats'

@@ -1,6 +1,6 @@
 const statusCodes = require("../constants/statusCode");
 const logger = require("../middleware/winston");
-const driver = require("../database/neo4j_setup");
+const { getDriver } = require("../database/neo4j_setup");
 
 const {
   makeUsername,
@@ -27,7 +27,7 @@ const signup = async (req, res) => {
   if (!email || !name || !password) {
     res.status(statusCodes.badRequest).json({ message: "Missing fields" });
   }
-  const session = driver.session();
+  const session = getDriver()?.session();
   try {
     const emailExists = await checkExisting(session, email, "email");
     if (emailExists) {
@@ -90,8 +90,10 @@ const checkExistingUser = async (req, res) => {
       .json({ message: "Missing fields" });
   }
   try {
-    const session = driver.session();
-    if (await checkExisting(session, req.body.userInfo, "email")) {
+    const session = getDriver()?.session();
+
+    let userExists = await checkExisting(session, req.body.userInfo, "email") || await checkExisting(session, req.body.userInfo, "username");
+    if (userExists) {
       return res.status(statusCodes.success).json({ message: "User exists" });
     }
     return res
@@ -103,7 +105,7 @@ const checkExistingUser = async (req, res) => {
       message: "Exception occurred while checking existing user",
     });
   } finally {
-    session.close();
+    // session.close();
   }
 };
 
@@ -111,7 +113,8 @@ const login = async (req, res) => {
   const { userInfo, password, usingGoogle } = req.body;
 
   try {
-    session = driver.session();
+    const session = getDriver()?.session();
+
     // Check if the user is logging in with google
     if (usingGoogle) {
       const user = await session.run(
@@ -218,7 +221,7 @@ const sendOTP = async (req, res) => {
 const changePassword = async (req, res) => {
   const { email, newPassword } = req.body;
   try {
-    session = driver.session();
+    session = getDriver().session();
     const hashedPassword = await hashPassword(newPassword);
     const user = await session.run(
       "MATCH (u:User) WHERE u.email = $1 SET u.password = $2 RETURN u;",
@@ -250,7 +253,8 @@ const userPreferences = async (req, res) => {
     profile_pic,
   } = req.body;
   try {
-    session = driver.session();
+    session = getDriver().session();
+
 
     const params = {
       1: userId,
