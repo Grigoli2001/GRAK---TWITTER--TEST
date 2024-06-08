@@ -3,7 +3,7 @@ import { IoMdClose, IoMdArrowBack, IoMdCheckmark } from "react-icons/io";
 import { FaRegEye, FaEyeSlash } from "react-icons/fa";
 import ReactLoading from "react-loading";
 import { Checkbox } from "@material-tailwind/react";
-import { ToastContainer, toast } from "react-toastify";
+// import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { requests } from "../../constants/requests";
 import instance from "../../constants/axios";
@@ -130,6 +130,7 @@ const RegisterPopup = ({ onClose, user, setUser }) => {
         setCurrentPage(currentPage + 1);
         break;
       case 4:
+        console.log(VerificationCode, verificationInput)
         if (verificationInput === VerificationCode.toString()) {
           setCurrentPage(currentPage + 1);
         } else {
@@ -179,12 +180,7 @@ const RegisterPopup = ({ onClose, user, setUser }) => {
     }
   }, [isEmailFocused, invalidEmail, user.email]);
 
-  useEffect(() => {
-    if (currentPage === 4) {
-      console.log("Sending OTP");
-      sendOTP();
-    }
-  }, [currentPage]);
+
 
   const sendOTP = async () => {
     setLoading(true);
@@ -200,6 +196,13 @@ const RegisterPopup = ({ onClose, user, setUser }) => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (currentPage === 4) {
+      console.log("Sending OTP");
+      sendOTP();
+    }
+  }, [currentPage]);
 
   const finishRegistration = () => {
     console.log("Finishing registration");
@@ -642,7 +645,7 @@ const RegisterPopup = ({ onClose, user, setUser }) => {
                             : "text-lg"
                         }`}
                       >
-                        Email
+                        Date of Birth
                       </label>
                       <div className="absolute right-2 top-7 flex justify-center items-center bg-customGreen h-4 w-4 rounded-full">
                         <IoMdCheckmark className="text-black text-xs" />
@@ -705,7 +708,7 @@ const RegisterPopup = ({ onClose, user, setUser }) => {
                       </label>
                     </div>
                     <span
-                      onClick={sendOTP.bind(this)}
+                      onClick={sendOTP}
                       className="text-blue-600 text-xs ml-3 hover:pointer hover:underline mt-2 cursor-pointer w-32"
                     >
                       Didn't receive email?

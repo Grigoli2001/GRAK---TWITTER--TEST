@@ -4,7 +4,7 @@ const { Schema } = mongoose;
 const NotificationSchema = new Schema(
   {
     userId: {
-      type: Number,
+      type: String,
       required: [true, "user_id is required"],
     },
     tweetId: {
@@ -14,7 +14,7 @@ const NotificationSchema = new Schema(
       required: false,
     },
     triggeredByUserId: {
-      type: Number,
+      type: String,
       required: [true, "triggered_by_user_id is required"],
     },
     notificationType: {

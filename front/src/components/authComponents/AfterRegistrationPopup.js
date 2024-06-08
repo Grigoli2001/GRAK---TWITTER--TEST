@@ -546,7 +546,7 @@ const AfterRegistrationPopup = ({ onClose }) => {
                           onClick={(e) => handleNext(7)}
                           className="font-medium text-white p-2 border-2 border-gray-500 hover:bg-gray-800 rounded-full w-full h-12"
                         >
-                          skip for now
+                          Skip for now
                         </button>
                       )}
                     </div>

@@ -28,20 +28,17 @@ const { getDriver } = require("../database/neo4j_setup");
   // return user.rows[0];
 const getUserFullDetails = async (currentUser, fetch_how) => {
 
-let currentUID;
-  if (fetch_how === "id" ){
-    currentUID = parseInt(currentUser);
-  }else if (fetch_how === "username"){
-    currentUID = currentUser;
-  }else{
+  if (fetch_how !== "id" && fetch_how !== "username") {
     throw new Error("Invalid fetch_how: should be id or username");
   }
 
+  console.log("currentUser", currentUser, fetch_how)
+
   const session = getDriver().session();
   const result = await session.run(
-    `MATCH (u:User {${fetch_how}: $currentUID})
-    OPTIONAL MATCH (u)-[f1:follows]->(following:User)
-    OPTIONAL MATCH (u)<-[f2:follows]-(follower:User)
+    `MATCH (u:User {${fetch_how}: $currentUser})
+    OPTIONAL MATCH (u)-[f1:FOLLOWS]->(following:User)
+    OPTIONAL MATCH (u)<-[f2:FOLLOWS]-(follower:User)
     RETURN u.id as id, u.name as name, u.username as username, u.email as email, u.profile_pic as profile_pic, u.created_at as created_at,
     COUNT(DISTINCT following) as following_count,
     COUNT(DISTINCT follower) as followers_count,
@@ -52,12 +49,13 @@ let currentUID;
       END 
       AS is_followed
     `,
-    { currentUID }
+    { currentUser }
   );
   if (!result.records.length) {
     throw new Error("User not found");
   }
-  const user = result.records[0].toObject();
+  const user = result.records.map((record) => record.toObject())[0];
+  console.log("user in getUserFull", user) 
   return user;
 
 };

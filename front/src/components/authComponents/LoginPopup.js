@@ -196,7 +196,7 @@ const LoginPopup = ({ onClose, openSignUpFromLogin, Google }) => {
                       />
                       <label
                         htmlFor="email"
-                        className={`absolute top-4 left-4  ${
+                        className={`absolute top-4 left-4 pointer-events-none ${
                           isEmailFocused ? "text-blue-600" : "text-gray-400"
                         } transition-all text-base ${
                           isEmailFocused || user.email

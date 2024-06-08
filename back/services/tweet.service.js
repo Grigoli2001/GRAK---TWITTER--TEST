@@ -74,7 +74,7 @@ const getTweetsByCategory = async (req, res) => {
         });
     }
     let resolvePage = parseInt(page) ?? 0
-    const userid = parseInt(userId)
+    const userid =  userId
 
     const categoryConditions = {
         'foryou': {},

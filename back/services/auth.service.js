@@ -37,7 +37,6 @@ const signup = async (req, res) => {
       });
     }
     let username = makeUsername(name);
-    const userId = uuidv4();
     while (await checkExisting(session, username, "username")) {
       logger.info("USERNAME ALREADY EXISTS", username);
       username = makeUsername(name);
@@ -45,7 +44,6 @@ const signup = async (req, res) => {
 
     const hashedPassword = await hashPassword(password);
     const queryParams = {
-      userId,
       email,
       name,
       username,
@@ -180,7 +178,7 @@ const login = async (req, res) => {
       email: user.records[0]._fields[0].properties.email,
       id: user.records[0]._fields[0].properties.id,
     };
-    req.user.id = user.records[0]._fields[0].properties.id;
+    req.user = {id:user.records[0]._fields[0].properties.id};
     console.log("USER", user.records[0]._fields[0].properties.id);
     const token = generateToken(user.records[0]._fields[0].properties);
     const refreshToken = generateRefreshToken(
@@ -193,6 +191,7 @@ const login = async (req, res) => {
       username: user.records[0]._fields[0].properties.username,
     });
   } catch (err) {
+    console.log(err)
     logger.error(err);
     return res
       .status(statusCodes.serverError)

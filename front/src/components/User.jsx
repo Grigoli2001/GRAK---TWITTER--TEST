@@ -159,10 +159,10 @@ export const UserCard = ({ user, children }) => {
             <p className="">{user.bio}</p>
             <div className="flex items-center gap-2">
               <p className="">
-                <b>10</b> Followers
+                <b>{user.follower_count}</b> Followers
               </p>
               <p className="">
-                <b>10</b> Following
+                <b>{user.following_count}</b> Following
               </p>
             </div>
           </div>
@@ -250,7 +250,7 @@ const users = data?.pages?.reduce((acc, page) => {
   return [...acc, ...page.users]
 }, [])
 
-if (users && users.length ===0  || error) {
+if (users && users.length === 0  || error) {
   return FallbackComponent
 }
 

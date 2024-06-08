@@ -54,15 +54,15 @@ const registerCoreMiddleWare = async () => {
       })
     );
 
-    app.use(verifyToken);
 
     // routes
     app.use("/auth", authRoutes);
     app.use("/token", tokenRoutes);
+    app.use(verifyToken);
+    app.use("/users", userRoutes);
     app.use("/tweets", tweetRoutes);
     app.use("/messages", messageRoutes);
     app.use("/profile", profileRoutes);
-    app.use("/users", userRoutes);
     app.use("/notifications", notificationRoutes);
     
     app.use(notFound);

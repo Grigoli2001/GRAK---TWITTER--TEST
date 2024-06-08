@@ -11,7 +11,7 @@ const TweetSchema = new Schema({
         type: String,
     },
     userId: {
-        type: Number,
+        type: String,
         required: [true, "user_id is required"],
     },
     poll: {

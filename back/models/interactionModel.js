@@ -12,7 +12,7 @@ const interactionModel = new mongoose.Schema({
       required: [true, "tweet_id is required"],
     },
     userId: {
-      type: Number,
+      type: String,
       required: [true, "user_id is required"],
     },
     pollOption: {

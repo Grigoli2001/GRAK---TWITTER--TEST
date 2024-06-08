@@ -1,13 +1,10 @@
 const statusCodes = require("../constants/statusCode");
 const { getDriver } = require("../database/neo4j_setup");
 const logger = require("../middleware/winston");
-// const pool = require("../database/db_setup");
 // const jwt = require("jsonwebtoken");
 var neo4j = require('neo4j-driver');
 const tweetModel = require("../models/tweetModel");
 const { getUserFullDetails } = require("../utils/user.utils");
-// const { post } = require("../routes/auth.routes");
-// const { allFollowers } = require("../utils/tweet.utils");
 
 
 
@@ -20,20 +17,22 @@ const getUserSimple = async (req, res) => {
   try{
 
   const { id, username } = req.query;
+  console.log(req.query, 'req.query in getUserSimple')
   if (id) {
     return getUserById(req, res);
   } else if (username) {
     const session = getDriver().session();  
     const result = await session.run(
       `MATCH (u:User) WHERE u.username = $username RETURN u`,
-      { 1: username }
+      { username }
     );
     const user = result.records.map(record => record.get('u').properties)?.[0];
     if (!user) {
+      console.log('user not found in getUserSimple')
       return res.status(statusCodes.notFound).json({ message: "User not found" });
     }
 
-    return res.status(statusCodes.success).json({ user});
+    return res.status(statusCodes.success).json({ user });
 
   } else {
     res.status(statusCodes.badRequest).json({ message: "Missing fields" });
@@ -145,6 +144,8 @@ const getUserByUsername = async (req, res) => {
 
     
     // const userData = await pool.query(`SELECT id, name, username, email, profile_pic, created_at, bio, website, location, cover, dob FROM users WHERE username = $1`, [username]);
+
+
     // const userData = await pool.query(`
     // SELECT u.id, name, username, email, profile_pic, u.created_at, cover, website, location, bio, dob,
     // COUNT(DISTINCT f1.following) AS following_count,
@@ -191,7 +192,8 @@ const getUserByUsername = async (req, res) => {
 
       //   let user = userData.rows[0];
 
-      const user = getUserFullDetails(username, 'username');
+      const user = await getUserFullDetails(username, 'username');
+      console.log("USER in getUserByUsername", user)
     if (!user) {
       return res.status(statusCodes.notFound).json({ message: "User not found" });
     }
@@ -216,15 +218,13 @@ const getExploreUsers = async (req, res) => {
     const { limit, page } = req.query;
     const session = getDriver().session();
 
-    console.log(typeof(parseInt(limit)), 'limit')
-
     const intLimit = parseInt(limit) ?? 3;
     const intPage = parseInt(page) ?? 0;
     const intSkip = intPage * intLimit;
 
     const result = await session.run(
-      `MATCH (u:User) WHERE u.id <> $userid AND NOT (u)-[:FOLLOWS]->(:User {id: $userid})  RETURN u ORDER BY rand() SKIP $skip LIMIT $limit`,
-      { userid: 1, limit: neo4j.int(intLimit), skip: neo4j.int(intSkip)}
+      `MATCH (u:User) WHERE u.id <> $userid AND NOT (u)<-[:FOLLOWS]-(:User {id: $userid})  RETURN u ORDER BY rand() SKIP $skip LIMIT $limit`,
+      { userid: req.user.id, limit: neo4j.int(intLimit), skip: neo4j.int(intSkip)}
     ); 
     const users = result.records.map(record => record.get('u').properties);
     // console.log(users, 'users')
@@ -248,6 +248,7 @@ const getExploreUsers = async (req, res) => {
     //   LIMIT $2`,
     //   [req.user.id, limit ?? 3]
     // );
+    console.log("Explore users", users)
     return res.status(statusCodes.success).json({ users });
   } catch (err) {
     // logger.error(err);
@@ -319,34 +320,77 @@ const updateUser = async (req, res) => {
       .status(statusCodes.serverError)
       .json({ message: "Error updating user" });
   }
+};
+
+
+      // const query = `
+      // SELECT f1.user_id, users.id, username, name, profile_pic,
+      // COUNT(DISTINCT f2.user_id) AS followers_count,
+      // COUNT(DISTINCT f1.following) AS following_count,
+      // CASE WHEN users.id IN (SELECT following from follows where user_id= $1) THEN 1 ELSE 0 END as is_followed
+      // FROM follows f1
+      // JOIN users 
+      // ON f1.${followType === 'following' ? 'following' : 'user_id'} = users.id
+      // FULL OUTER JOIN follows f2 ON f1.${followType === 'following' ? 'following' : 'user_id'} = f2.${followType === 'following' ? 'user_id' : 'following'}
+      // WHERE f1.${followType === 'following' ? 'user_id' : 'following'} = $1
+      // ${resolveVerified}
+      // GROUP BY f1.user_id, users.id, username, name, profile_pic
+      // ORDER BY users.username
+      // OFFSET $2 ROWS FETCH NEXT $3 ROWS ONLY
+      // `
+      // ;
+      // const follow_data = await pool.query(
+      //     query,
+      //     [userId, toSkip, resolveLimit] // default limit is 20 
+      // );
+
+
+const getFollowData = async (req, res) => {
+  try {
+      const { userId, followType, verified, limit, page } = req.query;
+      console.log(req.query, 'query')
+      if (!userId || !followType || (followType !== 'followers' && followType !== 'following')) {
+          throw new Error('Missing fields or invalid followType');
+      }
+
+      const pageSize = parseInt(page) ??  0;
+      const resolveLimit = parseInt(limit) ?? 20;
+      const toSkip = pageSize * resolveLimit;
+      const resolveVerified = verified === 'true' ? 'WHERE u.verified = true' : '';
+      const resolveFollowType = followType === 'followers' ? '<-[:FOLLOWS]-' : '-[:FOLLOWS]->';
+
+      console.log(userId, 'userId')
+      const session = getDriver().session();
+      //${resolveFollowType}(f:User)
+      const result = await session.run(
+        `MATCH (u:User {id: $userId})${resolveFollowType}(f:User)
+       ${resolveVerified} 
+       OPTIONAL MATCH (f)-[:FOLLOWS]->(following:User) 
+       WITH f, count(following) as followingCount
+       OPTIONAL MATCH (f)<-[:FOLLOWS]-(followers:User)
+       WITH f, followingCount, count(followers) as followersCount
+       RETURN f {.*, followingCount: followingCount, followersCount: followersCount}
+       SKIP $toSkip
+       LIMIT $resolveLimit`,
+        { userId, toSkip: neo4j.int(toSkip), resolveLimit: neo4j.int(resolveLimit) }
+      );
+      // const follow_data = result.records.map(record => record.get('f').properties);
+      const follow_data = result.records.map(record => record.get(0));
+      
+      console.log('follow_data', follow_data, )
+      return res.status(statusCodes.success).json({users: follow_data});
+      } catch (error) {
+          console.log(error)
+      return res.status(statusCodes.serverError).json({ message: 'An error occurred' });
+  }
 }
 
 
-
-  // const query = `
-  // SELECT f1.user_id, users.id, username, name, profile_pic,
-  // COUNT(DISTINCT f2.user_id) AS followers_count,
-  // COUNT(DISTINCT f1.following) AS following_count,
-  // CASE WHEN users.id IN (SELECT following from follows where user_id= $1) THEN 1 ELSE 0 END as is_followed
-  // FROM follows f1
-  // JOIN users 
-  // ON f1.${followType === 'following' ? 'following' : 'user_id'} = users.id
-  // FULL OUTER JOIN follows f2 ON f1.${followType === 'following' ? 'following' : 'user_id'} = f2.${followType === 'following' ? 'user_id' : 'following'}
-  // WHERE f1.${followType === 'following' ? 'user_id' : 'following'} = $1
-  // ${resolveVerified}
-  // GROUP BY f1.user_id, users.id, username, name, profile_pic
-  // ORDER BY users.username
-  // OFFSET $2 ROWS FETCH NEXT $3 ROWS ONLY
-  // `
-  // ;
-  // const follow_data = await pool.query(
-  //     query,
-  //     [userId, toSkip, resolveLimit] // default limit is 20 
-  // );
-
-
-
-
+ // await pool.query(
+        //   `INSERT INTO follows(user_id, following) VALUES ($1, $2)`,
+        //   [req.user.id, followerId]
+      //  );
+        
 const addFollower = async (req, res) => {
     const { followerId } = req.body;
     console.log(followerId, req.body, 'followerId')
@@ -354,16 +398,17 @@ const addFollower = async (req, res) => {
 
         if ( !followerId) {
           return res.status(statusCodes.badRequest).json({ message: "Missing fields" });
-        }    
+        } 
+       
         const session = getDriver().session();
-        await session.run(
-          `MATCH (u:User {id: $1}), (f:User {id: $2}) MERGE (u)-[:FOLLOWS]->(f)`,
-          { 1: req.user.id, 2: followerId }
+        const result = await session.run(
+          `MATCH (u:User {id: $userid}), (f:User {id: $followerId}) MERGE (u)-[:FOLLOWS]->(f)`,
+          { userid: req.user.id, followerId }
         );
+        console.log('result', result)
 
         res.status(statusCodes.success).json({ message: "Follower added" });
         } catch (error) {
-          console.log(error)
         logger.error("Error adding follower", error);
         res.status(statusCodes.serverError).json({ message: "Error" });
       } 
@@ -381,7 +426,10 @@ const removeFollower = async (req, res) => {
           if (!followerId) {
           return res.status(statusCodes.badRequest).json({ message: "Missing follow id" });
       } 
-      
+        // await pool.query(
+        //     `DELETE FROM follows WHERE user_id = $1 AND following = $2`,
+        //     [req.user.id, followerId]
+        // );
         const session = getDriver().session();
         await session.run(
           `MATCH (u:User {id: $1})-[r:FOLLOWS]->(f:User {id: $2}) DELETE r`,
@@ -389,7 +437,6 @@ const removeFollower = async (req, res) => {
         );
         res.status(statusCodes.success).json({ message: "Follower removed" });
         } catch (error) {
-          console.log(error)  
         logger.error("Error removing follower", error);
         res.status(statusCodes.serverError).json({ message: "Error" });
         } 
@@ -404,4 +451,6 @@ module.exports = {
     addFollower,
     removeFollower,
     getFollowData
+    // getAllFollowers,
+    // getAllFollowing,
 };

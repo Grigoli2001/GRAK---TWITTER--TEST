@@ -18,7 +18,8 @@ const tweetQuery = async ({
     page = 0;
   }
   // currentUID to check if user liked, bookmarked, voted
-  const currentUIDasInt = parseInt(currentUID);
+  // const currentUIDasInt = parseInt(currentUID);
+  const currentUIDasInt = currentUID;
 
   const pipline = [
     {
