@@ -1,4 +1,4 @@
-const pool = require("../database/db_setup");
+// const pool = require("../database/db_setup");
 
 const getUserById = async (userId) => {
   try {

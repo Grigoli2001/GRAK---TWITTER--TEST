@@ -1,4 +1,4 @@
-const queryError = 500;
+const serverError = 500;
 const notFound = 404;
 const badGateway = 502;
 const success = 200;
@@ -10,7 +10,7 @@ const fileTooLarge = 413;
 const invalidFileType = 415;
 
 module.exports = {
-  queryError,
+  serverError,
   notFound,
   badGateway,
   success,

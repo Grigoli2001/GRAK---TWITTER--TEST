@@ -4,7 +4,7 @@ const Interaction = require("../models/interactionModel");
 const statusCode = require("../constants/statusCode");
 const mongoose = require("mongoose");
 const ObjectId = mongoose.Types.ObjectId;
-const pool = require("../database/db_setup");
+// const pool = require("../database/db_setup");
 const { tweetQuery, allFollowers, getUserById, checkTweetText } = require('../utils/tweet.utils');
 
 const getAllTweets = async (req, res) => {
@@ -121,7 +121,7 @@ const getTweetsByCategory = async (req, res) => {
     }
 } catch (err) {
     console.log(err);
-    return res.status(statusCode.queryError).json({
+    return res.status(statusCode.serverError).json({
         message: err,
     });
 };
@@ -311,7 +311,7 @@ const createTweet = async (req, res) => {
                 errors: err.errors,
             });
         } else {
-            res.status(statusCode.queryError).json({
+            res.status(statusCode.serverError).json({
                 status: "error",
                 message: err.message || "Some error occurred while creating the tweet.",
             });
@@ -370,7 +370,7 @@ const { tweetId, tweetText, tags } = req.body;
         tweet: updateTweet
     });
   } catch (err) {
-    res.status(statusCode.queryError).json({
+    res.status(statusCode.serverError).json({
       message: err,
     });
   }
@@ -443,7 +443,7 @@ const deleteTweet = async (req, res) => {
 
     } catch (err) {
         console.log(err)
-        res.status(statusCode.queryError).json({
+        res.status(statusCode.serverError).json({
             message: "error deleting the tweet" ,
         });
     }
@@ -613,7 +613,7 @@ const highlightTweet = async (req, res) => {
         })
 
     }catch(err) {
-        res.status(statusCode.queryError).json({
+        res.status(statusCode.serverError).json({
             message: "error highlighting the tweet"
         });
     
@@ -636,7 +636,7 @@ const getTrendingTags = async (req, res) => {
         });
     }
     catch (err) {
-        res.status(statusCode.queryError).json({
+        res.status(statusCode.serverError).json({
             message: "error finding the tweet", err,
         });
     }
@@ -679,7 +679,7 @@ const getTags = async (req, res) => {
         console.log(tags)
         res.status(statusCode.success).json({ tags });
     } catch (error) {
-        res.status(statusCode.queryError).json({ error: error.message });
+        res.status(statusCode.serverError).json({ error: error.message });
     }
 }
 
@@ -695,7 +695,7 @@ const getTweetsByTag = async(req, res) => {
     }
     catch (err) {
         console.log(err)
-        res.status(statusCode.queryError).json({
+        res.status(statusCode.serverError).json({
             message: "error finding tags", err,
         });
     }

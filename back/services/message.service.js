@@ -1,6 +1,6 @@
 const messageModel = require('../models/messageModel');
 const statusCode = require('../constants/statusCode');
-const pool = require("../database/db_setup");
+// const pool = require("../database/db_setup");
 const { error } = require('winston');
 
 const MESSAGE_PAGE_SIZE = 20;

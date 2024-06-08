@@ -55,7 +55,17 @@ const signup = async (req, res) => {
     };
 
     const addUser = await session.run(
-      `CREATE (u:User {email: $email, name: $name, username: $username, password: $hashedPassword, dob: $dob, isGetmoreMarked: $isGetmoreMarked, isConnectMarked: $isConnectMarked, isPersonalizedMarked: $isPersonalizedMarked, profile_pic: $profile_pic}) RETURN u;`,
+      `CREATE (u:User {
+              email: $email, 
+              name: $name, 
+              username: $username, 
+              password: $hashedPassword, 
+              dob: $dob, 
+              isGetmoreMarked: $isGetmoreMarked, 
+              isConnectMarked: $isConnectMarked, 
+              isPersonalizedMarked: $isPersonalizedMarked, 
+              profile_pic: $profile_pic
+              }) RETURN u;`,
       queryParams
     );
     logger.info("USER ADDED", addUser.records.length, "email", email);
@@ -65,7 +75,7 @@ const signup = async (req, res) => {
     login(req, res);
   } catch (error) {
     logger.error("SignUp error:", error);
-    return res.status(statusCodes.queryError).json({
+    return res.status(statusCodes.serverError).json({
       message: "Exception occurred while checking existing user",
     });
   } finally {
@@ -89,7 +99,7 @@ const checkExistingUser = async (req, res) => {
       .json({ message: "User does not exist" });
   } catch (error) {
     logger.error("Checking existing user error:", error);
-    return res.status(statusCodes.queryError).json({
+    return res.status(statusCodes.serverError).json({
       message: "Exception occurred while checking existing user",
     });
   } finally {
@@ -172,7 +182,7 @@ const login = async (req, res) => {
   } catch (err) {
     logger.error(err);
     return res
-      .status(statusCodes.queryError)
+      .status(statusCodes.serverError)
       .json({ error: "Exception occurred while logging in" });
   } finally {
     session.close();
@@ -200,7 +210,7 @@ const sendOTP = async (req, res) => {
       .json({ message: "OTP sent", otp: otp });
   } else {
     return res
-      .status(statusCodes.queryError)
+      .status(statusCodes.serverError)
       .json({ message: "Error while sending OTP" });
   }
 };
@@ -223,7 +233,7 @@ const changePassword = async (req, res) => {
   } catch (error) {
     logger.error(error);
     return res
-      .status(statusCodes.queryError)
+      .status(statusCodes.serverError)
       .json({ message: "Error while changing password" });
   } finally {
     session.close();
@@ -265,7 +275,7 @@ const userPreferences = async (req, res) => {
   } catch (error) {
     logger.error(error);
     return res
-      .status(statusCodes.queryError)
+      .status(statusCodes.serverError)
       .json({ message: "Error while updating preferences" });
   } finally {
     session.close();

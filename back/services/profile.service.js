@@ -1,6 +1,6 @@
 const statusCodes = require("../constants/statusCode");
 const logger = require("../middleware/winston");
-const pool = require("../database/db_setup");
+// const pool = require("../database/db_setup");
 
 const follow = async (user_id, following, client) => {
   const addingFollow = await client.query(
@@ -10,7 +10,7 @@ const follow = async (user_id, following, client) => {
   );
 
   if (!addingFollow.rowCount) {
-    return res.status(statusCodes.queryError).json({
+    return res.status(statusCodes.serverError).json({
       message: "Exception occurred while following",
     });
   }
@@ -27,7 +27,7 @@ WHERE user_id = $1 and following = $2;`,
   );
 
   if (!unFollow.rowCount) {
-    return res.status(statusCodes.queryError).json({
+    return res.status(statusCodes.serverError).json({
       message: "Exception occurred while unfollowing",
     });
   }
@@ -77,7 +77,7 @@ const changeFollowStatus = async (req, res) => {
     }
   } catch (error) {
     logger.error("Following error:", error);
-    return res.status(statusCodes.queryError).json({
+    return res.status(statusCodes.serverError).json({
       message: "Exception occurred while following",
     });
   } finally {
@@ -97,7 +97,7 @@ const changeProfilePicture = async (req, res) => {
   );
 
   if (!updateProfilePicture.rowCount) {
-    return res.status(statusCodes.queryError).json({
+    return res.status(statusCodes.serverError).json({
       message: "Exception occurred while updating profile picture",
     });
   }
@@ -119,7 +119,7 @@ const changePassword = async (req, res) => {
   );
 
   if (!user.rowCount) {
-    return res.status(statusCodes.queryError).json({
+    return res.status(statusCodes.serverError).json({
       message: "Exception occurred while updating password",
     });
   }
@@ -145,7 +145,7 @@ const changePassword = async (req, res) => {
   );
 
   if (!updatePassword.rowCount) {
-    return res.status(statusCodes.queryError).json({
+    return res.status(statusCodes.serverError).json({
       message: "Exception occurred while updating password",
     });
   }
@@ -186,7 +186,7 @@ const changeUsername = async (req, res) => {
   );
 
   if (!updateUsername.rowCount) {
-    return res.status(statusCodes.queryError).json({
+    return res.status(statusCodes.serverError).json({
       message: "Exception occurred while updating username",
     });
   }
@@ -221,7 +221,7 @@ WHERE id = $2;`,
   );
 
   if (!updateEmail.rowCount) {
-    return res.status(statusCodes.queryError).json({
+    return res.status(statusCodes.serverError).json({
       message: "Exception occurred while updating email",
     });
   }
@@ -243,7 +243,7 @@ WHERE id = $2;`,
   );
 
   if (!updateBio.rowCount) {
-    return res.status(statusCodes.queryError).json({
+    return res.status(statusCodes.serverError).json({
       message: "Exception occurred while updating bio",
     });
   }
@@ -264,7 +264,7 @@ WHERE id = $1;`,
   );
 
   if (!profile.rowCount) {
-    return res.status(statusCodes.queryError).json({
+    return res.status(statusCodes.serverError).json({
       message: "Exception occurred while fetching profile",
     });
   }

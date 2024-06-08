@@ -1,9 +1,9 @@
 const statusCodes = require("../constants/statusCode");
 const logger = require("../middleware/winston");
-const pool = require("../database/db_setup");
+// const pool = require("../database/db_setup");
 // const jwt = require("jsonwebtoken");
 const tweetModel = require("../models/tweetModel");
-const { post } = require("../routes/auth.routes");
+// const { post } = require("../routes/auth.routes");
 // const { allFollowers } = require("../utils/tweet.utils");
 
 
@@ -27,7 +27,7 @@ const getUserSimple = async (req, res) => {
   }
   } catch (err) {
     logger.error(err);
-    res.status(statusCodes.queryError).json({ message: "Error fetching user" });
+    res.status(statusCodes.serverError).json({ message: "Error fetching user" });
   };
 }
 
@@ -50,7 +50,7 @@ const getUsers = async (req, res) => {
     res.status(statusCodes.success).json({ users: users.rows });
   } catch (err) {
     logger.error(err);
-    res.status(statusCodes.queryError).json({ message: "Error fetching users" });
+    res.status(statusCodes.serverError).json({ message: "Error fetching users" });
   }
 }
 
@@ -66,7 +66,7 @@ const getUserById = async (req, res) => {
     res.status(statusCodes.success).json({ user: user.rows[0] });
   } catch (err) {
     logger.error(err);
-    res.status(statusCodes.queryError).json({ message: "Error fetching user" });
+    res.status(statusCodes.serverError).json({ message: "Error fetching user" });
   }
 }
 
@@ -120,7 +120,7 @@ const getUserByUsername = async (req, res) => {
   } catch (err) {
     console.log(err)
     logger.error(err);
-    res.status(statusCodes.queryError).json({ message: "Error user by username" });
+    res.status(statusCodes.serverError).json({ message: "Error user by username" });
   }
 };
 
@@ -151,7 +151,7 @@ const getExploreUsers = async (req, res) => {
     res.status(statusCodes.success).json({ users: exploreUsers.rows });
   } catch (err) {
     logger.error(err);
-    res.status(statusCodes.queryError).json({ message: "Error fetching non-followed users" });
+    res.status(statusCodes.serverError).json({ message: "Error fetching non-followed users" });
   }
 }
 
@@ -184,7 +184,7 @@ const updateUser = async (req, res) => {
     res.status(statusCodes.success).json({ message: "User updated" });
   } catch (err) {
     logger.error(err);
-    res.status(statusCodes.queryError).json({ message: "Error updating user" });
+    res.status(statusCodes.serverError).json({ message: "Error updating user" });
   }
 }
 
@@ -227,7 +227,7 @@ const getFollowData = async (req, res) => {
       res.status(statusCodes.success).json({users: follow_data.rows});
       } catch (error) {
           console.log(error)
-      res.status(statusCodes.queryError).json({ message: 'An error occurred' });
+      res.status(statusCodes.serverError).json({ message: 'An error occurred' });
   }
 }
 
@@ -248,7 +248,7 @@ const addFollower = async (req, res) => {
         res.status(statusCodes.success).json({ message: "Follower added" });
         } catch (error) {
         logger.error("Error adding follower", error);
-        res.status(statusCodes.queryError).json({ message: "Error" });
+        res.status(statusCodes.serverError).json({ message: "Error" });
       } 
 }
 
@@ -266,7 +266,7 @@ const removeFollower = async (req, res) => {
         res.status(statusCodes.success).json({ message: "Follower removed" });
         } catch (error) {
         logger.error("Error removing follower", error);
-        res.status(statusCodes.queryError).json({ message: "Error" });
+        res.status(statusCodes.serverError).json({ message: "Error" });
         } 
 }
 

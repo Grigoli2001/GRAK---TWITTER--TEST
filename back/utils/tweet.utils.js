@@ -1,7 +1,7 @@
 const tweetModel = require("../models/tweetModel");
 const pollModel = require("../models/pollModel");
 const Interaction = require("../models/interactionModel");
-const pool = require("../database/db_setup");
+// const pool = require("../database/db_setup");
 
 const getUserById = async (currentUID) => {
   const currentUIDasInt = parseInt(currentUID);

@@ -4,11 +4,20 @@ const cors = require("cors");
 const helmet = require("helmet");
 const morgan = require("morgan");
 const session = require("express-session");
-const mongoose = require("mongoose");
 const logger = require("../middleware/winston");
 const notFound = require("../middleware/notFound");
+
+// database
+const { connectToMongo }= require("../database/mongo_setup");
+const { connectToRedis, redisClient, RedisStore } = require("../database/redis_setup");
+const { connectToNeo4j }= require("../database/neo4j_setup");
+
+// sockets
 const initSockets = require("../sockets/sockets");
+
+// middleware
 const verifyToken = require("../middleware/verifyToken");
+
 // routes
 const tweetRoutes = require("../routes/tweet.routes");
 const authRoutes = require("../routes/auth.routes");
@@ -17,18 +26,20 @@ const profileRoutes = require("../routes/profile.routes");
 const userRoutes = require("../routes/user.routes");
 const tokenRoutes = require("../routes/token.routes");
 const notificationRoutes = require("../routes/notification.routes");
+
+// app setup
 const app = express();
 const PORT = process.env.PORT;
-// connect to the database
-const connectToDB = async () => {
-  mongoose
-    .connect(process.env.MONGO_URI)
-    .then(() => logger.info("MongoDB connected successfully"))
-    .catch((err) => console.log(err));
-};
 
 const registerCoreMiddleWare = async () => {
+  const redisStore = new RedisStore({ client: redisClient });
   try {
+
+    // middleware
+    app.use(morgan("combined", { stream: logger.stream }));
+    app.use(express.json());
+    app.use(cors({}));
+    app.use(helmet());
     app.use(
       session({
         secret: process.env.APP_SECRET,
@@ -37,25 +48,26 @@ const registerCoreMiddleWare = async () => {
         cookie: {
           secure: false,
           httpOnly: true,
+          maxAge: 1000 * 60 * 60 * 24 , // 1 day
         },
+        store: redisStore
       })
     );
 
-    app.use(morgan("combined", { stream: logger.stream }));
-    app.use(express.json());
-    app.use(cors({}));
-    app.use(helmet());
+    app.use(verifyToken);
 
+    // routes
     app.use("/auth", authRoutes);
     app.use("/token", tokenRoutes);
-    app.use(verifyToken);
     app.use("/tweets", tweetRoutes);
     app.use("/messages", messageRoutes);
     app.use("/profile", profileRoutes);
     app.use("/users", userRoutes);
     app.use("/notifications", notificationRoutes);
-
+    
     app.use(notFound);
+
+
   } catch (err) {
     logger.error("Error thrown while executing registerCoreMiddleWare", err);
     process.exit(1);
@@ -73,23 +85,26 @@ const handleError = () => {
 const startApp = async () => {
   try {
     await registerCoreMiddleWare();
-    await connectToDB();
+    await connectToMongo();
+    await connectToRedis();
+    await connectToNeo4j();
     initSockets(app);
 
     app.listen(PORT, () => {
-      logger.info("Listening on 127.0.0.1:" + PORT);
+      logger.info("Application Listening on 127.0.0.1:" + PORT);
     });
 
     handleError();
   } catch (err) {
-    logger.error(
-      `startup :: Error while booting the applicaiton ${JSON.stringify(
-        err,
-        undefined,
-        2
-      )}`
-    );
-    throw err;
+    console.log(err);
+    // logger.error(
+    //   `startup :: Error while booting the applicaiton ${JSON.stringify(
+    //     err,
+    //     undefined,
+    //     2
+    //   )}`
+    // );
+    // throw err;
   }
 };
 

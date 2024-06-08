@@ -33,7 +33,7 @@ const createNotification = async (req, res) => {
   } catch (err) {
     logger.error("Error creating notification: ", err);
     return res
-      .status(statusCode.queryError)
+      .status(statusCode.serverError)
       .json({ message: "Error creating notification" });
   }
 };
@@ -55,7 +55,7 @@ const getNotifications = async (req, res) => {
   } catch (err) {
     logger.error("the error is " + err);
     return res
-      .status(statusCode.queryError)
+      .status(statusCode.serverError)
       .json({ message: "Error fetching notifications" });
   }
 };
@@ -71,7 +71,7 @@ const updateNotification = async (req, res) => {
   } catch (err) {
     logger.error("error updating notifications", err);
     return res
-      .status(statusCode.queryError)
+      .status(statusCode.serverError)
       .json({ message: "Error updating notification" });
   }
 };
@@ -86,7 +86,7 @@ const deleteNotification = async (req, res) => {
   } catch (err) {
     logger.error("error while deleting notifications", err);
     return res
-      .status(statusCode.queryError)
+      .status(statusCode.serverError)
       .json({ message: "Error deleting notification" });
   }
 };
