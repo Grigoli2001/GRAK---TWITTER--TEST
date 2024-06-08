@@ -1,40 +1,46 @@
 const statusCodes = require("../constants/statusCode");
 const logger = require("../middleware/winston");
 // const pool = require("../database/db_setup");
+const { getDriver } = require("../database/neo4j_setup");
+const { comparePassword, hashPassword } = require("../utils/auth.utils");
 
-const follow = async (user_id, following, client) => {
-  const addingFollow = await client.query(
-    `INSERT INTO follows(user_id, following)
-             VALUES ($1, $2);`,
-    [user_id, following]
+const follow = async (user_id, following, session) => {
+  const result = await session.run(
+    `MATCH (a:User), (b:User) WHERE a.id=$user_id and b.id = $following MERGE (a)-[r:FOLLOWS]->(b) return a,b,r`,
+    { user_id, following }
   );
-
-  if (!addingFollow.rowCount) {
-    return res.status(statusCodes.serverError).json({
+  if (!result) {
+    return {
+      status: statusCodes.serverError,
       message: "Exception occurred while following",
-    });
+    };
   }
-  logger.info(user_id, "followed", following);
+  logger.info(user_id + " followed " + following);
 
-  return res.status(statusCodes.success).json({ message: "User followed" });
+  return {
+    status: statusCodes.success,
+    message: "User followed",
+  };
 };
 
-const unfollow = async (user_id, following, client) => {
-  const unFollow = await client.query(
-    `DELETE FROM follows
-WHERE user_id = $1 and following = $2;`,
-    [user_id, following]
-  );
-
-  if (!unFollow.rowCount) {
-    return res.status(statusCodes.serverError).json({
+const unfollow = async (user_id, following, session) => {
+  try {
+    const result = await session.run(
+      `MATCH (a:User)-[r:FOLLOWS]->(b:User) WHERE a.id=$user_id and b.id = $following DELETE r return a,b,r`,
+      { user_id, following }
+    );
+    logger.info(user_id + " uenfollowed " + following);
+    return {
+      status: statusCodes.success,
+      message: "User unfollowed",
+    };
+  } catch (error) {
+    logger.error("Unfollowing error:", error);
+    return {
+      status: statusCodes.serverError,
       message: "Exception occurred while unfollowing",
-    });
+    };
   }
-
-  logger.info(user_id, "unfollowed", following);
-
-  res.status(statusCodes.success).json({ message: "User unfollowed" });
 };
 
 const changeFollowStatus = async (req, res) => {
@@ -45,43 +51,48 @@ const changeFollowStatus = async (req, res) => {
       .json({ message: "Missing user to follow" });
   }
 
-  const client = await pool.connect();
+  const session = getDriver()?.session();
   const user_id = req.user.id;
-  const following = await client.query(
-    `SELECT id FROM users WHERE username = $1;`,
-    [username]
-  );
-
-  if (!following.rowCount) {
-    return res
-      .status(statusCodes.badRequest)
-      .json({ message: "Invalid user to follow" });
-  }
-
-  if (following.rows[0].id === user_id) {
-    return res
-      .status(statusCodes.badRequest)
-      .json({ message: "You cannot follow yourself" });
-  }
-
-  const followStatus = await client.query(
-    `SELECT 1 FROM follows WHERE user_id = $1 AND following = $2;`,
-    [user_id, following.rows[0].id]
-  );
-
   try {
-    if (!followStatus.rowCount) {
-      follow(user_id, following.rows[0].id, client);
-    } else {
-      unfollow(user_id, following.rows[0].id, client);
+    const followingResult = await session.run(
+      `MATCH (u:User {username: $username}) RETURN u.id as id`,
+      { username }
+    );
+    if (!followingResult.records.length) {
+      return res
+        .status(statusCodes.badRequest)
+        .json({ message: "Invalid user to follow" });
     }
+    const following = followingResult.records[0].get("id");
+
+    if (following === user_id) {
+      return res
+        .status(statusCodes.badRequest)
+        .json({ message: "You cannot follow yourself" });
+    }
+    const followStatus = await session.run(
+      `MATCH (a:User), (b:User) WHERE a.id=$user_id and b.id = $following RETURN EXISTS((a)-[:FOLLOWS]->(b)) as followStatus`,
+      { user_id, following }
+    );
+
+    console.log(
+      `follow status ${user_id} follows ${following}`,
+      followStatus.records[0].get("followStatus")
+    );
+    let response;
+    if (!followStatus.records[0].get("followStatus")) {
+      response = await follow(user_id, following, session);
+    } else {
+      response = await unfollow(user_id, following, session);
+    }
+    return res.status(response.status).json({ message: response.message });
   } catch (error) {
     logger.error("Following error:", error);
     return res.status(statusCodes.serverError).json({
       message: "Exception occurred while following",
     });
   } finally {
-    client.release();
+    session.close();
   }
 };
 
@@ -89,70 +100,67 @@ const changeProfilePicture = async (req, res) => {
   const user_id = req.user.id;
   const profile_picture = req.file.path;
 
-  const updateProfilePicture = await pool.query(
-    `UPDATE users
-        SET profile_picture = $1
-        WHERE id = $2;`,
-    [profile_picture, user_id]
-  );
-
-  if (!updateProfilePicture.rowCount) {
+  try {
+    const session = getDriver()?.session();
+    const result = await session.run(
+      `MATCH (u:User {id: $user_id}) SET u.profile_picture = $profile_picture RETURN u`,
+      { user_id, profile_picture }
+    );
+    logger.info("Profile picture updated for : " + user_id);
+    return res
+      .status(statusCodes.success)
+      .json({ message: "Profile picture updated" });
+  } catch (error) {
+    logger.error("Profile picture update error:", error);
     return res.status(statusCodes.serverError).json({
       message: "Exception occurred while updating profile picture",
     });
+  } finally {
+    session.close();
   }
-
-  logger.info("Profile picture updated for", user_id);
-
-  res.status(statusCodes.success).json({ message: "Profile picture updated" });
 };
 
 const changePassword = async (req, res) => {
   const user_id = req.user.id;
   const { oldPassword, newPassword } = req.body;
 
-  const user = await pool.query(
-    `SELECT password
-        FROM users
-        WHERE id = $1;`,
-    [user_id]
-  );
-
-  if (!user.rowCount) {
-    return res.status(statusCodes.serverError).json({
-      message: "Exception occurred while updating password",
-    });
-  }
-
-  const validPassword = await bcrypt.compare(
-    oldPassword,
-    user.rows[0].password
-  );
-
-  if (!validPassword) {
+  try {
+    const session = getDriver()?.session();
+    const user = await session.run(
+      `MATCH (u:User {id: $user_id}) RETURN u.password as password`,
+      { user_id }
+    );
+    if (!user.records.length) {
+      return res.status(statusCodes.serverError).json({
+        message: "Exception occurred while updating password",
+      });
+    }
+    const validPassword = await comparePassword(
+      oldPassword,
+      user.records[0].get("password")
+    );
+    if (!validPassword) {
+      return res
+        .status(statusCodes.badRequest)
+        .json({ message: "Invalid password" });
+    }
+    const hashedPassword = await hashPassword(newPassword);
+    const result = await session.run(
+      `MATCH (u:User {id: $user_id}) SET u.password = $hashedPassword RETURN u`,
+      { user_id, hashedPassword }
+    );
+    logger.info("Password updated for " + user_id);
     return res
-      .status(statusCodes.badRequest)
-      .json({ message: "Invalid password" });
-  }
-
-  const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-  const updatePassword = await pool.query(
-    `UPDATE users
-        SET password = $1
-        WHERE id = $2;`,
-    [hashedPassword, user_id]
-  );
-
-  if (!updatePassword.rowCount) {
+      .status(statusCodes.success)
+      .json({ message: "Password updated" });
+  } catch (error) {
+    logger.error("Password update error:", error);
     return res.status(statusCodes.serverError).json({
       message: "Exception occurred while updating password",
     });
+  } finally {
+    session.close();
   }
-
-  logger.info("Password updated for", user_id);
-
-  res.status(statusCodes.success).json({ message: "Password updated" });
 };
 
 const changeUsername = async (req, res) => {
@@ -165,111 +173,111 @@ const changeUsername = async (req, res) => {
       .json({ message: "Missing new username" });
   }
 
-  const usernameExists = await pool.query(
-    `SELECT 1
-        FROM users
-        WHERE username = $1;`,
-    [newUsername]
-  );
-
-  if (usernameExists.rowCount) {
+  try {
+    const session = getDriver()?.session();
+    const usernameExists = await session.run(
+      `MATCH (u:User {username: $newUsername}) RETURN u`,
+      { newUsername }
+    );
+    if (usernameExists.records.length) {
+      return res
+        .status(statusCodes.badRequest)
+        .json({ message: "Username already exists" });
+    }
+    const result = await session.run(
+      `MATCH (u:User {id: $user_id}) SET u.username = $newUsername RETURN u`,
+      { user_id, newUsername }
+    );
+    logger.info("Username updated for " + user_id);
     return res
-      .status(statusCodes.badRequest)
-      .json({ message: "Username already exists" });
-  }
-
-  const updateUsername = await pool.query(
-    `UPDATE users
-        SET username = $1
-        WHERE id = $2;`,
-    [newUsername, user_id]
-  );
-
-  if (!updateUsername.rowCount) {
+      .status(statusCodes.success)
+      .json({ message: "Username updated" });
+  } catch (error) {
+    logger.error("Username update error:", error);
     return res.status(statusCodes.serverError).json({
       message: "Exception occurred while updating username",
     });
+  } finally {
+    session.close();
   }
-
-  logger.info("Username updated for", user_id);
-
-  res.status(statusCodes.success).json({ message: "Username updated" });
 };
 
 const changeEmail = async (req, res) => {
   const user_id = req.user.id;
   const { newEmail } = req.body;
 
-  const emailExists = await pool.query(
-    `SELECT 1
-        FROM users
-        WHERE email = $1;`,
-    [newEmail]
-  );
-
-  if (emailExists.rowCount) {
-    return res
-      .status(statusCodes.badRequest)
-      .json({ message: "Email already exists" });
-  }
-
-  const updateEmail = await pool.query(
-    `UPDATE users
-SET email = $1
-WHERE id = $2;`,
-    [newEmail, user_id]
-  );
-
-  if (!updateEmail.rowCount) {
+  try {
+    const session = getDriver()?.session();
+    const emailExists = await session.run(
+      `MATCH (u:User {email: $newEmail}) RETURN u`,
+      { newEmail }
+    );
+    if (emailExists.records.length) {
+      return res
+        .status(statusCodes.badRequest)
+        .json({ message: "Email already exists" });
+    }
+    const result = await session.run(
+      `MATCH (u:User {id: $user_id}) SET u.email = $newEmail RETURN u`,
+      { user_id, newEmail }
+    );
+    logger.info("Email updated for " + user_id);
+    return res.status(statusCodes.success).json({ message: "Email updated" });
+  } catch (error) {
+    logger.error("Email update error:", error);
     return res.status(statusCodes.serverError).json({
       message: "Exception occurred while updating email",
     });
+  } finally {
+    session.close();
   }
-
-  logger.info("Email updated for", user_id);
-
-  res.status(statusCodes.success).json({ message: "Email updated" });
 };
 
 const changeBio = async (req, res) => {
   const user_id = req.user.id;
   const { newBio } = req.body;
 
-  const updateBio = await pool.query(
-    `UPDATE users
-SET bio = $1
-WHERE id = $2;`,
-    [newBio, user_id]
-  );
-
-  if (!updateBio.rowCount) {
+  try {
+    const session = getDriver()?.session();
+    const result = await session.run(
+      `MATCH (u:User {id: $user_id}) SET u.bio = $newBio RETURN u`,
+      { user_id, newBio }
+    );
+    logger.info("Bio updated for " + user_id);
+    return res.status(statusCodes.success).json({ message: "Bio updated" });
+  } catch (error) {
+    logger.error("Bio update error:", error);
     return res.status(statusCodes.serverError).json({
       message: "Exception occurred while updating bio",
     });
+  } finally {
+    session.close();
   }
-
-  logger.info("Bio updated for", user_id);
-
-  res.status(statusCodes.success).json({ message: "Bio updated" });
 };
 
 const getProfile = async (req, res) => {
   const user_id = req.user.id;
 
-  const profile = await pool.query(
-    `SELECT username, email, bio, profile_picture
-FROM users
-WHERE id = $1;`,
-    [user_id]
-  );
-
-  if (!profile.rowCount) {
+  try {
+    const session = getDriver()?.session();
+    const result = await session.run(
+      `MATCH (u:User {id: $user_id}) RETURN u.username as username, u.email as email, u.bio as bio, u.profile_picture as profile_picture`,
+      { user_id }
+    );
+    if (!result.records.length) {
+      return res.status(statusCodes.serverError).json({
+        message: "Exception occurred while fetching profile",
+      });
+    }
+    res.status(statusCodes.success).json(result.records[0].toObject());
+  } catch (error) {
+    logger.error("Profile fetch error:", error);
     return res.status(statusCodes.serverError).json({
       message: "Exception occurred while fetching profile",
     });
+  } finally {
+    session.close();
   }
-
-  res.status(statusCodes.success).json(profile.rows[0]);
 };
 
 module.exports = {

@@ -1,7 +1,7 @@
 const statusCodes = require("../constants/statusCode");
 const logger = require("../middleware/winston");
 const { getDriver } = require("../database/neo4j_setup");
-
+const { v4: uuidv4 } = require("uuid");
 const {
   makeUsername,
   checkExisting,
@@ -36,6 +36,7 @@ const signup = async (req, res) => {
       });
     }
     let username = makeUsername(name);
+    const userId = uuidv4();
     while (await checkExisting(session, username, "username")) {
       logger.info("USERNAME ALREADY EXISTS", username);
       username = makeUsername(name);
@@ -43,6 +44,7 @@ const signup = async (req, res) => {
 
     const hashedPassword = await hashPassword(password);
     const queryParams = {
+      userId,
       email,
       name,
       username,
@@ -56,6 +58,7 @@ const signup = async (req, res) => {
 
     const addUser = await session.run(
       `CREATE (u:User {
+              id: $userId, 
               email: $email, 
               name: $name, 
               username: $username, 
@@ -64,7 +67,8 @@ const signup = async (req, res) => {
               isGetmoreMarked: $isGetmoreMarked, 
               isConnectMarked: $isConnectMarked, 
               isPersonalizedMarked: $isPersonalizedMarked, 
-              profile_pic: $profile_pic
+              profile_pic: $profile_pic,
+              bio: ""
               }) RETURN u;`,
       queryParams
     );
@@ -92,7 +96,9 @@ const checkExistingUser = async (req, res) => {
   try {
     const session = getDriver()?.session();
 
-    let userExists = await checkExisting(session, req.body.userInfo, "email") || await checkExisting(session, req.body.userInfo, "username");
+    let userExists =
+      (await checkExisting(session, req.body.userInfo, "email")) ||
+      (await checkExisting(session, req.body.userInfo, "username"));
     if (userExists) {
       return res.status(statusCodes.success).json({ message: "User exists" });
     }
@@ -169,9 +175,10 @@ const login = async (req, res) => {
 
     req.session.user = {
       email: user.records[0]._fields[0].properties.email,
-      _id: user.records[0]._fields[0].identity.low,
+      id: user.records[0]._fields[0].properties.id,
     };
-
+    req.user.id = user.records[0]._fields[0].properties.id;
+    console.log("USER", user.records[0]._fields[0].properties.id);
     const token = generateToken(user.records[0]._fields[0].properties);
     const refreshToken = generateRefreshToken(
       user.records[0]._fields[0].properties
@@ -188,7 +195,7 @@ const login = async (req, res) => {
       .status(statusCodes.serverError)
       .json({ error: "Exception occurred while logging in" });
   } finally {
-    session.close();
+    // session.close();
   }
 };
 
@@ -221,7 +228,7 @@ const sendOTP = async (req, res) => {
 const changePassword = async (req, res) => {
   const { email, newPassword } = req.body;
   try {
-    session = getDriver().session();
+    session = getDriver()?.session();
     const hashedPassword = await hashPassword(newPassword);
     const user = await session.run(
       "MATCH (u:User) WHERE u.email = $1 SET u.password = $2 RETURN u;",
@@ -239,7 +246,7 @@ const changePassword = async (req, res) => {
       .status(statusCodes.serverError)
       .json({ message: "Error while changing password" });
   } finally {
-    session.close();
+    // session.close();
   }
 };
 
@@ -253,8 +260,7 @@ const userPreferences = async (req, res) => {
     profile_pic,
   } = req.body;
   try {
-    session = getDriver().session();
-
+    session = getDriver()?.session();
 
     const params = {
       1: userId,
@@ -265,7 +271,7 @@ const userPreferences = async (req, res) => {
       6: profile_pic,
     };
     const user = await session.run(
-      `MATCH (u:User) WHERE ID(u) = $1 SET u.selectedTopics = $2, u.selectedCategories = $3, u.selectedLanguages = $4, u.username = $5, u.profile_pic = $6 RETURN u;`,
+      `MATCH (u:User) WHERE u.id = $1 SET u.selectedTopics = $2, u.selectedCategories = $3, u.selectedLanguages = $4, u.username = $5, u.profile_pic = $6 RETURN u;`,
       params
     );
 
@@ -282,7 +288,7 @@ const userPreferences = async (req, res) => {
       .status(statusCodes.serverError)
       .json({ message: "Error while updating preferences" });
   } finally {
-    session.close();
+    // session.close();
   }
 };
 

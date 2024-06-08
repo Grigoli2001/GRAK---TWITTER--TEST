@@ -14,16 +14,17 @@ const verifyToken = (req, res, next) => {
     // req.user = decoded;
 
     req.user = {
-      id: 1,
+      id: "7a8fd4ea-5218-4978-80c1-f12ccdf694f3",
       username: "cohat73642",
-      email: "cohat75394@lapeds.com"
+      email: "cohat75394@lapeds.com",
       // name: "test",
       // profile_pic: "test",
     };
     next();
   } catch (error) {
     logger.error(error);
-    return res.status(unauthorized).json({ error: "Invalid token" });s
+    return res.status(unauthorized).json({ error: "Invalid token" });
+    s;
   }
 };
 
