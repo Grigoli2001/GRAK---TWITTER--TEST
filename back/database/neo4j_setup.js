@@ -32,41 +32,38 @@
 
 // startConnection();
 
-
-const neo4j = require('neo4j-driver');
-const logger = require('../middleware/winston');
-let driver
-const connectToNeo4j =  async () => {
-  const URI = process.env.NEO4J_URI 
-  const USER = process.env.NEO4J_USER
-  const PASSWORD = process.env.NEO4J_PASSWORD
-
-  console.log(URI, USER, PASSWORD)
+const neo4j = require("neo4j-driver");
+const logger = require("../middleware/winston");
+let driver;
+const connectToNeo4j = async () => {
+  const URI = process.env.NEO4J_URI;
+  const USER = process.env.NEO4J_USER;
+  const PASSWORD = process.env.NEO4J_PASSWORD;
 
   try {
     driver = neo4j.driver(URI, neo4j.auth.basic(USER, PASSWORD), 
   { disableLosslessIntegers: true })
     const serverInfo = await driver.getServerInfo()
     if (!serverInfo) {
-      throw new Error("Server info not found")
+      throw new Error("Server info not found");
     }
-    logger.info('Neo4j connected Successfully')
+    logger.info("Neo4j connected Successfully");
     // console.log(serverInfo)
-  } catch(err) {
-    await driver.close()
-    console.log(`Connection error\n${err}\nCause: ${err.cause}`)
-    return process.exit(1)
+  } catch (err) {
+    await driver.close();
+    console.log(`Connection error\n${err}\nCause: ${err.cause}`);
+    return process.exit(1);
   }
 };
 
 const getDriver = () => {
   if (!driver) {
-    throw new Error('Driver not initialized')
+    throw new Error("Driver not initialized");
   }
-  return driver
-}
+  return driver;
+};
 
 module.exports = {
   connectToNeo4j,
-  getDriver
-}
+  getDriver,
+};
