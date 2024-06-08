@@ -4,7 +4,7 @@ const Interaction = require("../models/interactionModel");
 const statusCode = require("../constants/statusCode");
 const mongoose = require("mongoose");
 const ObjectId = mongoose.Types.ObjectId;
-const pool = require("../database/db_setup");
+const session = require("../database/db_setup");
 const { tweetQuery, allFollowers, getUserById, checkTweetText } = require('../utils/tweet.utils');
 
 const getAllTweets = async (req, res) => {
@@ -471,9 +471,13 @@ const getReplies = async (req, res) => {
         
         const replies = await tweetQuery({matchOptions:{ reference_id: new ObjectId(req.params.id), tweetType: 'reply' }, currentUID: req.user.id});
         for (let i = 0; i < replies.length; i++) {
-        const user = await pool.query(
-            `SELECT id, username, name, profile_pic FROM users WHERE id = ${replies[i].userId}`
-        );
+            const user = await session.run(
+                `
+                MATCH (u:User {id: $userId})
+                RETURN u.id AS id, u.username AS username, u.name AS name, u.profile_pic AS profile_pic
+                `,
+                { userId: replies[i].userId }
+            );
         replies[i].user = user.rows[0];
         }
         return res.status(statusCode.success).json({

@@ -6,20 +6,17 @@ const makeUsername = (name) => {
         Math.floor(Math.random() * 10000);
 
     return username;
-    }
+}
 
 const checkExistingUsername = async (username) => {
-    const client = await pool.connect();
     try {
-        const { rows } = await client.query(
-            "SELECT * FROM users WHERE username = $1;",
-            [username]
+        const result = await session.run(
+            "MATCH (u:User) WHERE u.username = $username RETURN u",
+            { username: username }
         );
-        return rows.length > 0;
+        return result.records.length > 0;
     } catch (error) {
         logger.error("Error while checking existing username:", error);
         return true;
-    } finally {
-        client.release();
     }
 }

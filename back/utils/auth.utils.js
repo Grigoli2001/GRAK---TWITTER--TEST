@@ -2,6 +2,13 @@ const jwt = require("jsonwebtoken");
 const otpGenerator = require("otp-generator");
 const nodemailer = require("nodemailer");
 const logger = require("../middleware/winston");
+const neo4j = require('neo4j-driver');
+
+const driver = neo4j.driver(
+  'neo4j://localhost',
+  neo4j.auth.basic('neo4j', 'password')
+);
+const session = driver.session();
 
 const makeUsername = (name) => {
   const username =
@@ -13,21 +20,23 @@ const makeUsername = (name) => {
   return username;
 };
 
-const checkExisting = async (client, data, column) => {
+const checkExisting = async (data, column) => {
   try {
+    let result;
     if (column) {
-      const { rows } = await client.query(
-        "SELECT $1 FROM users WHERE $2 = $3;",
-        [1, column, data]
+      const existingUser = await session.run(
+        'MATCH (u:User) WHERE u.$column = $data RETURN u',
+        { column: column, data: data }
       );
-      return rows.length > 0;
+      result = existingUser.records.length > 0;
     } else {
-      const { rows } = await client.query(
-        "SELECT $1 FROM users WHERE username = $2 OR email = $2;",
-        [1, data]
+      const existingUser = await session.run(
+        'MATCH (u:User) WHERE u.username = $data OR u.email = $data RETURN u',
+        { data: data }
       );
-      return rows.length > 0;
+      result = existingUser.records.length > 0;
     }
+    return result;
   } catch (error) {
     logger.error(`Error while checking existing ${column}:`, error);
     return true;

@@ -1,6 +1,6 @@
 const messageModel = require('../models/messageModel');
 const statusCode = require('../constants/statusCode');
-const pool = require("../database/db_setup");
+const driver = require("../database/db_setup");
 const { error } = require('winston');
 
 const MESSAGE_PAGE_SIZE = 20;
@@ -87,87 +87,58 @@ const deleteRoom = async(req, res) => {
 }
 
 const getActiveChats = async (req, res) => {
+  const session = driver.session();
+  try {
+    const { q } = req.query;
+    const result = await session.run(
+      `
+      MATCH (m:Message)
+      WHERE m.sender_id = $userId OR m.receiver_id = $userId
+      AND NOT $userId IN m.is_deleted_for
+      WITH m, 
+      CASE 
+        WHEN m.sender_id = $userId THEN m.receiver_id
+        ELSE m.sender_id
+      END AS otherUserId
+      ORDER BY m.date DESC
+      WITH COLLECT(DISTINCT otherUserId) AS combined_ids
+      RETURN combined_ids
+      `,
+      { userId: req.user.id }
+    );
 
+    const combinedIds = result.records.length ? result.records[0].get('combined_ids') : [];
 
-  
-
-    try {
-
-      const { q } = req.query
-        // get any message where the current user is the send er or receiver and the message is not deleted
-        const activeChatsQuery = await messageModel.aggregate([
-            {
-              '$match': {
-                '$or': [
-                  {
-                    'sender_id': req.user.id
-                  }, {
-                    'receiver_id': req.user.id
-                  }
-                ], 
-                'is_deleted_for': {
-                  '$nin': [
-                    req.user.id
-                  ],
-                }
-              }
-            }, {
-              '$sort': {
-                'date': -1
-              }
-            }, {
-              '$group': {
-                '_id': 1, 
-                'combined_ids': {
-                  '$addToSet': {
-                    '$cond': {
-                      'if': {
-                        '$eq': [
-                          '$sender_id', req.user.id
-                        ]
-                      }, 
-                      'then': '$receiver_id', 
-                      'else': '$sender_id'
-                    }
-                  }
-                }
-              }
-            }, {
-              '$project': {
-                '_id': 0, 
-                'combined_ids': 1
-              }
-            }
-          ])
-
-        
-        if (activeChatsQuery?.length<=0) {
-            return res.status(statusCode.success).json({ users: [] })
-        }
-
-        console.log(activeChatsQuery[0].combined_ids)
-
-        // user array order to match the combined_ids array which has the is sorted by latest date
-        const userData = await pool.query(
-          `SELECT id, username, name, profile_pic 
-           FROM users 
-           WHERE id = ANY($1)
-           AND username like $2
-           ORDER BY ARRAY_POSITION($1, id) 
-           LIMIT 10`,
-          [activeChatsQuery[0].combined_ids, q ? `%${q}%` : '%']
-      )
-
-
-        res.status(statusCode.success).json({ users: userData.rows })
-    }catch (err) {
-        console.log(error)
-        res.status(statusCode.badRequest).json({
-            message: err
-        })
+    if (combinedIds.length === 0) {
+      return res.status(statusCode.success).json({ users: [] });
     }
 
-}
+    const userData = await session.run(
+      `
+      MATCH (u:User)
+      WHERE u.id IN $combinedIds
+      AND u.username CONTAINS $username
+      RETURN u.id AS id, u.username AS username, u.name AS name, u.profile_pic AS profile_pic
+      LIMIT 10
+      `,
+      { combinedIds, username: q ? `%${q}%` : '%' }
+    );
+
+    const users = userData.records.map(record => ({
+      id: record.get('id'),
+      username: record.get('username'),
+      name: record.get('name'),
+      profile_pic: record.get('profile_pic')
+    }));
+
+    res.status(statusCode.success).json({ users });
+  } catch (error) {
+    logger.error(error);
+    res.status(statusCode.badRequest).json({ message: error });
+  } finally {
+    await session.close();
+  }
+};
 
 module.exports = {
     getAllMessages,

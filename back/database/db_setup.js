@@ -1,43 +1,36 @@
-const pg = require("pg");
-const logger = require("../middleware/winston");
+const logger = require('../middleware/winston');
+const neo4j = require('neo4j-driver');
 
-const db_config = {
-  user: process.env.DB_USER,
-  host: process.env.DB_HOST || "127.0.0.1",
-  database: process.env.DB_NAME,
-  password: process.env.DB_PASSWORD,
-  port: 5432,
-  max: 10,
+// Create the Neo4j driver
+const driver = neo4j.driver(
+  process.env.NEO4J_URI,
+  neo4j.auth.basic(process.env.NEO4J_USER, process.env.NEO4J_PASSWORD)
+);
+
+// Function to establish connection to Neo4j database and log the number of nodes
+const connectToNeo4j = async () => {
+  const session = driver.session();
+  try {
+    const result = await session.run('MATCH (n) RETURN count(n) as count');
+    const count = result.records[0].get('count').toNumber();
+    logger.info(`Connected to Neo4j database with ${count} nodes.`);
+  } catch (error) {
+    logger.error('Failed to connect to Neo4j database:', error);
+  } finally {
+    await session.close();
+  }
 };
 
-let db_connection;
+// Function to create a new session
+const getSession = () => {
+  logger.info('Creating a new session with Neo4j database.');
+  return driver.session();
+};
 
-function startConnection() {
+// Log driver errors
+driver.onError = (error) => {
+  logger.error('Neo4j driver instantiation failed:', error);
+};
 
-  db_connection = new pg.Pool(db_config);
-
-  db_connection.connect((err, client) => {
-    if (!err) {
-      logger.info("PostgreSQL Connected");
-    } else {
-      console.log(err)
-      logger.error("PostgreSQL Connection Failed");
-      startConnection();
-    }
-  });
-
-  db_connection.on("error", (err, client) => {
-    logger.error("Unexpected error on idle client");
-    startConnection();
-  });
-}
-
-startConnection();
-
-setInterval(function () {
-  db_connection.query("SELECT $1", [1], (err, res) => {
-    if (err) logger.error("SELECT 1", err.message);
-  });
-}, 3000);
-
-module.exports = db_connection;
+// Export the function to establish connection and getSession
+module.exports = { connectToNeo4j, getSession };

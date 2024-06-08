@@ -1,9 +1,8 @@
 const statusCodes = require("../constants/statusCode");
 const logger = require("../middleware/winston");
-const pool = require("../database/db_setup");
+const { getSession } = require("../database/db_setup");
 const jwt = require("jsonwebtoken");
 const multer = require("multer");
-
 const {
   makeUsername,
   checkExisting,
@@ -12,8 +11,6 @@ const {
   generateToken,
   generateRefreshToken,
 } = require("../utils/auth.utils");
-const { info } = require("winston");
-const { generate } = require("otp-generator");
 
 const signup = async (req, res) => {
   const {
@@ -28,137 +25,137 @@ const signup = async (req, res) => {
   } = req.body;
 
   if (!email || !name || !password) {
-    res.status(statusCodes.badRequest).json({ message: "Missing fields" });
-  } else {
-    const client = await pool.connect();
+    return res.status(statusCodes.badRequest).json({ message: "Missing fields" });
+  }
 
-    try {
-      const emailExists = await checkExisting(client, email, "email");
-      if (emailExists) {
-        return res.status(statusCodes.badRequest).json({
-          message: "Email already exists",
-        });
-      }
-
-      let username = makeUsername(name);
-      while (await checkExisting(client, username, "username")) {
-        logger.info("USERNAME ALREADY EXISTS", username);
-        username = makeUsername(name);
-      }
-
-      const queryParams = [
-        email,
-        name,
-        username,
-        password,
-        dob,
-        isGetmoreMarked,
-        isConnectMarked,
-        isPersonalizedMarked,
-        "default_profile_pic.png",
-      ];
-
-      const addUser = await client.query(
-        `INSERT INTO users(email,name, username, password,dob,isGetmoreMarked,isConnectMarked,isPersonalizedMarked,profile_pic)
-           VALUES ($1,$2,$3, crypt($4, gen_salt('bf')), $5, $6, $7, $8, $9);`,
-        queryParams
-      );
-      logger.info("USER ADDED", addUser.rowCount, "email", email);
-
-      //   Login the user
-      req.body.userInfo = email;
-      login(req, res);
-    } catch (error) {
-      logger.error("Adding user error:", error);
-      res.status(statusCodes.queryError).json({
-        message: "Exception occurred while registering",
-      });
-    } finally {
-      client.release();
+  const session = getSession();
+  try {
+    logger.info('Checking if email exists:', email);
+    const emailExists = await checkExisting(session, email, "email");
+    if (emailExists) {
+      return res.status(statusCodes.badRequest).json({ message: "Email already exists" });
     }
+
+    let username = makeUsername(name);
+    while (await checkExisting(session, username, "username")) {
+      logger.info("USERNAME ALREADY EXISTS", username);
+      username = makeUsername(name);
+    }
+
+    const queryParams = {
+      email,
+      name,
+      username,
+      password,
+      dob,
+      isGetmoreMarked,
+      isConnectMarked,
+      isPersonalizedMarked,
+      profile_pic: "default_profile_pic.png",
+    };
+
+    const addUser = await session.run(
+      `
+      CREATE (u:User {
+        email: $email,
+        name: $name,
+        username: $username,
+        password: apoc.crypto.bcrypt($password),
+        dob: $dob,
+        isGetmoreMarked: $isGetmoreMarked,
+        isConnectMarked: $isConnectMarked,
+        isPersonalizedMarked: $isPersonalizedMarked,
+        profile_pic: $profile_pic
+      })
+      RETURN u
+      `,
+      queryParams
+    );
+    logger.info("USER ADDED", addUser.records.length, "email", email);
+
+    // Login the user
+    req.body.userInfo = email;
+    login(req, res);
+  } catch (error) {
+    logger.error("Adding user error:", error);
+    res.status(statusCodes.queryError).json({ message: "Exception occurred while registering" });
+  } finally {
+    await session.close();
   }
 };
 
 const checkExistingUser = async (req, res) => {
   if (!req.body.userInfo) {
-    return res
-      .status(statusCodes.badRequest)
-      .json({ message: "Missing fields" });
+    return res.status(statusCodes.badRequest).json({ message: "Missing fields" });
   }
-  if (await checkExisting(pool, req.body.userInfo)) {
-    return res.status(statusCodes.success).json({ message: "User exists" });
+
+  const session = getSession();
+  try {
+    const userExists = await checkExisting(session, req.body.userInfo);
+    const message = userExists ? "User exists" : "User does not exist";
+    return res.status(statusCodes.success).json({ message });
+  } catch (error) {
+    logger.error(error);
+    return res.status(statusCodes.queryError).json({ message: "Error while checking existing user" });
+  } finally {
+    await session.close();
   }
-  return res
-    .status(statusCodes.success)
-    .json({ message: "User does not exist" });
 };
 
 const login = async (req, res) => {
   const { userInfo, password, usingGoogle } = req.body;
 
-  // Check if the user is logging in with google
   if (usingGoogle) {
-    const user = await pool.query("SELECT * FROM users WHERE email = $1;", [
-      userInfo,
-    ]);
-    if (!user.rowCount) {
-      return res
-        .status(statusCodes.notFound)
-        .json({ message: "User does not exist" });
-    }
-    req.session.user = {
-      email: user.rows[0].email,
-    };
-
-    const token = generateToken(user.rows[0]);
-    const refreshToken = generateRefreshToken(user.rows[0]);
-
-    return res
-      .status(statusCodes.success)
-      .json({
-        token: token,
-        refresh: refreshToken,
-        username: user.rows[0].username,
-      });
-  }
-
-  // Normal login
-  if (!userInfo || !password) {
-    return res
-      .status(statusCodes.badRequest)
-      .json({ message: "Missing fields" });
-  } else {
+    const session = getSession();
     try {
-      const user = await pool.query(
-        "SELECT * FROM users WHERE (username = $1 OR email = $1) AND password = crypt($2, password) ;",
-        [userInfo, password]
-      );
-      if (!user.rowCount) {
-        return res
-          .status(statusCodes.notFound)
-          .json({ message: "Incorrect credentials" });
+      const result = await session.run("MATCH (u:User {email: $email}) RETURN u", { email: userInfo });
+      const user = result.records.length ? result.records[0].get('u').properties : null;
+      if (!user) {
+        return res.status(statusCodes.notFound).json({ message: "User does not exist" });
       }
+      req.session.user = { email: user.email };
 
-      req.session.user = {
-        email: user.rows[0].email,
-      };
+      const token = generateToken(user);
+      const refreshToken = generateRefreshToken(user);
 
-      const token = generateToken(user.rows[0]);
-      const refreshToken = generateRefreshToken(user.rows[0]);
-
-      return res
-        .status(statusCodes.success)
-        .json({
-          token: token,
-          refresh: refreshToken,
-          username: user.rows[0].username,
-        });
+      return res.status(statusCodes.success).json({ token, refresh: refreshToken, username: user.username });
     } catch (error) {
       logger.error(error);
-      return res
-        .status(statusCodes.queryError)
-        .json({ error: "Exception occurred while logging in" });
+      return res.status(statusCodes.queryError).json({ error: "Exception occurred while logging in" });
+    } finally {
+      await session.close();
     }
+  }
+
+  if (!userInfo || !password) {
+    return res.status(statusCodes.badRequest).json({ message: "Missing fields" });
+  }
+
+  const session = getSession();
+  try {
+    const result = await session.run(
+      `MATCH (u:User) 
+       WHERE (u.username = $userInfo OR u.email = $userInfo) 
+         AND u.password = apoc.crypto.bcryptCheck($password, u.password) 
+       RETURN u`,
+      { userInfo, password }
+    );
+    const user = result.records.length ? result.records[0].get('u').properties : null;
+    if (!user) {
+      return res.status(statusCodes.notFound).json({ message: "Incorrect credentials" });
+    }
+
+    req.session.user = { email: user.email };
+
+    const token = generateToken(user);
+    const refreshToken = generateRefreshToken(user);
+
+    return res.status(statusCodes.success).json({ token, refresh: refreshToken, username: user.username });
+  } catch (error) {
+    logger.error(error);
+    return res.status(statusCodes.queryError).json({ error: "Exception occurred while logging in" });
+  } finally {
+    await session.close();
   }
 };
 
@@ -176,37 +173,34 @@ const sendOTP = async (req, res) => {
   const text = `Your OTP is ${otp}`;
   const mailSent = await sendEmail(email, subject, text);
   if (mailSent) {
-    return res
-      .status(statusCodes.success)
-      .json({ message: "OTP sent", otp: otp });
+    return res.status(statusCodes.success).json({ message: "OTP sent", otp });
   } else {
-    return res
-      .status(statusCodes.queryError)
-      .json({ message: "Error while sending OTP" });
+    return res.status(statusCodes.queryError).json({ message: "Error while sending OTP" });
   }
 };
 
 const changePassword = async (req, res) => {
   const { email, newPassword } = req.body;
-  const client = await pool.connect();
+  const session = getSession();
   try {
-    const user = await client.query(
-      "UPDATE users SET password = crypt($1, gen_salt('bf')) WHERE email = $2;",
-      [newPassword, email]
+    const result = await session.run(
+      `
+      MATCH (u:User {email: $email})
+      SET u.password = apoc.crypto.bcrypt($newPassword)
+      RETURN u
+      `,
+      { email, newPassword }
     );
-    if (user.rowCount) {
-      return res
-        .status(statusCodes.success)
-        .json({ message: "Password changed" });
+
+    if (result.records.length) {
+      return res.status(statusCodes.success).json({ message: "Password changed" });
     }
     return res.status(statusCodes.notFound).json({ message: "User not found" });
   } catch (error) {
     logger.error(error);
-    return res
-      .status(statusCodes.queryError)
-      .json({ message: "Error while changing password" });
+    return res.status(statusCodes.queryError).json({ message: "Error while changing password" });
   } finally {
-    client.release();
+    await session.close();
   }
 };
 
@@ -220,32 +214,37 @@ const userPreferences = async (req, res) => {
     profile_pic,
   } = req.body;
 
-  const client = await pool.connect();
+  const session = getSession();
   try {
-    const user = await client.query(
-      "UPDATE users SET selectedTopics = $1, selectedCategories = $2, selectedLanguages = $3, username = $4, profile_pic = $5 WHERE id = $6;",
-      [
+    const result = await session.run(
+      `
+      MATCH (u:User {id: $userId})
+      SET u.selectedTopics = $selectedTopics,
+          u.selectedCategories = $selectedCategories,
+          u.selectedLanguages = $selectedLanguages,
+          u.username = $userName,
+          u.profile_pic = $profile_pic
+      RETURN u
+      `,
+      {
+        userId,
         selectedTopics,
         selectedCategories,
         selectedLanguages,
         userName,
-        profile_pic || "default_profile_pic.png",
-        userId,
-      ]
+        profile_pic: profile_pic || "default_profile_pic.png",
+      }
     );
-    if (user.rowCount) {
-      return res
-        .status(statusCodes.success)
-        .json({ message: "Preferences updated" });
+
+    if (result.records.length) {
+      return res.status(statusCodes.success).json({ message: "Preferences updated" });
     }
     return res.status(statusCodes.notFound).json({ message: "User not found" });
   } catch (error) {
     logger.error(error);
-    return res
-      .status(statusCodes.queryError)
-      .json({ message: "Error while updating preferences" });
+    return res.status(statusCodes.queryError).json({ message: "Error while updating preferences" });
   } finally {
-    client.release();
+    await session.close();
   }
 };
 
