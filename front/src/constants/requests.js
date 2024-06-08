@@ -11,9 +11,10 @@ export const requests = {
   change_password: "/auth/change-password",
   changeUsername: "/profile/changeUsername",
   userPreferences: "/auth/user-preferences",
+  uploadImage: "/firebase/upload-image",
 
   exploreUsers: "/users/explore-users",
-  getActiveChats: '/messages/active-chats'
+  getActiveChats: "/messages/active-chats",
 };
 
 export const followRequests = {
@@ -49,10 +50,8 @@ export const tweetRequests = {
   deleteTweet: "/tweets/delete",
   highlightTweet: "/tweets/highlight",
   getTrending: "/tweets/trending",
-  searchTags: '/tweets/tags'
-}
-
-  
+  searchTags: "/tweets/tags",
+};
 
 export const notificationRequests = {
   allNotifications: "/notifications",

@@ -1,8 +1,7 @@
 import ReactLoading from "react-loading";
-import { IoMdClose } from "react-icons/io";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Checkbox } from "@material-tailwind/react";
-import { IoMdArrowBack, IoMdCheckmark } from "react-icons/io";
+import { IoMdCheckmark } from "react-icons/io";
 import { FiBell } from "react-icons/fi";
 import { TbCameraPlus } from "react-icons/tb";
 import instance from "../../constants/axios";
@@ -11,8 +10,6 @@ import { useNavigate } from "react-router-dom";
 import { topics } from "../../constants/feedTest";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { storage } from "../../utils/firebase";
-import { UserDisplayer } from "../User";
-import { jwtDecode } from "jwt-decode";
 
 import useUserContext from "../../hooks/useUserContext";
 
@@ -41,28 +38,48 @@ const AfterRegistrationPopup = ({ onClose }) => {
     if (!justRegistered) {
       Navigate("/home");
     }
-  }, []);
+  }, [justRegistered, Navigate]);
   console.log(display);
 
-  const handleUpdateProfilePic = (image) => {
+  const handleUpdateProfilePic = async (image) => {
     if (!image) return;
 
-    const storageRef = ref(storage, `profile_pics/${user.id}/profile_image`);
-    uploadBytesResumable(storageRef, image)
-      .then((snapshot) => {
-        console.log("Uploaded a blob or file!", snapshot);
-        getDownloadURL(snapshot.ref)
-          .then((downloadURL) => {
-            console.log("File available at", downloadURL);
-            setDisplay(downloadURL);
-            setProfilePic(downloadURL);
-          })
-          .catch((error) => {
-            console.error("Error getting download URL:", error);
-          });
+    // const storageRef = ref(storage, `profile_pics/${user.id}/profile_image`);
+    // uploadBytesResumable(storageRef, image)
+    //   .then((snapshot) => {
+    //     console.log("Uploaded a blob or file!", snapshot);
+    //     getDownloadURL(snapshot.ref)
+    //       .then((downloadURL) => {
+    //         console.log("File available at", downloadURL);
+    //         setDisplay(downloadURL);
+    //         setProfilePic(downloadURL);
+    //       })
+    //       .catch((error) => {
+    //         console.error("Error getting download URL:", error);
+    //       });
+    //   })
+    //   .catch((error) => {
+    //     console.error("Error uploading file:", error);
+    //   });
+    // does not work for now
+    const formData = new FormData();
+    formData.append("file", image);
+    console.log(formData);
+    console.log(`image ${image}`);
+
+    instance
+      .post(requests.uploadImage, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       })
-      .catch((error) => {
-        console.error("Error uploading file:", error);
+      .then((res) => {
+        console.log(res.data);
+        setDisplay(res.data.url);
+        setProfilePic(res.data.url);
+      })
+      .catch((err) => {
+        console.log(err);
       });
   };
 
@@ -142,6 +159,7 @@ const AfterRegistrationPopup = ({ onClose }) => {
             setLoading(false);
           });
         setLoading(false);
+        break;
       default:
         break;
     }
@@ -456,8 +474,7 @@ const AfterRegistrationPopup = ({ onClose }) => {
                           setUserName(e.target.value.toLowerCase().trim())
                         }
                         className={`bg-black text-white w-[300px] h-[60px] rounded-md p-4 pt-7 pl-7 border-gray-300  ${
-                          isUsernameAvailable === false &&
-                          "border-red-700 "
+                          isUsernameAvailable === false && "border-red-700 "
                         }  border-2 focus:outline-none focus:border-blue-600 transition-all `}
                       />
                       <label

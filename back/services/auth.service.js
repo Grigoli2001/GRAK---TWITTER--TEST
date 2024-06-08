@@ -1,7 +1,6 @@
 const statusCodes = require("../constants/statusCode");
 const logger = require("../middleware/winston");
 const { getDriver } = require("../database/neo4j_setup");
-const { v4: uuidv4 } = require("uuid");
 const {
   makeUsername,
   checkExisting,
@@ -11,7 +10,7 @@ const {
   generateRefreshToken,
   hashPassword,
   comparePassword,
-  generateNumberUUID
+  generateNumberUUID,
 } = require("../utils/auth.utils");
 
 const signup = async (req, res) => {
@@ -53,12 +52,12 @@ const signup = async (req, res) => {
       isConnectMarked,
       isPersonalizedMarked,
       profile_pic: "default_profile_pic.png",
-      id: generateNumberUUID()
+      id: generateNumberUUID(),
     };
 
     const addUser = await session.run(
       `CREATE (u:User {
-              id: $userId, 
+              id: $id, 
               email: $email, 
               name: $name, 
               id: $id,
@@ -178,7 +177,7 @@ const login = async (req, res) => {
       email: user.records[0]._fields[0].properties.email,
       id: user.records[0]._fields[0].properties.id,
     };
-    req.user = {id:user.records[0]._fields[0].properties.id};
+    req.user = { id: user.records[0]._fields[0].properties.id };
     console.log("USER", user.records[0]._fields[0].properties.id);
     const token = generateToken(user.records[0]._fields[0].properties);
     const refreshToken = generateRefreshToken(
@@ -191,7 +190,7 @@ const login = async (req, res) => {
       username: user.records[0]._fields[0].properties.username,
     });
   } catch (err) {
-    console.log(err)
+    console.log(err);
     logger.error(err);
     return res
       .status(statusCodes.serverError)
@@ -253,7 +252,6 @@ const changePassword = async (req, res) => {
 };
 
 const userPreferences = async (req, res) => {
-  
   const {
     userId,
     selectedTopics,

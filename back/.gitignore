@@ -52,3 +52,7 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 **/logs/*
+
+
+# local configs
+twitter-clone-413423-firebase-adminsdk-b4tea-aaee6e54b8.json

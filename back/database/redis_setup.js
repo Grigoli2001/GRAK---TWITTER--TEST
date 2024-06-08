@@ -8,12 +8,10 @@ if (!REDIS_URI) {
   process.exit(1);
 }
 const redisClient = redis.createClient({
-    url: REDIS_URI
+  url: REDIS_URI,
 });
 
 const connectToRedis = async () => {
-   
-
   redisClient.on("error", (err) => {
     logger.error("Redis error: ", err);
     throw new Error("Redis connection error");
@@ -24,12 +22,10 @@ const connectToRedis = async () => {
   });
 
   await redisClient.connect();
-  
-}
-
+};
 
 module.exports = {
-    RedisStore,
-    connectToRedis,
-    redisClient,
-}
+  RedisStore,
+  connectToRedis,
+  redisClient,
+};

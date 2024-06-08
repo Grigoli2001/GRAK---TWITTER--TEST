@@ -6,11 +6,17 @@ const morgan = require("morgan");
 const session = require("express-session");
 const logger = require("../middleware/winston");
 const notFound = require("../middleware/notFound");
+const fileUpload = require("express-fileupload");
 
 // database
-const { connectToMongo }= require("../database/mongo_setup");
-const { connectToRedis, redisClient, RedisStore } = require("../database/redis_setup");
-const { connectToNeo4j }= require("../database/neo4j_setup");
+const { connectToMongo } = require("../database/mongo_setup");
+const {
+  connectToRedis,
+  redisClient,
+  RedisStore,
+} = require("../database/redis_setup");
+const { connectToNeo4j } = require("../database/neo4j_setup");
+const { connectToFirebase } = require("../database/firebase_setup");
 
 // sockets
 const initSockets = require("../sockets/sockets");
@@ -26,6 +32,7 @@ const profileRoutes = require("../routes/profile.routes");
 const userRoutes = require("../routes/user.routes");
 const tokenRoutes = require("../routes/token.routes");
 const notificationRoutes = require("../routes/notification.routes");
+const firebaseRoutes = require("../routes/firebase.routes");
 
 // app setup
 const app = express();
@@ -34,7 +41,6 @@ const PORT = process.env.PORT;
 const registerCoreMiddleWare = async () => {
   const redisStore = new RedisStore({ client: redisClient });
   try {
-
     // middleware
     app.use(morgan("combined", { stream: logger.stream }));
     app.use(express.json());
@@ -48,12 +54,16 @@ const registerCoreMiddleWare = async () => {
         cookie: {
           secure: false,
           httpOnly: true,
-          maxAge: 1000 * 60 * 60 * 24 , // 1 day
+          maxAge: 1000 * 60 * 60 * 24, // 1 day
         },
-        store: redisStore
+        store: redisStore,
       })
     );
-
+    app.use(
+      fileUpload({
+        createParentPath: true,
+      })
+    );
 
     // routes
     app.use("/auth", authRoutes);
@@ -64,10 +74,9 @@ const registerCoreMiddleWare = async () => {
     app.use("/messages", messageRoutes);
     app.use("/profile", profileRoutes);
     app.use("/notifications", notificationRoutes);
-    
+    app.use("/firebase", firebaseRoutes);
+
     app.use(notFound);
-
-
   } catch (err) {
     logger.error("Error thrown while executing registerCoreMiddleWare", err);
     process.exit(1);
@@ -88,6 +97,7 @@ const startApp = async () => {
     await connectToMongo();
     await connectToRedis();
     await connectToNeo4j();
+    await connectToFirebase();
     initSockets(app);
 
     app.listen(PORT, () => {
