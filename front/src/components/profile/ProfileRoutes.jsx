@@ -16,11 +16,8 @@ import { months, getDaysInMonth, getYears, defaultAvatar } from "../../utils/uti
 import instance from "../../constants/axios";
 import { requests } from "../../constants/requests";
 
-import { storage } from "../../utils/firebase";
-import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-import { v4 } from "uuid";
 import { createToast } from "../../hooks/createToast";
-import { QueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 
 const PhotoModal = ({ type, backTo }) => {
   // code to get a user since it is routable & reject if user does not exist
@@ -99,44 +96,40 @@ const EditProfileModal = ({ backTo }) => {
   };
 
   const [loading, setLoading] = useState(true);
-  const [day, setDay] = useState();
-  const [month, setMonth] = useState();
-  const [year, setYear] = useState();
+  const [day, setDay] = useState(null);
+  const [month, setMonth] = useState(null);
+  const [year, setYear] = useState(null);
   const [dayOptions, setDayOptions] = useState();
   const years = getYears(16, 100);
-  const queryClient = new QueryClient();
 
   const [formState, setFormState] = useState({})
-    // id: user?.id,
-    // name: user?.name || "",
-    // username: user?.username || "",
-    // bio: user?.bio || "",
-    // location: user?.location || "",
-    // profile_pic: user?.profile_pic || "",
-    // website: user?.website || "",
-    // cover: user?.cover || "",
-    // dob: user.dob,
-  // });
+  const [formProfilePic, setFormProfilePic] = useState()
+  const [formCoverPic, setFormCoverPic] = useState()
 
+  const queryClient = useQueryClient()
+ 
   useEffect(() => {
     instance.get(requests.getUser, {params: {id: user.id}}).then(res => {
 
       // remove unneeded fields
-      const { email, dob,profile_pic,cover,created_at,  ...formData } = res.data.user;
-      console.log(res.data.user, 'user')
+      const { email, dob,  created_at,  ...formData } = res.data.user;
       setFormState(formData)          
 
       // set dob for option selector
-      const date = new Date(res.data.user.dob);  
-      setDay(date.getDate());
-      setMonth(getMonthCounterpart(date.getMonth()));
-      setYear(date.getFullYear());
-      setDayOptions(getDaysInMonth(date.getFullYear(), months.indexOf(getMonthCounterpart(date.getMonth()))))
+      const date = res.data.user.dob;
+      setDay(date.day);
+
+      setMonth(getMonthCounterpart(date.month));
+
+      setYear(date.year);
+      setDayOptions(getDaysInMonth(date.year, months.indexOf(getMonthCounterpart(date.month))))
+
       setLoading(false)
+      
     }).catch(err => {
       console.error(err)
     })
-  },[user.id])
+  },[])
 
   function getMonthCounterpart(month) {
     const monthMap = {
@@ -188,47 +181,50 @@ const EditProfileModal = ({ backTo }) => {
 
   const handleUpdateProfilePic = ( image ) => {
     if (!image) return;
+    const imageUrl = URL.createObjectURL(image)
+    setFormState({...formState, profile_pic: imageUrl})
+    setFormProfilePic(image)
     
-    const storageRef = ref(storage, `profile_pics/${formState.id}/profile_image`);
-    uploadBytesResumable(storageRef, image).then((snapshot) => {
-      console.log("Uploaded a blob or file!", snapshot);
-      getDownloadURL(snapshot.ref).then((downloadURL) => {
-        console.log("File available at", downloadURL);
-        setFormState({ ...formState, profile_pic: downloadURL });
-      }).catch((error) => {
-        // console.error("Error getting download URL:", error);
-      });
-    }).catch((error) => {
-      console.error("Error uploading file:", error);
-    });
   };
 
   const handleUpdateCoverPic = ( image ) => {
-    console.log('cover', formState.cover)
     if (!image) return;
-
-    const storageRef = ref(storage, `cover_pics/${formState.id}/cover_image`);
-    uploadBytesResumable(storageRef, image).then((snapshot) => {
-      console.log("Uploaded a blob or file!", snapshot);
-      getDownloadURL(snapshot.ref).then((downloadURL) => {
-        console.log("File available at", downloadURL);
-        setFormState({ ...formState, cover: downloadURL });
-        console.log('cover2', formState.cover)
-      }).catch((error) => {
-        console.error("Error getting download URL:", error);
-      });
-    }).catch((error) => {
-      console.error("Error uploading file:", error);
-    });
+    const imageUrl = URL.createObjectURL(image)
+    setFormState({...formState, cover: imageUrl})
+    setFormCoverPic(image)
   };
+
+  const handleRemoveCover = () => {
+    setFormState({...formState, cover: ''})
+    setFormCoverPic("default")
+  }
 
   const updateProfile = () => {
     console.log(year, month, day, 'date')
-    const dob = new Date(`${year}-${months.indexOf(month) + 1}-${day}`).toISOString();
-    instance.patch(requests.updateUser, {...formState, dob})
+    // const dob = new Date(`${year}-${months.indexOf(month) + 1}-${day}`).toISOString();
+    const dob = {year, month: parseInt(getMonthCounterpart(month)), day}
+    // change to formdata
+    const sendForm = new FormData()
+    sendForm.append('profile_pic', formProfilePic)
+    sendForm.append('cover', formCoverPic)
+    sendForm.append('dob', JSON.stringify(dob))
+    for (const key in formState) {
+      if (key !== 'profile_pic' && key !== 'cover' && key !== 'id' && key !== 'dob') {
+        sendForm.append(key, formState[key])
+      }
+    }
+    for (var pair of sendForm.entries()) {
+      console.log(pair[0]+ ', ' + pair[1]); 
+    }
+
+    instance.patch(requests.updateUser, sendForm, {
+      headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  })
     .then(res => {
       createToast('Profile updated', 'success', 'profile-updated', {limit: 1})
-      queryClient.invalidateQueries(['user', user.username])
+     queryClient.invalidateQueries({queryKey: ['user', user.username]})
       dispatch({type: 'UPDATE', payload: formState})
       navigate(`/${formState.username}`)
       
@@ -236,10 +232,6 @@ const EditProfileModal = ({ backTo }) => {
       createToast('Error updating profile', 'error', 'errorr-updating-profile', {limit: 1})
     })
   };
-
-  // if (loading) {
-  //   return <p>Loading...</p>; // Render loading indicator until data is fetched
-  // }
 
   return (
     <NavModal backTo={backTo}>
@@ -276,8 +268,6 @@ const EditProfileModal = ({ backTo }) => {
                 />
 
               }
-              
-             
           </div>
 
           <div className="z-20 flex items-center justify-center gap-x-4">
@@ -303,7 +293,7 @@ const EditProfileModal = ({ backTo }) => {
             {formState?.cover && (
 
               <Button
-              onClick={() => {setFormState({...formState, cover: ''})}}
+              onClick={handleRemoveCover}
                 variant="icon"
                 size="icon-sm"
                 tooltip="Remove cover photo"
@@ -336,7 +326,7 @@ const EditProfileModal = ({ backTo }) => {
               </Button>
             </div>
             <ExtAvatar
-              user={user?.profile_pic}
+              user={user?.username}
               src={formState?.profile_pic || null}
               size="lg"
               className={
@@ -348,7 +338,7 @@ const EditProfileModal = ({ backTo }) => {
 
         {/* place all fields here */}
         <div className="p-4 mt-10 grid gap-y-3">
-          {Object.keys(formState).filter(key => !['profile_pic', 'cover', 'id', 'dob'].includes(key)).map((field, index) => {
+          {Object.keys(formState).filter(key => !['profile_pic', 'profile_pic_url', 'cover', 'cover_url', 'id', 'dob'].includes(key)).map((field, index) => {
             return (
               <CustomInput
                 key={index}
@@ -367,7 +357,7 @@ const EditProfileModal = ({ backTo }) => {
             <span className="text-sm">Birth date</span>
             <div className="flex gap-x-2">
               <OptionSelector
-                title="Day"
+                title={"Day"}
                 options={dayOptions}
                 name={"day"}
                 defaultValue={day}

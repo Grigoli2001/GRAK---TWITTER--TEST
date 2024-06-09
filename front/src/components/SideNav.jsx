@@ -166,7 +166,6 @@ const SideNav = () => {
   // TODO Add loading
   useEffect(() => {
     // get initial username should only run once on mount
-    console.log('getting user side nav')
     instance.get(requests.getUser, {
       params: {
         id: user?.id

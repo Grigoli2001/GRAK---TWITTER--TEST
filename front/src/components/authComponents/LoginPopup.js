@@ -1,11 +1,8 @@
 import React, { useState, useEffect, useContext } from "react";
 import { IoMdClose } from "react-icons/io";
-import { FcGoogle } from "react-icons/fc";
 import { FaApple, FaRegEye, FaEyeSlash } from "react-icons/fa";
 import { Button } from "@material-tailwind/react";
 import ReactLoading from "react-loading";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import { requests } from "../../constants/requests";
 import instance from "../../constants/axios";
 import { useNavigate } from "react-router-dom";
@@ -117,7 +114,7 @@ const LoginPopup = ({ onClose, openSignUpFromLogin, Google }) => {
         {loading ? (
           <ReactLoading
             type={"spin"}
-            color={"blue"}
+            color={"#1da1f2"}
             className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
           />
         ) : (

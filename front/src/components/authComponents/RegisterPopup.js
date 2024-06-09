@@ -228,7 +228,7 @@ const RegisterPopup = ({ onClose, user, setUser }) => {
         {loading ? (
           <ReactLoading
             type={"spin"}
-            color={"blue"}
+            color={"#1da1f2"}
             className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
           />
         ) : (

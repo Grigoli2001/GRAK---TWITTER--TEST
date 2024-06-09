@@ -50,9 +50,13 @@ const Feed = () => {
   const reduxDispatch = useDispatch()
 
   const refreshFeed = () => {
-    queryClient.invalidateQueries(['tweets', tweetRequests.forYou, { userId: user.id}])
-    queryClient.invalidateQueries(['tweets', tweetRequests.following, { userId: user.id}])
-    reduxDispatch(removeNotif({ category: 'home'}))
+    Promise.all([
+    queryClient.invalidateQueries({queryKey: ['tweets', tweetRequests.forYou, { userId: user.id}]}),
+    queryClient.invalidateQueries({queryKey: ['tweets', tweetRequests.following, { userId: user.id}]})
+    ]).then(() =>
+      reduxDispatch(removeNotif({ category: 'home'}))
+    )
+    .catch((err) => console.error(err))
   }
    
   return (

@@ -1,4 +1,3 @@
-import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '../components/Button'
 import { TrendData } from '../components/Trend'
@@ -14,13 +13,6 @@ const Trends = () => {
     const handleBack = () => {
       navigate(-1)
     }
-      
-    // const [trending, setTrending] = useState([])
-
-    // useEffect(() => {
-    //     // fetch and set  trending
-    //     setTrending(trends)
-    // }, [])
 
   
   return (

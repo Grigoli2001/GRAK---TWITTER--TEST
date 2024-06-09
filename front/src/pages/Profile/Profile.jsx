@@ -111,7 +111,9 @@ const OtherPostRepliesFallBack = ({user, isUser, isSetUp, type}) => {
      ) }
       
       <h3 className='font-bold text-xl  px-4 py-2'>Who To Follow</h3>
-      <UserDisplayer api={requests.exploreUsers} params={{limit:3}} withCard withFollow withNavTo="/" />
+      <UserDisplayer api={requests.exploreUsers} 
+      params={{limit:3}} withCard withFollow withNavTo="/" isInfinite={false}
+      FallbackComponent={<div className='px-4'>Look out for more users!</div>}/>
 
     </>
     :
@@ -138,7 +140,8 @@ const Profile = () => {
   const [followerCount, setFollowerCount] = useState(null)
 
   const [ isSetUp, setIsSetUp ] = useState(false)
-  const [ likeIsPublic, setLikesIsPublic ] = useState(true)
+  const likeIsPublic = true 
+  // const [ likeIsPublic, setLikesIsPublic ] = useState(true)
   // const [ hasLoaded, setHasLoaded ] = useState(false)
 
   const profileContainer = useRef(null)
@@ -154,7 +157,7 @@ const Profile = () => {
         noUserProfile.current.style.marginTop = `${profileRect.height/4}px`
       }}
 
-  }, [userProfile, noUserProfile, user?.id, profileContainer?.current])
+  }, [userProfile, noUserProfile, user?.id])
 
 
   useEffect(() => {
@@ -164,7 +167,7 @@ const Profile = () => {
         setFollowerCount(userProfile.followers_count)
         setIsSetUp(userProfile.location || (userProfile.profile_pic && userProfile.profile_pic !== 'default_profile_pic.png') || userProfile.bio || userProfile.website || userProfile.dob || userProfile.cover)
   }
-  }, [userProfile])
+  }, [userProfile, user?.id])
 
   const location = useLocation()
   const navigate = useNavigate()
@@ -308,7 +311,7 @@ const Profile = () => {
               }
               
               <div className="flex gap-x-4">
-                <NavLink to={`/${userProfile.username}/followers`} className="hover:underline"><b>{ quantityFormat(followerCount) }</b> Follower{ followerCount != 1 && 's'}</NavLink>
+                <NavLink to={`/${userProfile.username}/followers`} className="hover:underline"><b>{ quantityFormat(followerCount) }</b> Follower{ followerCount !== 1 && 's'}</NavLink>
                 <NavLink to={`/${userProfile.username}/following`} className="hover:underline"><b>{ quantityFormat(userProfile.following_count) }</b> Following</NavLink>
               </div>
             </div>

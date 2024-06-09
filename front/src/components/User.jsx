@@ -1,7 +1,5 @@
 import {
   useState,
-  useEffect,
-  useContext,
   useLayoutEffect,
   useCallback,
   useRef,
@@ -19,12 +17,10 @@ import {
   PopoverContent,
   PopoverHandler,
 } from "@material-tailwind/react";
-import { users } from "../constants/feedTest";
 import { cn } from "../utils/style";
 import useUserContext from "../hooks/useUserContext";
-import useInstance from "../hooks/useInstance";
 import instance from "../constants/axios";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import ReactLoading from "react-loading";
 
 
@@ -33,9 +29,11 @@ import ReactLoading from "react-loading";
  * Extends material-tailwind Avatar component
  */
 export const ExtAvatar = ({ src, ...props }) => {
-  if (src && !src.startsWith("http")) {
-    src = null;
-  }
+  // if (src && !src.startsWith("http")) {
+  //   src = null;
+  // }
+  if(src?.startsWith('default'))  src=null
+
   return (
     <Avatar
       src={src ? `${src}` : defaultAvatar}
@@ -63,11 +61,8 @@ export const UserBlock =  forwardRef(({
   withCard,
 }, ref) => {
   // TODO: add as variant ?
-  const [test, setTest] = useState(textSizes[textSize] ?? textSizes.md);
+  const test = textSizes[textSize] ?? textSizes.md;
   const [prevTest, setPrevTest] = useState("text-xs");
-  // const finalTextSize = textSizes[textSize] ?? textSizes.md
-  // console.log(user, "user in user block");
-  // console.log('profile_pic', user.profile_pic)
 
   useLayoutEffect(() => {
     let keys = Object.keys(textSizes);
@@ -159,7 +154,7 @@ export const UserCard = ({ user, children }) => {
             <p className="">{user.bio}</p>
             <div className="flex items-center gap-2">
               <p className="">
-                <b>{user.follower_count}</b> Followers
+                <b>{user.followers_count}</b> Followers
               </p>
               <p className="">
                 <b>{user.following_count}</b> Following
@@ -208,6 +203,10 @@ export const UserDisplayer = ({
     }
   })
 
+  // console.log(heelo)
+
+  // const { data, error, isLoading, isFetchingNextPage, fetchNextPage, hasNextPage } = heelo
+
 
   // useEffect(() => {
   //   // use api to fetch certain users
@@ -250,7 +249,7 @@ const users = data?.pages?.reduce((acc, page) => {
   return [...acc, ...page.users]
 }, [])
 
-if (users && users.length === 0  || error) {
+if ((users && users.length === 0 ) || error) {
   return FallbackComponent
 }
 

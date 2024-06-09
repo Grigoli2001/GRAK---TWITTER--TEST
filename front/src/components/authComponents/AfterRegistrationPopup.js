@@ -8,8 +8,6 @@ import instance from "../../constants/axios";
 import { requests } from "../../constants/requests";
 import { useNavigate } from "react-router-dom";
 import { topics } from "../../constants/feedTest";
-import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-import { storage } from "../../utils/firebase";
 
 import useUserContext from "../../hooks/useUserContext";
 
@@ -310,7 +308,7 @@ const AfterRegistrationPopup = ({ onClose }) => {
         {loading ? (
           <ReactLoading
             type={"spin"}
-            color={"blue"}
+            color={"#1da1f2"}
             className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
           />
         ) : (

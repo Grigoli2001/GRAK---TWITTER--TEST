@@ -1,9 +1,9 @@
-import { useEffect, createContext, useState } from "react";
+import { useEffect, createContext, useCallback } from "react";
 import { useParams, Outlet, useNavigate, useLocation } from "react-router-dom";
 // import useInstance from "../hooks/useInstance";
 import ReactLoading from 'react-loading'
 import useUserContext from "../hooks/useUserContext";
-import { useQuery,  useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import instance from "../constants/axios";
 
 export const ValidUserContext = createContext(null)
@@ -15,27 +15,22 @@ const RequireValidUser = ({redirect}) => {
     const { user, dispatch } = useUserContext()   
     const navigate = useNavigate()
     const location = useLocation()
-    const queryClient = useQueryClient()
     const accessingProfile = location.pathname.split('/')[1] === username
 
 
-    const naviagteTo404 = () => {
+    const naviagteTo404 = useCallback(() => {
         // keep url of current page while navigating to 404
         navigate(redirect ?? '/404', {replace: location.pathname})
-    }
+    }, [navigate, location.pathname, redirect])
 
     useEffect(() => {
 
-        console.log('username in req', username, accessingProfile, queryClient.getQueryData(['user', username]))
         if (!username) {
             return naviagteTo404()
         }  
-    },[username])
+    },[username, naviagteTo404])
 
-    // const [activeUser, setActiveUser] = useState(null)
-
-    // const {data: activeUserData, error,loading, hasLoaded } = useInstance(`/users/username/${username}`)
-     const {  data: activeUser, error, isLoading, isFetching  } = useQuery({
+     const {  data: activeUser, error, isLoading  } = useQuery({
           queryKey: ['user', username],
           keepPreviousData: true,
           queryFn: async () => {
@@ -52,8 +47,8 @@ const RequireValidUser = ({redirect}) => {
     useEffect(() => {
         // set user to undefined if error
         // setActiveUser(data?.user)
+        
         if (!isLoading){
-            console.log('active', activeUser, user.id)
             if (activeUser?.user.id === user?.id) dispatch({type: "UPDATE", payload: activeUser.user})
             if (accessingProfile) return
             if ( !activeUser || error) {
@@ -62,7 +57,7 @@ const RequireValidUser = ({redirect}) => {
         }
         // console.log('active user in req', activeUserData)
         // setActiveUser(activeUserData?.user)
-    }, [ error, activeUser])
+    }, [ error, activeUser, accessingProfile, isLoading, user?.id, naviagteTo404, dispatch])
   
 
     return (

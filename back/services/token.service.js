@@ -1,7 +1,8 @@
 const { verifyRefreshToken } = require("../utils/auth.utils");
 const { generateToken } = require("../utils/auth.utils");
 const statusCodes = require("../constants/statusCode");
-const driver = require("../database/neo4j_setup");
+const logger = require("../middleware/winston");
+const { getDriver } = require("../database/neo4j_setup");
 
 const refreshToken = async (req, res) => {
   const { refreshToken } = req.body;
@@ -11,10 +12,11 @@ const refreshToken = async (req, res) => {
       .json({ message: "Missing fields" });
   }
   try {
-    const session = driver.session();
+    const session = getDriver().session();
     const refreshDecoded = verifyRefreshToken(refreshToken);
+    console.log(refreshDecoded);
     const user = await session.run(
-      `MATCH (u:User) WHERE ID(u) = $id RETURN u`,
+      `MATCH (u:User {id: $id}) RETURN u`,
       { id: refreshDecoded.id }
     );
 
@@ -29,11 +31,10 @@ const refreshToken = async (req, res) => {
   } catch (error) {
     logger.error("Error while refreshing token:", error);
     return res
-      .status(statusCodes.internalServerError)
+      .status(statusCodes.serverError)
       .json({ message: "Error while refreshing token" });
-  } finally {
-    session.close();
-  }
+  } 
+
 };
 
 module.exports = { refreshToken };

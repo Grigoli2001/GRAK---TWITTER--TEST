@@ -53,6 +53,7 @@ const signup = async (req, res) => {
       isPersonalizedMarked,
       profile_pic: "default_profile_pic.png",
       id: generateNumberUUID(),
+      created_at: new Date().toISOString(),
     };
 
     const addUser = await session.run(
@@ -63,12 +64,13 @@ const signup = async (req, res) => {
               id: $id,
               username: $username, 
               password: $hashedPassword, 
-              dob: $dob, 
+              dob: date($dob), 
               isGetmoreMarked: $isGetmoreMarked, 
               isConnectMarked: $isConnectMarked, 
               isPersonalizedMarked: $isPersonalizedMarked, 
               profile_pic: $profile_pic,
               bio: ""
+              created_at: date($created_at)
               }) RETURN u;`,
       queryParams
     );
@@ -276,7 +278,6 @@ const userPreferences = async (req, res) => {
       params
     );
 
-    console.log(user.records.length);
     if (user.records.length) {
       return res
         .status(statusCodes.success)

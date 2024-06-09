@@ -1,10 +1,15 @@
 const express = require('express');
 const router = express.Router();
 const tweetService = require('../services/tweet.service')
+const multer = require('multer');
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 router.get('/', tweetService.getAllTweets);
 router.get('/category/:category', tweetService.getTweetsByCategory);
-router.post('/create', tweetService.createTweet);
+router.post('/create',upload.fields([
+    { name: 'tweetMedia', maxCount: 1 },
+ ]) , tweetService.createTweet);
 router.get('/replies/:id', tweetService.getReplies);
 router.get('/trending', tweetService.getTrendingTags);
 router.get('/tags', tweetService.getTags)

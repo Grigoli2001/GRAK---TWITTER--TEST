@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext, useReducer, forwardRef } from "react";
+import { useEffect, useState, useContext, useReducer, forwardRef} from "react";
 import ReactLoading from 'react-loading'
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import TweetMedia, { TweetMiniMedia } from "./TweetMedia";
@@ -201,6 +201,8 @@ const DelTweetModal = ({ open, setOpen, handleDeleteTweet}) => {
 }
 
 export const BaseTweet = forwardRef(({ tweetUser, post, isLast, reply, fullView, asQuote}, ref) => {
+
+  const location = useLocation()
   const [postState, dispatch] = useReducer(reducer, post)
   // const reducDispatch = useDispatch() 
   // console.log('post state IN base', postState?.tweetText, postState?.tweetType, postState?.userLiked)
@@ -231,8 +233,12 @@ const LikeTweetMutation = useMutation({
         });
       }
       dispatch({ type: TWEET_ACTIONS.LIKE, payload: { ...data } });
-      queryClient.invalidateQueries(['tweets', tweetRequests.forYou, { userId: user.id }]);
-      queryClient.invalidateQueries(['tweets', tweetRequests.likes, { userId: user.id }]);
+
+      Promise.all([
+      queryClient.invalidateQueries({queryKey: ['tweets', tweetRequests.forYou, { userId: user.id }]}),
+      queryClient.invalidateQueries({queryKey: ['tweets', tweetRequests.likes, { userId: user.id }]}),
+      ])
+      .catch(err => console.log('error', err))
     },
     onError: (error) => {
       createToast('An error occurred while liking', 'error', 'error-like-tweet', { limit: 1 });
@@ -270,8 +276,8 @@ const RetweetMutation = useMutation({
       createToast('Keep it up!😁', 'success', 'success-retweet-tweet', { limit: 1 });
     }
 
-      queryClient.invalidateQueries(['tweets', tweetRequests.forYou, { userId: user.id }]);
-      queryClient.invalidateQueries(['tweets', tweetRequests.replies, { userId: user.id }] );
+      queryClient.invalidateQueries({queryKey: ['tweets', tweetRequests.forYou, { userId: user.id }]});
+      queryClient.invalidateQueries({queryKey: ['tweets', tweetRequests.replies, { userId: user.id }]});
     
   },
   onError: (error) => {
@@ -360,7 +366,7 @@ const RetweetMutation = useMutation({
       }
       setOpenDel(false)
 
-      queryClient.invalidateQueries(['tweets'])
+      queryClient.invalidateQueries({queryKey: ['tweets']})
 
     },
     onError: (error) => {
@@ -410,8 +416,10 @@ const RetweetMutation = useMutation({
     if (data.is_bookmarked) {
       createToast('Saved to bookmarks!', 'success', 'success-bookmark', { limit: 1 });
     }
-      queryClient.invalidateQueries(['tweets', tweetRequests.bookmarks, { userId: user.id }]);
-      queryClient.invalidateQueries(['tweets', tweetRequests.forYou, { userId: user.id }]);
+    Promise.all([
+      queryClient.invalidateQueries({queryKey: ['tweets', tweetRequests.bookmarks, { userId: user.id }]}),
+      queryClient.invalidateQueries({queryKey: ['tweets', tweetRequests.forYou, { userId: user.id }]}),
+    ])
     },
     onError: (error) => {
 
@@ -464,7 +472,7 @@ const RetweetMutation = useMutation({
     },
     onSuccess: (data) => {
       dispatch({ type: TWEET_ACTIONS.HIGHLIGHT, payload: { ...data } });
-      queryClient.invalidateQueries(['tweets', tweetRequests.highlights, { userId: user.id }]); 
+      queryClient.invalidateQueries({queryKey: ['tweets', tweetRequests.highlights, { userId: user.id }]}); 
 
     },
     onError: (error) => {
@@ -500,15 +508,15 @@ const RetweetMutation = useMutation({
 
   const navigate = useNavigate();
 
-  const isValidMediaType = (contentType) => {
-    if (contentType?.startsWith('image/')) {
-        return 'image';
-    } else if (contentType?.startsWith('video/')) {
-        return 'video';
-    } else {
-        return null; // Invalid media type
-    }
-};
+  // const isValidMediaType = (contentType) => {
+  //   if (contentType?.startsWith('image/')) {
+  //       return 'image';
+  //   } else if (contentType?.startsWith('video/')) {
+  //       return 'video';
+  //   } else {
+  //       return null; // Invalid media type
+  //   }
+// };
 
   // let base64String = '';
   // if (postState?.tweetMedia) {

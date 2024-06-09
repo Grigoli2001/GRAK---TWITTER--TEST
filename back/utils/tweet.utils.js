@@ -13,7 +13,7 @@ const tweetQuery = async ({
   sortByInteraction,
   sort,
 }) => {
-  console.log(matchOptions, "sort", sort);
+
   if (isNaN(page)) {
     page = 0;
   }
@@ -250,13 +250,14 @@ const tweetQuery = async ({
 
       if (!tweet.user) {
         try {
-          tweet.user = await getUserFullDetails(tweet.userId, "id");
+          tweet.user = await getUserFullDetails(tweet.userId, currentUIDasInt, "id");
         } catch (e) {
           console.log(e);
         }
       }
+
       if (tweet.reference && !tweet.reference.user) {
-        tweet.reference.user = await getUserFullDetails(tweet.reference.userId, "id");
+        tweet.reference.user = await getUserFullDetails(tweet.reference.userId, currentUIDasInt, "id");
       }
     })
   );

@@ -7,6 +7,7 @@ const ObjectId = mongoose.Types.ObjectId;
 // const pool = require("../database/db_setup");
 const { tweetQuery, checkTweetText } = require('../utils/tweet.utils');
 const { getUserFullDetails, allFollowers } = require('../utils/user.utils');
+const { validateFiles, firebaseUpload } = require('../utils/firebase.utils');
 
 const getAllTweets = async (req, res) => {
   try {
@@ -140,14 +141,21 @@ const createTweet = async (req, res) => {
             });
         }
 
+        if (newTweetData.tags) {
+            newTweetData.tags = JSON.parse(newTweetData.tags)
+        }
+
     // filter out any undefined o|r null values
     Object.entries(newTweetData).forEach(([key, value]) => {
-      if (value === undefined || value === null) {
+      if (value === undefined || value === null || (key==='tags' && value.length === 0)) {
         delete newTweetData[key];
       }
     });
+    
+    console.log('newTweetData parsed', newTweetData)
 
-    const { tweetType, tweetText, tweetPoll, reference_id, tweetMedia } = newTweetData;
+    const tweetMedia = req.files?.tweetMedia;
+    const { tweetType, tweetText, tweetPoll, reference_id, } = newTweetData;
 
         if (!tweetType) {
             console.log('no tweet type')
@@ -165,7 +173,7 @@ const createTweet = async (req, res) => {
         }
 
         if (isOriginalTweet && reference_id) {
-            console.log('ref anD origin')
+            console.log('ref anD origin', isOriginalTweet, typeof reference_id)
 
             return res.status(statusCode.badRequest).json({
                 message: "should not pass a reference if original tweet",
@@ -205,22 +213,9 @@ const createTweet = async (req, res) => {
         newTweetData.tweetText = resolveTweetText;
 
 
-        // if (req.file) {
-
-        //     await import('file-type').then(async ({ fileTypeFromBuffer }) => {
-        //         const { mime } = await fileTypeFromBuffer(req.file.buffer)
-        //         if (!mime.startsWith('image') && !mime.startsWith('video')) {
-        //             throw new Error('Invalid file type, only JPEG, PNG and MP4 is allowed!');
-        //         }
-        //     })
-
-            // do firebase here
-
-            // newTweetData.tweetMedia = {
-            //     data: req.file.buffer,
-            //     contentType: req.file.mimetype,
-            // };
-        // }
+        const validatedFiles = await validateFiles(req.files);
+       
+       
 
         let originalTweet;
         if (reference_id) {
@@ -237,6 +232,7 @@ const createTweet = async (req, res) => {
                 });
             } 
         }
+
 
        
 
@@ -267,7 +263,18 @@ const createTweet = async (req, res) => {
                 await poll.save({ session });
 
             }
+// upload to firebase
+                if (validatedFiles) {
+                    console.log('validatedFiles', validatedFiles)   
+                    const { media, mimeType } = await firebaseUpload(req.files.tweetMedia?.[0], req.user.id, `${tweet._id}/tweetMedia`);
+                    // console.log('postMedia', postMedia)
+                    tweet.tweetMedia = {
+                        src: media,
+                        mimeType
+                    }
+            }
 
+            
             
                     if (!originalTweet) {
                         tweet.reference_id = reference_id;
@@ -277,7 +284,7 @@ const createTweet = async (req, res) => {
 
         });
 
-        const user = await getUserFullDetails(req.user.id, 'id');
+        const user = await getUserFullDetails(req.user.id, req.user.id, 'id');
         
         let tweetData = tweet.toObject();
         // Adding since front end is different query
@@ -427,7 +434,9 @@ const deleteTweet = async (req, res) => {
                     }, { session });
 
                     if (!tweet) {
-                        throw new Error('No tweet found with that ID');
+                        return res.status(statusCode.notFound).json({
+                            message: "No tweet found with that ID",
+                        });
                     }
 
                 // delete all interactions
@@ -472,7 +481,7 @@ const getReplies = async (req, res) => {
         
         const replies = await tweetQuery({matchOptions:{ reference_id: new ObjectId(req.params.id), tweetType: 'reply' }, currentUID: req.user.id});
         for (let i = 0; i < replies.length; i++) {
-         const user = await getUserFullDetails(replies[i].userId, 'id');
+         const user = await getUserFullDetails(replies[i].userId, req.user.id, 'id');
         // const user = await pool.query(
         //     `SELECT id, username, name, profile_pic FROM users WHERE id = ${replies[i].userId}`
         // );

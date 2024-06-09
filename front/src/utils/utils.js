@@ -103,7 +103,13 @@ export function getJoinDate(date) {
         year: 'numeric',
     };
 
+    if (typeof date === "string") {
     return new Date(date).toLocaleDateString('en-US', options);
+    }
+    else if (typeof date === "object") {
+        // expects a date object with day, month and year properties
+        return new Date(date.year, date.month, date.day).toLocaleDateString('en-US', options);
+    }
 }
 
 export function tweetTime(date) {

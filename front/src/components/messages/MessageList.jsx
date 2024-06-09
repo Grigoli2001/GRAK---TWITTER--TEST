@@ -45,14 +45,14 @@ const RoomDeletePopup = ({room, user, otherUser, handleDeleteRoom}) => {
 }
 
 const MessageList = () => {
-    const [deletedRoom, setDeletedRoom] = useState(null)
+    // const [deletedRoom, setDeletedRoom] = useState(null)
     const { user } = useUserContext()
     const navigate = useNavigate()
     const location = useLocation()
     const [initialChats, setInitialChats] = useState([])
     const [search, setSearch] = useState('')
     
-    const { data: userList, setData: setUserList, loading, setLoading, hasLoaded } = useInstance(requests.getActiveChats, {page: 0, limit: 10})
+    const { data: userList, setData: setUserList, loading, hasLoaded } = useInstance(requests.getActiveChats, {page: 0, limit: 10})
     
     useEffect(() => {
         // console.log(userList, hasLoaded)
@@ -61,7 +61,7 @@ const MessageList = () => {
             setInitialChats(userList)
             // setLoaded(true)
         }
-    }, [hasLoaded])
+    }, [hasLoaded, userList])
 
 
     const handleDeleteRoom = (room, otherUser) => {
@@ -71,7 +71,7 @@ const MessageList = () => {
             }
         }).then(res => {
             console.log(otherUser)
-            const filterUsers = userList?.users?.filter(ouser => ouser.id != otherUser.id)
+            const filterUsers = userList?.users?.filter(ouser => ouser.id !== otherUser.id)
             console.log(filterUsers)
             setUserList({users: filterUsers})
             setInitialChats({users: filterUsers})

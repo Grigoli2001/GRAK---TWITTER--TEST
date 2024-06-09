@@ -10,6 +10,7 @@ import useUserContext from '../hooks/useUserContext'
  * Widget component for who to follow and trends
  */
 const Widget = ({title, children}) => {
+    
     return (
         <section className="border-slate-100 border-solid bg-slate-50 rounded-xl overflow-hidden border">
             <h1 className="font-bold text-xl  px-4 py-2">{title}</h1>

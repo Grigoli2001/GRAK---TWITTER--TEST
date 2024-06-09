@@ -10,6 +10,7 @@ import useUserContext from '../../hooks/useUserContext';
 export const MessageComposeModal = ({backTo}) => {
     const navigate = useNavigate()
     const { user }= useUserContext()
+    
     return (
         <NavModal backTo={backTo}>
             <div className='block w-fit h-[80%] min-w-[40%] overflow-y-auto bg-white rounded-2xl'>

@@ -2,7 +2,6 @@ import { createContext,  useEffect, useRef, useState, useContext } from 'react'
 import { MentionsInput, Mention } from "react-mentions";
 import "../../styles/mentions.css";
 //  components
-import { TextareaAutosize } from "@mui/base/TextareaAutosize";
 import { PollCreate } from "./Poll";
 import { Button } from "../Button";
 import TextCounter from "./TextCounter";
@@ -13,7 +12,7 @@ import ReactLoading from "react-loading";
 
 // axios
 import instance from "../../constants/axios";
-import { requests, tweetRequests } from "../../constants/requests";
+import { tweetRequests } from "../../constants/requests";
 
 // icons
 import { GrImage } from "react-icons/gr";
@@ -28,13 +27,9 @@ import { SocketContext } from '../../context/socketContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { createToast } from '../../hooks/createToast';
 
-// import { useDispatch, useSelector } from 'react-redux';
-// import { dispatchers, addToTweets, addToForYouAsync } from '../../features/tweets/tweetSlice';
 import useUserContext from '../../hooks/useUserContext';
 import { useMutation } from '@tanstack/react-query';
 
-import { storage } from "../../utils/firebase";
-import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { v4 } from 'uuid';
 
 import { TWEET_ACTIONS, Tweet } from './Tweet';
@@ -130,15 +125,18 @@ const TweetCreate = ({type = 'Post', reference_id = null, quote, editTweet, edit
     });
   };
 
+  const [formMedia, setFormMedia] = useState(null);
 
   const removeMedia = () => {
     if (mediaRef.current) mediaRef.current.value = null;
     if (gifRef.current) gifRef.current.value = null;
 
+
       setTweetForm({
         ...tweetForm,
         tweetMedia: null
       })
+      setFormMedia(null)
       setButtonStates({
         ...buttonStates,
         media: false,
@@ -169,6 +167,7 @@ const TweetCreate = ({type = 'Post', reference_id = null, quote, editTweet, edit
       tweetLocation: null,
       tweetCanReply: canReply,
     });
+    setFormMedia(null);
 
       setCanInput(true);
       setCanPost(false);
@@ -222,34 +221,37 @@ const TweetCreate = ({type = 'Post', reference_id = null, quote, editTweet, edit
     );
   }
 
-  const handleTweetImage = (image, mime) => {
-    if (!image || !mime) return;
-    const prevButtonStates = buttonStates
-    disableAllInteractions()
-    const storageRef = ref(storage, `tweet_media/${image.name}/${v4()}`);
-    uploadBytesResumable(storageRef, image)
-      .then((snapshot) => {
-        console.log("Uploaded a blob or file!");
-        getDownloadURL(snapshot.ref)
-          .then((downloadURL) => {
-            // console.log("File available at", downloadURL);
-            setTweetForm({ ...tweetForm, tweetMedia: {src: downloadURL, mimeType: mime} });
-          })
-          .catch((error) => {
-            console.error("Error getting download URL", error);
-          });
-      })
-      .catch((error) => {
-        console.error("Error uploading file", error);
-      })
-      .finally(() => {
-        setButtonStates(prevButtonStates)
-        setCanInput(true)
-        setLoading(false)
-      }
+  // const handleTweetImage = (image, mime) => {
+  //   if (!image || !mime) return;
+  //   setTweetForm({ ...tweetForm, tweetMedia: {src: URL.createObjectURL(image), mimeType: mime} });
+  //   // const prevButtonStates = buttonStates
+  //   // disableAllInteractions()
+  //   setTimeout(() => {
 
-      )
-  };
+  // //   const storageRef = ref(storage, `tweet_media/${image.name}/${v4()}`);
+  // //   uploadBytesResumable(storageRef, image)
+  // //     .then((snapshot) => {
+  // //       console.log("Uploaded a blob or file!");
+  // //       getDownloadURL(snapshot.ref)
+  // //         .then((downloadURL) => {
+  // //           // console.log("File available at", downloadURL);
+  // //           setTweetForm({ ...tweetForm, tweetMedia: {src: downloadURL, mimeType: mime} });
+  // //         })
+  // //         .catch((error) => {
+  // //           console.error("Error getting download URL", error);
+  // //         });
+  // //     })
+  // //     .catch((error) => {
+  // //       console.error("Error uploading file", error);
+  // //     })
+  // //     .finally(() => {
+  //       // setButtonStates(prevButtonStates)
+  //       // setCanInput(true)
+  //       // setLoading(false)
+  //     }, 1000)
+
+  // //     )
+  // };
 
   const handleMediaChange = async (evt) => {
     if (evt.target.files && evt.target.files[0]) {
@@ -262,7 +264,10 @@ const TweetCreate = ({type = 'Post', reference_id = null, quote, editTweet, edit
       }
 
       removePoll();
-      handleTweetImage(file, mime)
+      console.log(file, mime)
+      // handleTweetImage(file, mime)
+      setTweetForm({ ...tweetForm, tweetMedia: {src: URL.createObjectURL(file), mimeType: mime} });
+      setFormMedia(file);
       setButtonStates({
         ...buttonStates,
         poll: true
@@ -307,17 +312,40 @@ const TweetCreate = ({type = 'Post', reference_id = null, quote, editTweet, edit
   const queryClient = useQueryClient();
   
   const invalidateQueries = (data) => {
-    if (data?.tweet?.tags) queryClient.invalidateQueries(['trending']);
-      if (data?.tweet?.tweetMedia) queryClient.invalidateQueries(['tweets', tweetRequests.myMedia, { userId: user.id }])
+    if (data?.tweet?.tags) {
+      console.log('invalidating tags')
+      queryClient.invalidateQueries({queryKey: ['trending']});}
+      if (data?.tweet?.tweetMedia) {
+        console.log('invalidating media')
+        queryClient.invalidateQueries({queryKey: ['tweets', tweetRequests.myMedia, { userId: user.id }]})
+      }
       if (data.tweet?.tweetType === 'reply' || data.tweetType === 'retweet'){
-        queryClient.invalidateQueries(['tweets', tweetRequests.replies, { userId: user.id }]);
-        queryClient.invalidateQueries(['replies', data?.tweet?._id]);
+        console.log('invalidating replies')
+        Promise.all([
+        queryClient.invalidateQueries({queryKey: ['tweets', tweetRequests.replies, { userId: user.id }]}),        
+        queryClient.invalidateQueries({queryKey: ['replies', data?.tweet?._id]})
+        ])
       }
     }
 
   const createTweetMutation = useMutation({
     mutationFn: async ({ tweetForm }) =>{ 
-      const response = await instance.post(tweetRequests.createTweets, tweetForm) 
+      const sendForm = new FormData();
+      for (const key in tweetForm) {
+        if (key === 'tweetMedia' && formMedia)  {
+          sendForm.append(key, formMedia)
+        }else if (key === 'tags' && tweetForm[key].length > 0) {
+          sendForm.append(key, JSON.stringify(tweetForm[key]))
+        }else{
+          if (tweetForm[key]) sendForm.append(key, tweetForm[key])
+        }
+      }
+      for (var pair of sendForm.entries()) {
+        console.log(pair[0]+ ', ' + pair[1]); 
+      }
+      const response = await instance.post(tweetRequests.createTweets, sendForm, 
+        { headers: { 'Content-Type': 'multipart/form-data' }})
+      // const response = await instance.post(tweetRequests.createTweets, tweetForm) 
       return response.data
     },
     onMutate: (variables) => {
@@ -334,13 +362,16 @@ const TweetCreate = ({type = 'Post', reference_id = null, quote, editTweet, edit
       //   ]
         // return oldData.pages?.slice(0)?.unshift(data)
       // })
-      // queryClient.invalidateQueries([tweetRequests.forYou, { userId: user.id }]);
+      queryClient.invalidateQueries([tweetRequests.forYou, { userId: user.id }]);
+
+      if(location.pathname === '/home') queryClient.invalidateQueries({queryKey: [tweetRequests.forYou, { userId: user.id }]});
+      if(location.pathname === `/${user.username}`) queryClient.invalidateQueries({queryKey: [tweetRequests.myTweets]})
 
       invalidateQueries(data)
 
         
       
-      resetComponent()
+      // resetComponent()
       createToast(`Nice ${type}🥳`, 'success', 'success-create-post', {limit: 1})
       socket.emit('feed:notify-create-post', { user })
       if ((location.pathname) === '/compose/tweet' || location.pathname === '/compose/post'){
@@ -357,6 +388,7 @@ const TweetCreate = ({type = 'Post', reference_id = null, quote, editTweet, edit
       setButtonStates(context)
     },
     onSettled: (error, variables, context) => {
+      resetComponent()
       setButtonStates(context)
       setCanInput(true)
     }

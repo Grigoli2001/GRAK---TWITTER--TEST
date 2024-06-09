@@ -2,14 +2,14 @@ import { useContext, useEffect, useState } from "react";
 import { SocketContext } from "../../context/socketContext";
 import useUserContext from "../../hooks/useUserContext";
 import { joinRoom, leaveRoom } from "../../utils/socketUtils";
-import { createToast } from "../../hooks/createToast";
+// import { createToast } from "../../hooks/createToast";
 
 const handleNotificationCreated = (socket, user) => {
   socket.on("notification:created", (data) => {
     console.log("notification neeew", data);
-    if (user && user.id && data?.userId !== user.id) {
-      createToast("New Notification", "success");
-    }
+    // if (user && user.id && data?.userId !== user.id) {
+    //   createToast("New Notification", "success");
+    // }
   });
 };
 

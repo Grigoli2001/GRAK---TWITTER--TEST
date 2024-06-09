@@ -1,16 +1,12 @@
-import React, { useState, useEffect } from "react";
+import { useState } from "react";
 import { IoMdClose } from "react-icons/io";
-import { FcGoogle } from "react-icons/fc";
-import { FaApple, FaRegEye, FaEyeSlash } from "react-icons/fa";
+import { FaRegEye, FaEyeSlash } from "react-icons/fa";
 import { Button } from "@material-tailwind/react";
 import ReactLoading from "react-loading";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import { requests } from "../../constants/requests";
 import instance from "../../constants/axios";
 import { useNavigate } from "react-router-dom";
-
-import useUserContext from "../../hooks/useUserContext";
+import { createToast } from "../../hooks/createToast";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
@@ -24,22 +20,8 @@ const ForgotPassword = () => {
   const [VerificationCode, setVerificationCode] = useState("");
   const [newPassword, setNewPassword] = useState("");
 
-  const { dispatch } = useUserContext();
-
   const navigate = useNavigate();
 
-  const handleEmailNotExists = () => {
-    toast.warn("Email or username does not exists", {
-      position: "bottom-center",
-      autoClose: 2000,
-      hideProgressBar: true,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      style: { backgroundColor: "#1268fc", color: "#fff" },
-    });
-  };
 
   const handleNext = (page) => {
     switch (page) {
@@ -54,7 +36,7 @@ const ForgotPassword = () => {
                 setCurrentPage(2);
                 sendOTP();
               } else {
-                handleEmailNotExists();
+                createToast("Email or username does not exists", "warn", "email-not-exists", {limit: 1});
               }
             })
             .catch((err) => {
@@ -66,30 +48,13 @@ const ForgotPassword = () => {
         if (verificationInput === VerificationCode) {
           setCurrentPage(3);
         } else {
-          toast.warn("Invalid code", {
-            position: "bottom-center",
-            autoClose: 2000,
-            hideProgressBar: true,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            style: { backgroundColor: "#1268fc", color: "#fff" },
-          });
+          createToast("Invalid verification code", "warn", "invalid-verification-code", {limit: 1});
         }
         break;
       case 3:
         if (newPassword.length < 8) {
-          toast.warn("Password must be at least 8 characters", {
-            position: "bottom-center",
-            autoClose: 2000,
-            hideProgressBar: true,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            style: { backgroundColor: "#1268fc", color: "#fff" },
-          });
+          createToast("Password must be at least 8 characters", "warn", "password-length", {limit: 1});
+         
         } else {
           instance
             .post(requests.change_password, {
@@ -99,34 +64,17 @@ const ForgotPassword = () => {
             .then((res) => {
               console.log(res);
               if (res.data.message === "Password changed") {
-                toast.success("Password changed successfully", {
-                  position: "bottom-center",
-                  autoClose: 2000,
-                  hideProgressBar: true,
-                  closeOnClick: true,
-                  pauseOnHover: true,
-                  draggable: true,
-                  progress: undefined,
-                  style: { backgroundColor: "#1268fc", color: "#fff" },
-                });
+                createToast("Password changed successfully", "success", "password-changed", {limit: 1});
                 navigate("/");
               } else {
-                toast.error("Error changing password", {
-                  position: "bottom-center",
-                  autoClose: 2000,
-                  hideProgressBar: true,
-                  closeOnClick: true,
-                  pauseOnHover: true,
-                  draggable: true,
-                  progress: undefined,
-                  style: { backgroundColor: "#1268fc", color: "#fff" },
-                });
+                createToast("Error changing password", "error", "error-changing-password", {limit: 1});
               }
             })
             .catch((err) => {
               console.log(err);
             });
         }
+        break;
       default:
         break;
     }
@@ -157,7 +105,7 @@ const ForgotPassword = () => {
         {loading ? (
           <ReactLoading
             type={"spin"}
-            color={"blue"}
+            color={"#1da1f2"}
             className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
           />
         ) : (

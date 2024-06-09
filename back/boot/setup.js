@@ -6,7 +6,7 @@ const morgan = require("morgan");
 const session = require("express-session");
 const logger = require("../middleware/winston");
 const notFound = require("../middleware/notFound");
-const fileUpload = require("express-fileupload");
+// const fileUpload = require("express-fileupload");
 
 // database
 const { connectToMongo } = require("../database/mongo_setup");
@@ -44,6 +44,7 @@ const registerCoreMiddleWare = async () => {
     // middleware
     app.use(morgan("combined", { stream: logger.stream }));
     app.use(express.json());
+    app.use(express.urlencoded({ extended: true}));
     app.use(cors({}));
     app.use(helmet());
     app.use(
@@ -59,11 +60,12 @@ const registerCoreMiddleWare = async () => {
         store: redisStore,
       })
     );
-    app.use(
-      fileUpload({
-        createParentPath: true,
-      })
-    );
+
+    // app.use(
+    //   fileUpload({
+    //     createParentPath: true,
+    //   })
+    // );
 
     // routes
     app.use("/auth", authRoutes);
@@ -74,9 +76,10 @@ const registerCoreMiddleWare = async () => {
     app.use("/messages", messageRoutes);
     app.use("/profile", profileRoutes);
     app.use("/notifications", notificationRoutes);
-    app.use("/firebase", firebaseRoutes);
+    // app.use("/firebase", firebaseRoutes);
 
     app.use(notFound);
+
   } catch (err) {
     logger.error("Error thrown while executing registerCoreMiddleWare", err);
     process.exit(1);

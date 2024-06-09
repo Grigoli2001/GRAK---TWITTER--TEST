@@ -15,10 +15,11 @@ import { PiCaretDown } from "react-icons/pi";
 export default function OptionSelector({title, options, defaultValue,...props}) {
 
   const selectRef = useRef(null)
+  console.log(title, defaultValue)
 
   return (
       
-      <Select {...props} title={title} defaultValue={defaultValue || (options?.length && options[0]) || 1} className={'flex'} ref={selectRef}>
+      <Select {...props} title={title} defaultValue={defaultValue } className={'flex'} ref={selectRef}>
         {
           options?.map((option, index) => {
             return (

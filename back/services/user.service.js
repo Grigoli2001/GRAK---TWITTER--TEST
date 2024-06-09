@@ -5,30 +5,38 @@ const logger = require("../middleware/winston");
 var neo4j = require('neo4j-driver');
 const tweetModel = require("../models/tweetModel");
 const { getUserFullDetails } = require("../utils/user.utils");
+const { firebaseUpload, validateFiles } = require("../utils/firebase.utils");
 
 
-
-   // const user = await pool.query(`SELECT id, name, username, email, dob, profile_pic, created_at, cover FROM users WHERE username = $1`, [username]);
-    // if (!user.rowCount) {
-    //   return res.status(statusCodes.notFound).json({ message: "User not found" });
-    // }
 const getUserSimple = async (req, res) => {
 
   try{
 
   const { id, username } = req.query;
-  console.log(req.query, 'req.query in getUserSimple')
   if (id) {
     return getUserById(req, res);
   } else if (username) {
     const session = getDriver().session();  
     const result = await session.run(
-      `MATCH (u:User) WHERE u.username = $username RETURN u`,
+      `MATCH (u:User) WHERE u.username = $username 
+      RETURN {
+        id: u.id,
+        name: u.name,
+        username: u.username,
+        email: u.email,
+        profile_pic: u.profile_pic,
+        cover: u.cover,
+        created_at: u.created_at,
+        dob: u.dob,
+        bio: u.bio,
+        website: u.website,
+        location: u.location
+      } as u
+      `,
       { username }
     );
     const user = result.records.map(record => record.get('u').properties)?.[0];
     if (!user) {
-      console.log('user not found in getUserSimple')
       return res.status(statusCodes.notFound).json({ message: "User not found" });
     }
 
@@ -46,16 +54,6 @@ const getUserSimple = async (req, res) => {
 
 
 
-    // const users = await pool.query(`
-    // SELECT id, name, username, email, profile_pic, created_at
-    // FROM users
-    // WHERE (username LIKE $1 OR name LIKE $2)
-    // AND id != $3
-    // LIMIT 6 `, [qformat, qformat, req.user.id]);
-
-    // if (!users?.rowCount) {
-    //   return res.status(statusCodes.notFound).json({ message: "No users found" });
-    // }
 const getUsers = async (req, res) => {
   const { q } = req.query;
 
@@ -78,7 +76,6 @@ const getUsers = async (req, res) => {
       { current_userid: req.user.id, query_user: qformat }
     );
     const users = result.records.map(record => record.get('u'));
-    console.log(users, 'users')
     return res.status(statusCodes.success).json({ users });
   } catch (err) {
     console.log(err)
@@ -117,6 +114,7 @@ const getUserById = async (req, res) => {
       { userid: id }
     );
     const user = result.records.map(record => record.get('u'))?.[0];
+    // console.log(user, 'user')
     if (!user) {
       return res
         .status(statusCodes.notFound)
@@ -142,7 +140,268 @@ const getUserByUsername = async (req, res) => {
       });
     }
 
+      const user = await getUserFullDetails(username, req.user.id, 'username');
+    if (!user) {
+      return res.status(statusCodes.notFound).json({ message: "User not found" });
+    }
     
+        let postcount = await tweetModel.countDocuments({ userId: user.id,  $or: [
+          { is_deleted: false }, 
+          { is_deleted: { $exists: false } }
+      ]});
+      user.post_count = postcount;
+      console.log('userProifke', user)
+      return res.status(statusCodes.success).json({ user });
+
+  } catch (err) {
+    console.log(err);
+    logger.error(err);
+    return res
+      .status(statusCodes.serverError)
+      .json({ message: "Error user by username" });
+  }
+};
+
+const getExploreUsers = async (req, res) => {
+  // gets users that are not followed by the user with their followers and following count
+  // does not return is followed as they are already not followed
+  try {
+    const { limit, page } = req.query;
+    const session = getDriver().session();
+
+    const intLimit = parseInt(limit) ?? 3;
+    const intPage = parseInt(page) ?? 0;
+    const intSkip = intPage * intLimit;
+
+    const result = await session.run(
+      `MATCH (u:User) WHERE u.id <> $userid AND NOT (u)<-[:FOLLOWS]-(:User {id: $userid})  
+      OPTIONAL MATCH (u)-[:FOLLOWS]->(f:User)
+      OPTIONAL MATCH (u)<-[:FOLLOWS]-(f2:User)
+      RETURN 
+      u.id as id,
+      u.name as name,
+      u.username as username,
+      u.profile_pic as profile_pic,
+      count(distinct f) as following_count, 
+      count( distinct f2) as followers_count
+      ORDER BY rand() SKIP $skip LIMIT $limit`,
+      { userid: req.user.id, limit: neo4j.int(intLimit), skip: neo4j.int(intSkip)}
+    ); 
+    const users = result.records.map(record => record.toObject());
+
+    return res.status(statusCodes.success).json({ users });
+  } catch (err) {
+    // logger.error(err);
+    console.log(err);
+    res
+      .status(statusCodes.serverError)
+      .json({ message: "Error fetching non-followed users" });
+  }
+};
+
+const updateUser = async (req, res) => {
+
+  const { name, username, bio, location, website, profile_pic, cover, dob } = req.body;
+  if (!dob || !username) {
+    return res
+      .status(statusCodes.badRequest)
+      .json({
+        message: "Missing fields must provide at lease dob and username",
+      });
+  }
+
+
+  if (username.length < 3 || username.length > 50 || username.includes(" "))
+    return res
+      .status(statusCodes.badRequest)
+      .json({ message: "Invalid username" });
+  if (name && (name.length < 3 || name.length > 50))
+    return res.status(statusCodes.badRequest).json({ message: "Invalid name" });
+  if (bio && bio?.length > 150)
+    return res.status(statusCodes.badRequest).json({ message: "Invalid bio" });
+  if (location && location?.length > 50)
+    return res
+      .status(statusCodes.badRequest)
+      .json({ message: "Invalid location" });
+  if (website && website.length > 50)
+    return res
+      .status(statusCodes.badRequest)
+      .json({ message: "Invalid website" });
+
+      let formatDob = JSON.parse(dob);
+      console.log(formatDob, 'formatDob')
+  if (!formatDob || !formatDob.year || !formatDob.month || !formatDob.day)
+    return res.status(statusCodes.badRequest).json({ message: "Invalid dob" });
+  
+
+    await validateFiles(req.files);
+    let {media: firebaseProfilePic}  = await firebaseUpload(req.files.profile_pic?.[0], req.user.id, 'profile_pic');
+    let { media: firebaseCover} = await firebaseUpload(req.files.cover?.[0], req.user.id, 'cover');
+    if (cover === "default") firebaseCover = "";
+
+  try {
+
+    formatDob.year = neo4j.int(formatDob.year);
+    formatDob.month = neo4j.int(formatDob.month);
+    formatDob.day = neo4j.int(formatDob.day);
+
+    var buildquery = `
+      MATCH (u:User {id: $userid})
+      SET u.name = $name,
+      u.username = $username,
+      u.dob = date({
+      year: $formatDob.year,
+      month: $formatDob.month,
+      day: $formatDob.day
+    }),
+    `
+    const queryParams = {
+      userid: req.user.id,
+      name,
+      username,
+      formatDob
+    }
+    if (bio) {
+      buildquery += `u.bio = $bio,`
+      queryParams.bio = bio;
+    }
+    if (location) {
+      buildquery += `u.location = $location,`
+      queryParams.location = location
+    }
+    if (website) {
+      buildquery += `u.website = $website,`
+      queryParams.website = website
+    }
+    if (firebaseProfilePic) {
+      buildquery += `u.profile_pic = $profile_pic,`
+      queryParams.profile_pic = firebaseProfilePic;
+    }
+    if (firebaseCover !== null && firebaseCover !== undefined) {
+      buildquery += `u.cover = $cover,`
+      queryParams.cover = firebaseCover;
+    }
+    buildquery = buildquery.trim().replace(/,+$/, ""); // remove trailing comma
+    buildquery += ` RETURN u`;
+
+    console.log(buildquery, 'buildquery')
+    console.log(queryParams, 'queryParams')
+
+
+    
+    const session = getDriver().session();
+    const result = await session.run(
+      buildquery,
+      queryParams
+    );
+    return res.status(statusCodes.success).json({ message: "User updated" });
+  } catch (err) {
+    console.log(err)
+    logger.error(err);
+    return res .status(statusCodes.serverError).json({ message: "Error updating user" });
+  }
+};
+
+
+
+const getFollowData = async (req, res) => {
+  // returns a list of users that a user follows or that follow a user with 
+  try {
+      const { userId, followType, verified, limit, page } = req.query;
+      if (!userId || !followType || (followType !== 'followers' && followType !== 'following')) {
+          throw new Error('Missing fields or invalid followType');
+      }
+
+      const pageSize = parseInt(page) ??  0;
+      const resolveLimit = parseInt(limit) ?? 20;
+      const toSkip = pageSize * resolveLimit;
+      const resolveVerified = verified === 'true' ? 'WHERE u.verified = true' : '';
+      const resolveFollowType = followType === 'followers' ? '<-[:FOLLOWS]-' : '-[:FOLLOWS]->';
+
+      const session = getDriver().session();
+      const result = await session.run(
+        `MATCH (u:User {id: $userId})${resolveFollowType}(f:User)
+       ${resolveVerified} 
+       OPTIONAL MATCH (f)-[:FOLLOWS]->(following:User) 
+       WITH f, count(following) as followingCount
+       OPTIONAL MATCH (f)<-[:FOLLOWS]-(followers:User)
+       WITH f, followingCount, count(followers) as followersCount
+       OPTIONAL MATCH (f)<-[:FOLLOWS]-(is_followed_check:User {id: $userId})
+       RETURN f {.*, followingCount: followingCount, followersCount: followersCount, is_followed: CASE WHEN is_followed_check IS NOT NULL THEN 1 ELSE 0 END}
+       SKIP $toSkip
+       LIMIT $resolveLimit`,
+        { userId, toSkip: neo4j.int(toSkip), resolveLimit: neo4j.int(resolveLimit) }
+      );
+
+      const follow_data = result.records.map(record => record.get(0));
+      
+      return res.status(statusCodes.success).json({users: follow_data});
+      } catch (error) {
+          console.log(error)
+      return res.status(statusCodes.serverError).json({ message: 'An error occurred' });
+  }
+}
+       
+const addFollower = async (req, res) => {
+    const { followerId } = req.body;
+      try {
+
+        if ( !followerId) {
+          return res.status(statusCodes.badRequest).json({ message: "Missing fields" });
+        } 
+       
+        const session = getDriver().session();
+        const result = await session.run(
+          `MATCH (u:User {id: $userid}), (f:User {id: $followerId}) MERGE (u)-[:FOLLOWS]->(f)`,
+          { userid: req.user.id, followerId }
+        );
+
+        res.status(statusCodes.success).json({ message: "Follower added" });
+        } catch (error) {
+        logger.error("Error adding follower", error);
+        res.status(statusCodes.serverError).json({ message: "Error" });
+      } 
+}
+
+ 
+
+const removeFollower = async (req, res) => {
+    const { followerId } = req.body;
+   
+        try { 
+          if (!followerId) {
+          return res.status(statusCodes.badRequest).json({ message: "Missing follow id" });
+          }
+        const session = getDriver().session();
+        await session.run(
+          `MATCH (u:User {id: $1})-[r:FOLLOWS]->(f:User {id: $2}) DELETE r`,
+          { 1: req.user.id, 2: followerId }
+        );
+        res.status(statusCodes.success).json({ message: "Follower removed" });
+        } catch (error) {
+        logger.error("Error removing follower", error);
+        res.status(statusCodes.serverError).json({ message: "Error" });
+        } 
+}
+
+module.exports = {
+    getUsers,
+    getUserSimple,
+    getUserByUsername,
+    getExploreUsers,
+    updateUser,
+    addFollower,
+    removeFollower,
+    getFollowData
+};
+
+
+   // const user = await pool.query(`SELECT id, name, username, email, dob, profile_pic, created_at, cover FROM users WHERE username = $1`, [username]);
+    // if (!user.rowCount) {
+    //   return res.status(statusCodes.notFound).json({ message: "User not found" });
+    // }
+    // ------------------
+
     // const userData = await pool.query(`SELECT id, name, username, email, profile_pic, created_at, bio, website, location, cover, dob FROM users WHERE username = $1`, [username]);
 
 
@@ -191,42 +450,32 @@ const getUserByUsername = async (req, res) => {
     // console.log(userData.rows[0], 'userData')
 
       //   let user = userData.rows[0];
+// ----------------------------------------
 
-      const user = await getUserFullDetails(username, 'username');
-      console.log("USER in getUserByUsername", user)
-    if (!user) {
-      return res.status(statusCodes.notFound).json({ message: "User not found" });
-    }
-        let postcount = await tweetModel.countDocuments({ userId: user.id,  $or: [
-          { is_deleted: false }, 
-          { is_deleted: { $exists: false } }
-      ]});
-      user.post_count = postcount;
-      return res.status(statusCodes.success).json({ user });
 
-  } catch (err) {
-    console.log(err);
-    logger.error(err);
-    return res
-      .status(statusCodes.serverError)
-      .json({ message: "Error user by username" });
-  }
-};
+    // const users = await pool.query(`
+    // SELECT id, name, username, email, profile_pic, created_at
+    // FROM users
+    // WHERE (username LIKE $1 OR name LIKE $2)
+    // AND id != $3
+    // LIMIT 6 `, [qformat, qformat, req.user.id]);
 
-const getExploreUsers = async (req, res) => {
-  try {
-    const { limit, page } = req.query;
-    const session = getDriver().session();
+    // if (!users?.rowCount) {
+    //   return res.status(statusCodes.notFound).json({ message: "No users found" });
+    // }
+    // ------------------------------------
 
-    const intLimit = parseInt(limit) ?? 3;
-    const intPage = parseInt(page) ?? 0;
-    const intSkip = intPage * intLimit;
+ // await pool.query(
+        //     `DELETE FROM follows WHERE user_id = $1 AND following = $2`,
+        //     [req.user.id, followerId]
+        // );
+        //---------------------
+// 
+  // if (!id || !name || !username || !bio || !location || !website || !profile_pic || !dob) {
+  //   return res.status(statusCodes.badRequest).json({ message: "Missing fields" });
+  // }
 
-    const result = await session.run(
-      `MATCH (u:User) WHERE u.id <> $userid AND NOT (u)<-[:FOLLOWS]-(:User {id: $userid})  RETURN u ORDER BY rand() SKIP $skip LIMIT $limit`,
-      { userid: req.user.id, limit: neo4j.int(intLimit), skip: neo4j.int(intSkip)}
-    ); 
-    const users = result.records.map(record => record.get('u').properties);
+  // -------------------
     // console.log(users, 'users')
     // const exploreUsers = await pool.query(
     //   `SELECT
@@ -247,81 +496,8 @@ const getExploreUsers = async (req, res) => {
     //   ORDER BY RANDOM()
     //   LIMIT $2`,
     //   [req.user.id, limit ?? 3]
-    // );
-    console.log("Explore users", users)
-    return res.status(statusCodes.success).json({ users });
-  } catch (err) {
-    // logger.error(err);
-    console.log(err);
-    res
-      .status(statusCodes.serverError)
-      .json({ message: "Error fetching non-followed users" });
-  }
-};
 
-const updateUser = async (req, res) => {
-  // const { profile_pic } = req.file
-  console.log(req.body, "req.body");
-  const { name, username, bio, location, website, profile_pic, cover, dob } =
-    req.body;
-
-  // if (!id || !name || !username || !bio || !location || !website || !profile_pic || !dob) {
-  //   return res.status(statusCodes.badRequest).json({ message: "Missing fields" });
-  // }
-
-  if (!dob || !username) {
-    return res
-      .status(statusCodes.badRequest)
-      .json({
-        message: "Missing fields must provide at lease dob and username",
-      });
-  }
-
-  if (username.length < 3 || username.length > 50 || username.includes(" "))
-    return res
-      .status(statusCodes.badRequest)
-      .json({ message: "Invalid username" });
-  if (name && (name.length < 3 || name.length > 50))
-    return res.status(statusCodes.badRequest).json({ message: "Invalid name" });
-  if (bio && bio?.length > 150)
-    return res.status(statusCodes.badRequest).json({ message: "Invalid bio" });
-  if (location && location?.length > 50)
-    return res
-      .status(statusCodes.badRequest)
-      .json({ message: "Invalid location" });
-  if (website && website.length > 50)
-    return res
-      .status(statusCodes.badRequest)
-      .json({ message: "Invalid website" });
-  if (!new Date(dob))
-    return res.status(statusCodes.badRequest).json({ message: "Invalid dob" });
-
-  // firebase should be done here...
-  try {
-    const user = await pool.query(
-      `UPDATE users SET name = $1, username = $2, bio = $3, location = $4, profile_pic = $5, website = $6, cover = $7, dob = $8 WHERE id = $9`,
-      [
-        name,
-        username,
-        bio,
-        location,
-        profile_pic,
-        website,
-        cover,
-        dob,
-        req.user.id,
-      ]
-    );
-    res.status(statusCodes.success).json({ message: "User updated" });
-  } catch (err) {
-    console.log(err)
-    logger.error(err);
-    res
-      .status(statusCodes.serverError)
-      .json({ message: "Error updating user" });
-  }
-};
-
+    // -----
 
       // const query = `
       // SELECT f1.user_id, users.id, username, name, profile_pic,
@@ -343,114 +519,3 @@ const updateUser = async (req, res) => {
       //     query,
       //     [userId, toSkip, resolveLimit] // default limit is 20 
       // );
-
-
-const getFollowData = async (req, res) => {
-  try {
-      const { userId, followType, verified, limit, page } = req.query;
-      console.log(req.query, 'query')
-      if (!userId || !followType || (followType !== 'followers' && followType !== 'following')) {
-          throw new Error('Missing fields or invalid followType');
-      }
-
-      const pageSize = parseInt(page) ??  0;
-      const resolveLimit = parseInt(limit) ?? 20;
-      const toSkip = pageSize * resolveLimit;
-      const resolveVerified = verified === 'true' ? 'WHERE u.verified = true' : '';
-      const resolveFollowType = followType === 'followers' ? '<-[:FOLLOWS]-' : '-[:FOLLOWS]->';
-
-      console.log(userId, 'userId')
-      const session = getDriver().session();
-      //${resolveFollowType}(f:User)
-      const result = await session.run(
-        `MATCH (u:User {id: $userId})${resolveFollowType}(f:User)
-       ${resolveVerified} 
-       OPTIONAL MATCH (f)-[:FOLLOWS]->(following:User) 
-       WITH f, count(following) as followingCount
-       OPTIONAL MATCH (f)<-[:FOLLOWS]-(followers:User)
-       WITH f, followingCount, count(followers) as followersCount
-       RETURN f {.*, followingCount: followingCount, followersCount: followersCount}
-       SKIP $toSkip
-       LIMIT $resolveLimit`,
-        { userId, toSkip: neo4j.int(toSkip), resolveLimit: neo4j.int(resolveLimit) }
-      );
-      // const follow_data = result.records.map(record => record.get('f').properties);
-      const follow_data = result.records.map(record => record.get(0));
-      
-      console.log('follow_data', follow_data, )
-      return res.status(statusCodes.success).json({users: follow_data});
-      } catch (error) {
-          console.log(error)
-      return res.status(statusCodes.serverError).json({ message: 'An error occurred' });
-  }
-}
-
-
- // await pool.query(
-        //   `INSERT INTO follows(user_id, following) VALUES ($1, $2)`,
-        //   [req.user.id, followerId]
-      //  );
-        
-const addFollower = async (req, res) => {
-    const { followerId } = req.body;
-    console.log(followerId, req.body, 'followerId')
-      try {
-
-        if ( !followerId) {
-          return res.status(statusCodes.badRequest).json({ message: "Missing fields" });
-        } 
-       
-        const session = getDriver().session();
-        const result = await session.run(
-          `MATCH (u:User {id: $userid}), (f:User {id: $followerId}) MERGE (u)-[:FOLLOWS]->(f)`,
-          { userid: req.user.id, followerId }
-        );
-        console.log('result', result)
-
-        res.status(statusCodes.success).json({ message: "Follower added" });
-        } catch (error) {
-        logger.error("Error adding follower", error);
-        res.status(statusCodes.serverError).json({ message: "Error" });
-      } 
-}
-
-  // await pool.query(
-        //     `DELETE FROM follows WHERE user_id = $1 AND following = $2`,
-        //     [req.user.id, followerId]
-        // );
-
-const removeFollower = async (req, res) => {
-    const { followerId } = req.body;
-   
-        try { 
-          if (!followerId) {
-          return res.status(statusCodes.badRequest).json({ message: "Missing follow id" });
-      } 
-        // await pool.query(
-        //     `DELETE FROM follows WHERE user_id = $1 AND following = $2`,
-        //     [req.user.id, followerId]
-        // );
-        const session = getDriver().session();
-        await session.run(
-          `MATCH (u:User {id: $1})-[r:FOLLOWS]->(f:User {id: $2}) DELETE r`,
-          { 1: req.user.id, 2: followerId }
-        );
-        res.status(statusCodes.success).json({ message: "Follower removed" });
-        } catch (error) {
-        logger.error("Error removing follower", error);
-        res.status(statusCodes.serverError).json({ message: "Error" });
-        } 
-}
-
-module.exports = {
-    getUsers,
-    getUserSimple,
-    getUserByUsername,
-    getExploreUsers,
-    updateUser,
-    addFollower,
-    removeFollower,
-    getFollowData
-    // getAllFollowers,
-    // getAllFollowing,
-};

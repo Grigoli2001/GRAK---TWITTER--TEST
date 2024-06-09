@@ -21,6 +21,9 @@ const TweetSchema = new Schema({
     tweetMedia: {
         src: {
             type: String,
+            required: function() {
+                return this.mimeType;
+            }
         },
         mimeType: {
             type: String,

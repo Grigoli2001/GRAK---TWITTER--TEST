@@ -123,7 +123,7 @@ export const PollCreate = ({removePoll}) => {
       duration: duration
     }})
 
-  }, [choices])
+  }, [choices, TC, duration])
 
   return (
     <div className='flex flex-col border border-slate-200 rounded-lg [&>*]:p-2 my-2 overflow-hidden'>
@@ -138,7 +138,7 @@ export const PollCreate = ({removePoll}) => {
 
 
       <div className='border-y border-y-slate-200'>
-        <span className='text-slate-600 text-sm'>Poll length</span>
+        {/* <span className='text-slate-600 text-sm'>Poll length</span> */}
         <div className='flex items-center justify-evenly gap-x-2 '>
           <OptionSelector title={'Days'} options={dayOptions} defaultValue={duration.days} onChange={(e, newVal) => {setduration(prev => ({...prev, days: newVal}))}} />
           <OptionSelector title={'Hours'} options={hourOptions} defaultValue={duration.hours} onChange={(e, newVal) => setduration(prev => ({...prev, hours: newVal}))}/>
@@ -167,7 +167,7 @@ export const TweetPoll = forwardRef(({postState, dispatch, ...props}, ref) => {
       room: postState?._id,
     })
 
-   }, [socket])
+   }, [socket, postState?._id])
 
   const pollEndDate = new Date(postState.poll.poll_end)
 
@@ -187,7 +187,7 @@ export const TweetPoll = forwardRef(({postState, dispatch, ...props}, ref) => {
       socket.off('tweet:poll:handle-live-vote', handleLivePollVote)
     }
 
-  }, [socket, postState?.poll?.votes])
+  }, [socket, postState?.poll?.votes, dispatch, user.id])
 
   const handlePollVote = (e, optionId) => {
     e.stopPropagation()
@@ -222,7 +222,7 @@ export const TweetPoll = forwardRef(({postState, dispatch, ...props}, ref) => {
           )}
   
           <div className='flex items-center gap-2'>
-            <span className='text-sm text-slate-400'>{quantityFormat(postState.totalVotes)} vote{postState.totalVotes != 1 && 's'}</span>
+            <span className='text-sm text-slate-400'>{quantityFormat(postState.totalVotes)} vote{postState.totalVotes !== 1 && 's'}</span>
             <span className='text-sm text-slate-400'>{new Date() < pollEndDate ? `${timeAgo(new Date(), postState.poll.poll_end)} left` : 'Final Results'}</span>
           </div>
         </>

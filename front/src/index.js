@@ -11,6 +11,8 @@ import store from "./store/store";
 import { UserProvider } from "./context/UserProvider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import SocketProvider from "./context/socketContext";
+// import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+
 const queryClient = new QueryClient();
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
@@ -21,11 +23,12 @@ root.render(
           <SocketProvider>
             <GoogleOAuthProvider clientId="1092637215532-ktlj13jh7d5t1410n32pklpk6ubh9vo8.apps.googleusercontent.com">
               <QueryClientProvider client={queryClient}>
+                {/* <ReactQueryDevtools initialIsOpen={true} /> */}
                 <App />
               </QueryClientProvider>
             </GoogleOAuthProvider>
             {/* limit testing sockets */}
-            <ToastContainer limit={2} />
+            <ToastContainer limit={1} />
           </SocketProvider>
         </UserProvider>
       </Provider>
