@@ -8,7 +8,6 @@ io.use((socket, next) => {
     if (err) {
       return next(new Error(' Socket Authentication failed'));
     }
-
     socket.user = decoded.user;
     next();
   });

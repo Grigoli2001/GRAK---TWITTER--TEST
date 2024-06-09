@@ -5,6 +5,7 @@ const success = 200;
 const unauthorized = 401;
 const badRequest = 400;
 const userAlreadyExists = 409;
+const tooManyRequests = 429;
 const notModified = 204;
 const fileTooLarge = 413;
 const invalidFileType = 415;
@@ -19,5 +20,6 @@ module.exports = {
   userAlreadyExists,
   notModified,
   fileTooLarge,
-  invalidFileType
+  invalidFileType,
+  tooManyRequests,
 };

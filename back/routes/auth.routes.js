@@ -1,24 +1,13 @@
 const express = require("express");
 const router = express.Router();
-const multer = require("multer");
-
 const authServices = require("../services/auth.service");
+const  rateLimit  = require("../middleware/rateLimit");
 
-// const storage = multer.diskStorage({
-//   destination: function (req, file, cb) {
-//     cb(null, "../front/public/uploads/");
-//   },
-//   filename: function (req, file, cb) {
-//     cb(null, file.fieldname + "-" + Date.now() + ".jpg");
-//   },
-// });
-// const upload = multer({ storage: storage }).single("profile_pic");
-
-router.post("/login", authServices.login);
-router.post("/check", authServices.checkExistingUser);
-router.post("/signup", authServices.signup);
+router.post("/login", rateLimit(60, 10), authServices.login);
+router.post("/check", rateLimit(60, 20), authServices.checkExistingUser);
+router.post("/signup", rateLimit(60, 10), authServices.signup);
 router.get("/logout", authServices.logout);
-router.post("/sendotp", authServices.sendOTP);
-router.post("/change-password", authServices.changePassword);
+router.post("/sendotp",rateLimit(60, 10), authServices.sendOTP);
+router.post("/change-password", rateLimit(60, 10), authServices.changePassword);
 router.post("/user-preferences", authServices.userPreferences);
 module.exports = router;

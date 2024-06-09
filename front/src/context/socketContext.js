@@ -1,14 +1,12 @@
 import { io } from 'socket.io-client';
 import { createContext} from 'react';
-import { toast } from 'react-toastify';
+import { createToast } from '../hooks/createToast';
 // TODO connect socket when logged in
 const socket = io('http://localhost:4000', {
   auth: {
     token: localStorage.getItem('user')  ? JSON.parse(localStorage.getItem('user')).token : null,
-  }
-});
-
-socket.on("connect_error", (err) => {
+  },
+  autoConnect: false
 });
 
 export const SocketContext = createContext({ socket })

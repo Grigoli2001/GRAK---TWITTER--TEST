@@ -45,7 +45,10 @@ const registerCoreMiddleWare = async () => {
     app.use(morgan("combined", { stream: logger.stream }));
     app.use(express.json());
     app.use(express.urlencoded({ extended: true}));
-    app.use(cors({}));
+    app.use(cors({
+      origin: process.env.CLIENT_URL,
+      credentials: true,
+    }));
     app.use(helmet());
     app.use(
       session({
@@ -76,7 +79,7 @@ const registerCoreMiddleWare = async () => {
     app.use("/messages", messageRoutes);
     app.use("/profile", profileRoutes);
     app.use("/notifications", notificationRoutes);
-    // app.use("/firebase", firebaseRoutes);
+    app.use("/firebase", firebaseRoutes);
 
     app.use(notFound);
 
