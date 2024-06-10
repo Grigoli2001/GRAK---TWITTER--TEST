@@ -53,7 +53,7 @@ const signup = async (req, res) => {
       isPersonalizedMarked,
       profile_pic: "default_profile_pic.png",
       id: generateNumberUUID(),
-      created_at: new Date().toISOString(),
+      created_at: new Date().toISOString().split("T")[0],
     };
 
     const addUser = await session.run(
@@ -69,7 +69,7 @@ const signup = async (req, res) => {
               isConnectMarked: $isConnectMarked, 
               isPersonalizedMarked: $isPersonalizedMarked, 
               profile_pic: $profile_pic,
-              bio: ""
+              bio: "",
               created_at: date($created_at)
               }) RETURN u;`,
       queryParams
@@ -127,7 +127,7 @@ const login = async (req, res) => {
     if (usingGoogle) {
       const user = await session.run(
         "MATCH (u:User) WHERE u.email = $1 RETURN u;",
-        { userInfo }
+        { 1: userInfo }
       );
       if (!user.records.length) {
         return res

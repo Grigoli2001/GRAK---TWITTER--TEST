@@ -1,6 +1,6 @@
-import axios from 'axios';
+import axios from "axios";
 
-export const baseURL = 'http://localhost:8080';
+export const baseURL = "http://localhost:8080";
 
 const instance = axios.create({
   baseURL: baseURL,
@@ -9,7 +9,7 @@ const instance = axios.create({
 // Interceptor for authorized routes
 instance.interceptors.request.use(
   (config) => {
-    const token = JSON.parse(localStorage.getItem('user'))?.token;
+    const token = JSON.parse(localStorage.getItem("user"))?.token;
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -27,15 +27,17 @@ instance.interceptors.response.use(
       // originalRequest._retry = true;
 
       try {
-        console.log('refreshing token');
-        const refreshToken = JSON.parse(localStorage.getItem('user'))?.refresh;
-        const response = await axios.post(`${baseURL}/token/refresh`, { refreshToken });
+        console.log("refreshing token");
+        const refreshToken = JSON.parse(localStorage.getItem("user"))?.refresh;
+        const response = await axios.post(`${baseURL}/token/refresh`, {
+          refreshToken,
+        });
         const { token } = response.data;
 
         // Save the new token back to the local storage
-        const user = JSON.parse(localStorage.getItem('user')) || {};
+        const user = JSON.parse(localStorage.getItem("user")) || {};
         user.token = token;
-        localStorage.setItem('user', JSON.stringify(user));
+        localStorage.setItem("user", JSON.stringify(user));
 
         originalRequest.headers.Authorization = `Bearer ${token}`;
         return axios(originalRequest);

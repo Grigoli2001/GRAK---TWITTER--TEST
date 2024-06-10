@@ -130,7 +130,7 @@ const RegisterPopup = ({ onClose, user, setUser }) => {
         setCurrentPage(currentPage + 1);
         break;
       case 4:
-        console.log(VerificationCode, verificationInput)
+        console.log(VerificationCode, verificationInput);
         if (verificationInput === VerificationCode.toString()) {
           setCurrentPage(currentPage + 1);
         } else {
@@ -179,8 +179,6 @@ const RegisterPopup = ({ onClose, user, setUser }) => {
         });
     }
   }, [isEmailFocused, invalidEmail, user.email]);
-
-
 
   const sendOTP = async () => {
     setLoading(true);
