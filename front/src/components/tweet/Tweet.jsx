@@ -36,7 +36,7 @@ import {
   tweetTime,
 } from "../../utils/utils";
 import { cn } from "../../utils/style";
-import { TweetPoll } from "./Poll";
+import { TweetPoll, ReadOnlyPoll } from "./Poll";
 import { createToast } from "../../hooks/createToast";
 import useUserContext from "../../hooks/useUserContext";
 import { SocketContext } from "../../context/socketContext";
@@ -545,17 +545,17 @@ const RetweetMutation = useMutation({
       )}
     >
       {postState?.tweetType === "retweet" && (
-        <span className="font-semibold gap-x-1 text-slate-400 inline-flex text-sm items-center pl-4 col-span-full">
+        <NavLink to={`/${tweetUser.username}`} className="font-semibold gap-x-1 text-slate-400 inline-flex text-sm items-center pl-4 col-span-full hover:underline">
           <FaRetweet /> {tweetUser.name} reposted
-        </span>
+        </NavLink>
       )}
 
       <NavLink
         onClick={(e) => e.stopPropagation()}
-        to={`/${tweetUser.username}`}
+        to={`/${postState.tweetType === 'retweet' ? postState?.reference?.user.username : tweetUser.username}`}
         className="mr-4 mt-3 self-start"
       >
-        <ExtAvatar src={tweetUser?.profile_pic} size="sm" />
+        <ExtAvatar src={postState.tweetType === 'retweet' ? postState?.reference?.user.profile_pic: tweetUser.profile_pic} size="sm" />
       </NavLink>
 
       <div className="grid gap-y-2 relative">
@@ -568,9 +568,9 @@ const RetweetMutation = useMutation({
           }}
           className="flex items-center gap-x-2 text-slate-400 relative"
         >
-          <UserCard user={tweetUser}>
+          <UserCard user={postState.tweetType === 'retweet' ? postState?.reference?.user : tweetUser}>
             <NavLink
-              to={`/${tweetUser.username}`}
+              to={`/${postState.tweetType === 'retweet' ? postState?.reference?.user.username : tweetUser.username}`}
               className="flex items-center w-fit gap-x-1 text-black !outline-none"
               href="/"
             >
@@ -579,12 +579,14 @@ const RetweetMutation = useMutation({
                   "font-bold hover:underline text-ellipsis text-nowrap max-w-[300px] overflow-hidden"
                 )}
               >
-                {tweetUser.name}
+                {postState.tweetType === 'retweet' ? postState?.reference?.user.name: tweetUser.name}
               </span>
               {tweetUser.verified && (
                 <MdVerified className="text-twitter-blue" />
               )}
-              {showUsername(tweetUser)}
+              {/* {showUsername(tweetUser)} */}
+              @{postState.tweetType === 'retweet' ? postState?.reference?.user.username : tweetUser.username}
+
             </NavLink>
           </UserCard>
 
@@ -611,20 +613,21 @@ const RetweetMutation = useMutation({
               </PopoverHandler>
               <PopoverContent className="!p-0 !shadow-all-round text-black w-fit bg-white rounded-xl font-bold !outline-none z-10 overflow-hidden">
                 <ul className="list-none text-sm">
-                  { (!postState.poll || !postState.tweetType === 'retweet') &&
-                  <li onClick={() => setEditMode(true)}className="flex items-center gap-x-2 p-2 hover:bg-gray-100 cursor-pointer">
-                   <FiEdit /> Edit
-                  </li>
+                  { 
+                    (!postState.poll && postState.tweetType !== 'retweet') &&
+                        <li onClick={() => setEditMode(true)}className="flex items-center gap-x-2 p-2 hover:bg-gray-100 cursor-pointer">
+                        <FiEdit /> Edit 
+                        </li>
                   }
 
                   {
 
-                  (postState?.reference?.tweetType === 'deleted') ? null :
-                  <li onClick={handleHighlight} className="flex items-center gap-x-2 p-2 hover:bg-gray-100 cursor-pointer">
-                  {postState.is_highlighted ? 
-                  
-                  <><LuSparkles className="text-red-500"/>Remove from highlights</> : <><LuSparkles/>Add to highlights</>}
-                  </li>
+                    (postState?.reference?.tweetType === 'deleted') ? null :
+                    <li onClick={handleHighlight} className="flex items-center gap-x-2 p-2 hover:bg-gray-100 cursor-pointer">
+                    {postState.is_highlighted ? 
+                    
+                    <><LuSparkles className="text-red-500"/>Remove from highlights</> : <><LuSparkles/>Add to highlights</>}
+                    </li>
 
                   }
                   <li onClick={() => setOpenDel(true)} className="text-red-500 flex items-center gap-x-2 p-2 hover:bg-gray-100 cursor-pointer">
@@ -652,13 +655,13 @@ const RetweetMutation = useMutation({
             <TweetMedia mediaType={postState?.tweetMedia?.mimeType} src={postState?.tweetMedia?.src} alt="" />
           }
           {
-            postState?.poll && 
+            postState?.poll &&  !postState.reference?.poll &&
             <TweetPoll postState={postState} dispatch={dispatch} />
           }
 
           {
-            postState.tweetType ==='retweet' && postState?.reference.poll && 
-            <TweetPoll postState={postState.reference} dispatch={dispatch} />
+            (postState.tweetType ==='retweet' || postState.tweetType==='quote') && postState?.reference.poll && 
+            <ReadOnlyPoll postState={postState.reference} />
           }
 
 
@@ -770,7 +773,7 @@ export const FullTweet = ({ tweetId, isLast, parent }) => {
       ):(
         tweetPost?.user && 
         <>
-        {tweetPost.reference_id ? <FullTweet key={tweetPost.reference_id} tweetId={tweetPost.reference_id} parent={true} /> : null }
+        {tweetPost.reference_id && <FullTweet key={tweetPost.reference_id} tweetId={tweetPost.reference_id} parent={true} />  }
         {parent ? 
         <BaseTweet tweetUser={tweetPost.user} post={tweetPost} reply={true}/>
         :

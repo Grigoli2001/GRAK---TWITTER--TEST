@@ -15,7 +15,7 @@ import { PiCaretDown } from "react-icons/pi";
 export default function OptionSelector({title, options, defaultValue,...props}) {
 
   const selectRef = useRef(null)
-  console.log(title, defaultValue)
+  // console.log('rendering OptionSelector')
 
   return (
       

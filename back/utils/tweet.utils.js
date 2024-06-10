@@ -8,7 +8,6 @@ const PAGE_SIZE = 20;
 const tweetQuery = async ({
   matchOptions,
   currentUID,
-  otherUserUID,
   page,
   sortByInteraction,
   sort,
@@ -18,10 +17,11 @@ const tweetQuery = async ({
     page = 0;
   }
   // currentUID to check if user liked, bookmarked, voted
-  // const currentUIDasInt = parseInt(currentUID);
-  const currentUIDasInt = currentUID;
+  // const currentUIDasInt = parseInt(currentUID); // swapped to string
 
   const pipline = [
+
+    // still allow is deleted for everyone to be queried
     {
       $match: {
         $or: [{ is_deleted: false }, { is_deleted: { $exists: false } }],
@@ -96,7 +96,7 @@ const tweetQuery = async ({
                 $and: [
                   { $eq: ["$$interaction.interactionType", "like"] },
                   { $eq: ["$$interaction.is_deleted", false] },
-                  { $eq: ["$$interaction.userId", currentUIDasInt] },
+                  { $eq: ["$$interaction.userId", currentUID] },
                 ],
               },
             },
@@ -111,7 +111,7 @@ const tweetQuery = async ({
                 $and: [
                   { $eq: ["$$interaction.interactionType", "bookmark"] },
                   { $eq: ["$$interaction.is_deleted", false] },
-                  { $eq: ["$$interaction.userId", currentUIDasInt] },
+                  { $eq: ["$$interaction.userId", currentUID] },
                 ],
               },
             },
@@ -126,7 +126,7 @@ const tweetQuery = async ({
                 cond: {
                   $and: [
                     { $eq: ["$$interaction.interactionType", "vote"] },
-                    { $eq: ["$$interaction.userId", currentUIDasInt] },
+                    { $eq: ["$$interaction.userId", currentUID] },
                   ],
                 },
               },
@@ -183,6 +183,7 @@ const tweetQuery = async ({
       $sort: { createdAt: sort ?? -1 },
     });
   }
+  
 
   pipline.push({
     $project: {
@@ -241,27 +242,37 @@ const tweetQuery = async ({
       const userRetweeted = await tweetModel.countDocuments({
         reference_id: tweet._id,
         tweetType: "retweet",
-        userId: currentUIDasInt,
+        userId: currentUID,
       });
 
       tweet.totalReplies = totalReplies;
       tweet.totalRetweets = totalRetweets;
       tweet.userRetweeted = userRetweeted;
 
+      // has to stay since users are stored in neo4j
       if (!tweet.user) {
         try {
-          tweet.user = await getUserFullDetails(tweet.userId, currentUIDasInt, "id");
+          tweet.user = await getUserFullDetails(tweet.userId, currentUID, "id");
         } catch (e) {
           console.log(e);
         }
       }
 
       if (tweet.reference && !tweet.reference.user) {
-        tweet.reference.user = await getUserFullDetails(tweet.reference.userId, currentUIDasInt, "id");
+        tweet.reference.user = await getUserFullDetails(tweet.reference.userId, currentUID, "id");
       }
+      if (tweet.reference && tweet.reference.poll) {
+        console.log("TWEET REFERENCE POLL: ", tweet.reference.poll);
+        refpoll = await pollModel.findOne({ _id: tweet.reference.poll });
+        console.log("REFPOLL: ", refpoll, 'currentREFPOLL');
+        console.log("SEttiNG REFERENCE POLL: ", tweet.reference.poll, "TO: ", refpoll);
+        
+            tweet.reference.poll = refpoll;
+        }
     })
   );
 
+  console.log("ALL TWEETS: ",JSON.stringify(matchOptions), tweets);
   return tweets;
 };
 

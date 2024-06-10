@@ -312,20 +312,21 @@ const TweetCreate = ({type = 'Post', reference_id = null, quote, editTweet, edit
   const queryClient = useQueryClient();
   
   const invalidateQueries = (data) => {
-    if (data?.tweet?.tags) {
-      console.log('invalidating tags')
-      queryClient.invalidateQueries({queryKey: ['trending']});}
-      if (data?.tweet?.tweetMedia) {
-        console.log('invalidating media')
-        queryClient.invalidateQueries({queryKey: ['tweets', tweetRequests.myMedia, { userId: user.id }]})
-      }
-      if (data.tweet?.tweetType === 'reply' || data.tweetType === 'retweet'){
-        console.log('invalidating replies')
-        Promise.all([
-        queryClient.invalidateQueries({queryKey: ['tweets', tweetRequests.replies, { userId: user.id }]}),        
-        queryClient.invalidateQueries({queryKey: ['replies', data?.tweet?._id]})
-        ])
-      }
+    if (data?.tweet?.tags?.length > 0) {
+      console.log('invalidating tags', data?.tweet?.tags)
+      queryClient.invalidateQueries({queryKey: ['trending']});
+    }
+    if (data?.tweet?.tweetMedia) {
+      console.log('invalidating media')
+      queryClient.invalidateQueries({queryKey: ['tweets', tweetRequests.myMedia, { userId: user.id }]})
+    }
+    if (data.tweet?.tweetType === 'reply' || data.tweetType === 'retweet'){
+      console.log('invalidating replies')
+      Promise.all([
+      queryClient.invalidateQueries({queryKey: ['tweets', tweetRequests.replies, { userId: user.id }]}),        
+      queryClient.invalidateQueries({queryKey: ['replies', data?.tweet?._id]})
+      ])
+    }
     }
 
   const createTweetMutation = useMutation({
@@ -335,6 +336,9 @@ const TweetCreate = ({type = 'Post', reference_id = null, quote, editTweet, edit
         if (key === 'tweetMedia' && formMedia)  {
           sendForm.append(key, formMedia)
         }else if (key === 'tags' && tweetForm[key].length > 0) {
+          sendForm.append(key, JSON.stringify(tweetForm[key]))
+        }
+        else if (key === 'tweetPoll' && tweetForm[key]) {
           sendForm.append(key, JSON.stringify(tweetForm[key]))
         }else{
           if (tweetForm[key]) sendForm.append(key, tweetForm[key])

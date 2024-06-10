@@ -100,12 +100,14 @@ const Trend = ({index, category, title, numTweets, isWidget}) => {
     return (
       <>
        
-            {trends && trends.map((trend, index) =>{ 
+            {trends && trends.map((trend, index, arr) =>{ 
               // gen random category
               const categoryIndex =  Math.floor(Math.random() * topics.length);
               const category = topics[categoryIndex].category
               return (
-                <Trend key={index} index={index + 1} category={category} title={'#'+trend.tag} numTweets={trend.count} isWidget={true} />
+                <Trend key={index} index={index + 1} category={category} title={'#'+trend.tag} numTweets={trend.count} isWidget={true} 
+                {...(index === arr.length - 1 && {ref: lastTrendElementRef})}
+                />
               )}
               )}
               {isFetchingNextPage && <div className='flex justify-center items-center'><ReactLoading type="spin" color="#1da1f2" height={30} width={30} /></div>}

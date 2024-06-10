@@ -8,6 +8,7 @@ const ObjectId = mongoose.Types.ObjectId;
 const { tweetQuery, checkTweetText } = require('../utils/tweet.utils');
 const { getUserFullDetails, allFollowers } = require('../utils/user.utils');
 const { validateFiles, firebaseUpload } = require('../utils/firebase.utils');
+const { json } = require("express");
 
 const getAllTweets = async (req, res) => {
   try {
@@ -132,7 +133,6 @@ const getTweetsByCategory = async (req, res) => {
 const createTweet = async (req, res) => {
     try {
         const newTweetData = req.body;
-        console.log(newTweetData)
 
         if (!newTweetData) {
             console.log('no data')
@@ -152,7 +152,6 @@ const createTweet = async (req, res) => {
       }
     });
     
-    console.log('newTweetData parsed', newTweetData)
 
     const tweetMedia = req.files?.tweetMedia;
     const { tweetType, tweetText, tweetPoll, reference_id, } = newTweetData;
@@ -246,16 +245,17 @@ const createTweet = async (req, res) => {
 
             // filter out any undefined or null values
             if (tweetPoll) {
-                const poll_options = tweetPoll?.choices.filter(option => !!option);
+                let parsedTweetPoll = JSON.parse(tweetPoll); 
+                const poll_options = parsedTweetPoll?.choices.filter(option => !!option);
                 if (poll_options?.length < 2 || poll_options?.length > 4) {
                     throw Error("Poll must have between 2 and 4 options");
                 } else if (poll_options.some(option => !option.text || option.text.length > 25)) {
                     throw Error("Invalid poll data")
-                } else if (!tweetPoll.duration || tweetPoll.duration.days < 1 || tweetPoll.duration.hours < 1 || tweetPoll.duration.minutes < 1 ||
-                    tweetPoll.duration.days > 7 || tweetPoll.duration.hours > 24 || tweetPoll.duration.minutes > 60) {
+                } else if (!parsedTweetPoll.duration || parsedTweetPoll.duration.days < 1 || parsedTweetPoll.duration.hours < 1 || parsedTweetPoll.duration.minutes < 1 ||
+                    parsedTweetPoll.duration.days > 7 || parsedTweetPoll.duration.hours > 24 || parsedTweetPoll.duration.minutes > 60) {
                     throw Error("Invalid poll duration")
                 }
-                const pollExpiration = new Date(Date.now() + (tweetPoll.duration.days * 24 * 60 * 60 * 1000) + (tweetPoll.duration.hours * 60 * 60 * 1000) + (tweetPoll.duration.minutes * 60 * 1000));
+                const pollExpiration = new Date(Date.now() + (parsedTweetPoll.duration.days * 24 * 60 * 60 * 1000) + (parsedTweetPoll.duration.hours * 60 * 60 * 1000) + (parsedTweetPoll.duration.minutes * 60 * 1000));
 
                 const poll = new pollModel({ options: poll_options, poll_end: pollExpiration });
                 tweet.poll = poll._id;
@@ -263,7 +263,7 @@ const createTweet = async (req, res) => {
                 await poll.save({ session });
 
             }
-// upload to firebase
+                // upload to firebase
                 if (validatedFiles) {
                     console.log('validatedFiles', validatedFiles)   
                     const { media, mimeType } = await firebaseUpload(req.files.tweetMedia?.[0], req.user.id, `${tweet._id}/tweetMedia`);
@@ -273,14 +273,12 @@ const createTweet = async (req, res) => {
                         mimeType
                     }
             }
-
             
-            
-                    if (!originalTweet) {
-                        tweet.reference_id = reference_id;
-                    }
+                if (!originalTweet) {
+                    tweet.reference_id = reference_id;
+                }
                 
-                    await tweet.save({ session }); // enum will throw tweet type error or maybe set explicitly idk
+                await tweet.save({ session }); // enum will throw tweet type error or maybe set explicitly idk
 
         });
 
@@ -303,7 +301,7 @@ const createTweet = async (req, res) => {
             tweetData.reference = originalTweet;
         }
 
-        res.status(statusCode.success).json({
+        return res.status(statusCode.success).json({
             tweet: tweetData,
             data: {
                 is_retweeted: tweetType === 'retweet',
@@ -313,13 +311,13 @@ const createTweet = async (req, res) => {
     } catch (err) {
         console.log(err);
         if (err.name === 'ValidationError') {
-            res.status(statusCode.badRequest).json({
+            return res.status(statusCode.badRequest).json({
                 status: "fail",
                 message: "Invalid data provided",
                 errors: err.errors,
             });
         } else {
-            res.status(statusCode.serverError).json({
+            return res.status(statusCode.serverError).json({
                 status: "error",
                 message: err.message || "Some error occurred while creating the tweet.",
             });
@@ -333,7 +331,7 @@ const { tweetId, tweetText, tags } = req.body;
   try {
     if (!tweetId || !tweetText) {
         console.log('no tweet id or text', req.body)
-      res.status(statusCode.badRequest).json({
+      return res.status(statusCode.badRequest).json({
         message: "tweetId is required and tweeText are required in body ",
       });
     }
@@ -344,13 +342,35 @@ const { tweetId, tweetText, tags } = req.body;
             message: "tweetText is too long or invalid",
         });
     }
+    // check if tweet has poll or is a retweet
+    const tweet = await tweetModel.findOne({ _id: tweetId, userId: req.user.id, $or: [
+        { is_deleted: false },
+        { is_deleted: { $exists: false } },
+        { is_deleted_for_everyone: false }
+    ] });
+    if (!tweet) {
+        return res.status(statusCode.notFound).json({
+            message: "No tweet found with that ID",
+        });
+    }
+    if (tweet.tweetType === 'retweet') {
+        return res.status(statusCode.badRequest).json({
+            message: "Cannot edit a retweet",
+        });
+    }
+    if (tweet.poll) {
+        return res.status(statusCode.badRequest).json({
+            message: "Cannot edit a tweet with a poll",
+        });
+    }
     const updateTweet = await tweetModel.findOneAndUpdate(
       { 
         _id: tweetId, 
         userId: req.user.id, 
         $or: [
             { is_deleted: false }, 
-            { is_deleted: { $exists: false } }
+            { is_deleted: { $exists: false } },
+            { is_deleted_for_everyone: false }
         ],
         $or: [
             { tweetType: 'tweet' },

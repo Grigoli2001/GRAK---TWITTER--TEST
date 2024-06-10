@@ -58,7 +58,7 @@ const getUsers = async (req, res) => {
   const { q } = req.query;
 
   try {
-    let qformat = `${q.trim()}`;
+    let qformat = q?.trim() ?? "";
 
     const session = getDriver().session();
     const result = await session.run(

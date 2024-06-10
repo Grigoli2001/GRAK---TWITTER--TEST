@@ -1,4 +1,4 @@
-import { forwardRef, useState, useContext, useEffect } from 'react'
+import { forwardRef, useState, useContext, useEffect, Fragment } from 'react'
 import { FaPlus, FaMinus, FaCircleCheck } from "react-icons/fa6";
 import OptionSelector from '../OptionSelector';
 import { Button } from '../Button';
@@ -10,6 +10,9 @@ import { TWEET_ACTIONS } from './Tweet'
 import { createToast } from '../../hooks/createToast';
 import { quantityFormat } from '../../utils/utils';
 import useUserContext from '../../hooks/useUserContext';
+import { cn } from '../../utils/style'
+import { NavLink } from 'react-router-dom';
+
 
 
 /**
@@ -123,7 +126,7 @@ export const PollCreate = ({removePoll}) => {
       duration: duration
     }})
 
-  }, [choices, TC, duration])
+  }, [choices, duration, TC.setTweetForm])
 
   return (
     <div className='flex flex-col border border-slate-200 rounded-lg [&>*]:p-2 my-2 overflow-hidden'>
@@ -154,6 +157,21 @@ export const PollCreate = ({removePoll}) => {
     </div>
   )
 }
+export const ReadOnlyPoll = ({postState}) => {
+  // this poststate is referenced posttate
+  return (
+    <NavLink to={`/${postState.user.username}/status/${postState._id}`} className='flex flex-col gap-y-2 bg-gray-300 rounded-md hover:bg-gray-200 p-3 bg-opacity-35'>
+      { 
+      postState.poll?.options?.map((option, index) => (
+        <div key={index} className='flex items-center justify-center w-full rounded-full border border-blue-300 text-gray-400 py-1'>
+          <p>{option.text}</p>
+        </div>
+      ))}
+      <span className='text-xs'>Check out this poll!</span>
+    </NavLink>
+    
+  )};
+
 
 export const TweetPoll = forwardRef(({postState, dispatch, ...props}, ref) => {
 

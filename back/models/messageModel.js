@@ -1,13 +1,18 @@
 const mongoose = require('mongoose');
 
 const MessageSchema = new mongoose.Schema({
+    message_id: {
+        type: String,
+        required: [true, "message_id is required"],
+        unique: true,
+    },
     sender_id: {
-        type: Number,
+        type: String,
         required: [true, "sender_id is required"],
     },
     // used to get active chats
     receiver_id: {
-        type: Number,
+        type: String,
         required: [true, "receiver_id is required"],
     },
     // room to allow for private messaging and group messaging
@@ -30,6 +35,11 @@ const MessageSchema = new mongoose.Schema({
     is_deleted_for: {
         type: Array,
         default: [],
+    },
+
+    is_deleted_for_everyone: {
+        type: Boolean,
+        default: false,
     },
     // is_room_deleted_for: {
     //     type: Array,

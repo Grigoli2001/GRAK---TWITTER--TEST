@@ -6,7 +6,8 @@ import { GrImage } from "react-icons/gr";
 import { MdOutlineGifBox } from "react-icons/md";
 import { BsEmojiSmile } from "react-icons/bs";
 import { AiOutlineSend } from "react-icons/ai";
-import { TextareaAutosize } from '@mui/base/TextareaAutosize';
+// import { TextareaAutosize } from '@mui/base/TextareaAutosize';
+import TextareaAutosize from 'react-textarea-autosize';
 import Message, { Typing } from './Message';
 import { NavLink, useParams } from 'react-router-dom';
 
@@ -93,6 +94,7 @@ export const MessageWindow = () => {
     const [ lastReceived, setLastReceived ] = useState(null)
 
     const [modalOpen, setModalOpen] = useState(false)
+    const [deleteText, setDeleteText] = useState('you only' )
     const [messageToDelete, setMessageToDelete] = useState(null)
     const reduxDispatch = useDispatch()
 
@@ -165,8 +167,8 @@ export const MessageWindow = () => {
 
     useEffect(() => {
     if (messages?.length){
-        setLastSent(messages.find(msg => msg.sender_id === user.id))
-        setLastReceived(messages.find(msg => msg.sender_id !== user.id))
+        setLastSent(messages.find(msg => msg.sender_id === user.id && !msg.is_deleted_for_everyone))
+        setLastReceived(messages.find(msg => msg.sender_id !== user.id && !msg.is_deleted_for_everyone))
     }
     }, [messages])
 
@@ -209,7 +211,12 @@ export const MessageWindow = () => {
             setNewMessage(!newMessage)
         }
 
+        function handleDeleted(msg_id) {
+            setMessages(prevMessages => prevMessages.filter(msg => msg.message_id !== msg_id))
+        }
+
         socket?.on('message:received_message', handleReceived)
+        socket?.on('message:deleted_message', handleDeleted)
 
         return () => {
             socket?.off('message:received_message', handleReceived)
@@ -266,25 +273,75 @@ export const MessageWindow = () => {
         }
     }
 
-    const handleModalOpen = (msg_id) => {
-        setMessageToDelete(msg_id)
+    const handleModalOpen = (msg_id, everyone=false) => {
+        console.log(msg_id)
+        setMessageToDelete(msg_id, everyone)
+        if (everyone){
+            setDeleteText('everyone')
+        }else{
+            setDeleteText('you only')
+        }
         setModalOpen(true)
     }
 
-    const handleDeleteMessage = (msg_id) => {
+    const handleDeleteMessageReq = (msg_id) => {
         instance.delete('/messages/delete-message', {
             data:{
-                msg_id
+                msg_id,
             } 
         }).then(res => {
-            if (res.status === 204) throw new Error('Failed to delete message')
-            setMessages(prevMessages => prevMessages.filter(msg => msg._id !== msg_id))
-            createToast("Message deleted!", 'success', 'success-del-message', {limit: 1})
+            if (res.status === 204) {
+                    createToast("Message not found!", 'error', 'error-del-message', {limit: 1})
+                    return
+            }
+            setMessages(prevMessages => prevMessages.filter(msg => msg.message_id !== msg_id))
+            createToast(res.data.message, 'success', 'success-del-message', {limit: 1})
         })
         .catch(err => {
             createToast("Failed to delete message!", 'error', 'error-del-message', {limit: 1})
         }).finally(() => setModalOpen(false))
     }
+
+    const handleDeleteMessageSocket = (msg_id) => {
+        socket.emit('message:delete_message', {room, msg_id})
+    }
+
+    useEffect(() => {
+
+        const handleDeleteError = (error) => {
+            createToast("Failed to delete message!", 'error', 'error-del-message', {limit: 1})
+            setModalOpen(false)
+
+        }
+
+        const receiveDelete = (data) => {
+            const { msg_id } = data
+            // update the message in the messages state
+            setMessages(prevMessages => prevMessages.map(msg => {
+                if (msg.message_id === msg_id){
+                    
+                    msg.message = 'This message was deleted'
+                    msg.is_deleted_for_everyone = true  
+                }
+                return msg
+            })
+            )
+        }
+
+        const handleDeleteSuccess = (data) => {
+            createToast("Message deleted!", 'success', 'success-del-message', {limit: 1})
+            setModalOpen(false)
+        }
+
+        socket.on('message:error_deleted_message', handleDeleteError)
+        socket.on('message:deleted_message', receiveDelete)
+        socket.on('message:success_deleted_message', handleDeleteSuccess)
+ 
+        return () => {
+            socket.off('message:deleted_message')
+            socket.off('message:error_delete_message')
+        }
+    }, [socket])
 
 
     return (
@@ -301,9 +358,13 @@ export const MessageWindow = () => {
 
             <Modal open={modalOpen} handleBackClick={() => setModalOpen(false)}>
                 <div className='p-4 flex flex-col bg-white rounded-xl gap-y-2'>
-                    <h1 className='text-xl font-bold'>Delete message</h1>
+                    <h1 className='text-xl font-bold'>Delete message for {deleteText}</h1>
+                    {deleteText==='everyone' && <p className='text-slate-500'>If @{chatTo.username} has already read this message, it will only be deleted for you.</p>}
                     <p className='text-gray-600'>Are you sure you want to delete this message?</p>
-                    <Button onClick={() => handleDeleteMessage(messageToDelete)} variant='outline' className='w-fit bg-red-500 self-center'>Delete</Button>
+                    <Button onClick={deleteText === "everyone" ? 
+                            () => handleDeleteMessageSocket(messageToDelete): 
+                            () => handleDeleteMessageReq(messageToDelete)
+                            } variant='outline' className='w-fit bg-red-500 self-center'>Delete</Button>
                     <Button onClick={() => setModalOpen(false)} variant='outlined' className='w-fit self-center'>Cancel</Button>
                 </div>
             </Modal>
@@ -337,8 +398,7 @@ export const MessageWindow = () => {
                                 key={index} 
                                 message={msg} 
                                 messageType={msg.sender_id === user.id ? 'sent' : 'received'} 
-                                isLastMessage={msg._id === lastSent?._id || msg._id === lastReceived?._id}
-                                handleDeleteMessage={handleDeleteMessage}
+                                isLastMessage={msg.message_id === lastSent?.message_id || msg.message_id === lastReceived?.message_id}
                                 handleModalOpen={handleModalOpen}
                                 />)
                             }

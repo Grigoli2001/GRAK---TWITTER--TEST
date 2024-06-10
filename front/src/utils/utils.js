@@ -94,7 +94,7 @@ export function getDaysInMonth(year, month) {
 
   export const evalRoom = (user, otherUser) => {
     if (!user || !otherUser) return null
-    return [ user?.id, otherUser?.id ].sort().join('-')
+    return 'message-room:'+ [ user?.id, otherUser?.id ].sort().join('-')
 }
 
 export function getJoinDate(date) {

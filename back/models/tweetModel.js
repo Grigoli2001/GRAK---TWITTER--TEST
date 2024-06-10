@@ -61,6 +61,7 @@ const TweetSchema = new Schema({
         type: [{
             type: String,
             maxlength: 25,
+            minlength: 1
         }],
         validate: {
             validator: function(value) {

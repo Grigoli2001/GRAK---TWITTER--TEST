@@ -2,9 +2,8 @@ import { forwardRef, useState } from 'react';
 import { cn } from '../../utils/style'
 import { Popover, PopoverHandler, PopoverContent } from '@material-tailwind/react'
 import { FaCircleCheck, FaEllipsis } from 'react-icons/fa6';
-import { RiDeleteBinLine } from "react-icons/ri";
+import { RiDeleteBinLine, RiDeleteBin2Fill } from "react-icons/ri";
 import { CIAddSquare } from '../customIcons';
-import { toast } from 'react-toastify';
 import { Button } from '../Button';
 import { createToast } from '../../hooks/createToast';
 
@@ -47,6 +46,8 @@ const Message = forwardRef(({ message, messageType, isLastMessage,  handleModalO
           'flex-row-reverse': messageType === 'received',
         })}>
 
+        {
+         !message.is_deleted_for_everyone &&
           <Popover open={showMore} handler={setShowMore} placement={ messageType==='received' ? 'left': 'right'} offset={{ mainAxis: messageType==='received' ? -100: -50}}>
               <PopoverHandler className=''>
                 <div>
@@ -57,19 +58,30 @@ const Message = forwardRef(({ message, messageType, isLastMessage,  handleModalO
               </PopoverHandler>
               <PopoverContent className='!p-0 !shadow-all-round text-black w-fit bg-white rounded-xl font-bold !outline-none z-10'>
                   <ul className='list-none text-sm'>
+                    
                       <li onClick={handleCopyMessage} className='hover:bg-slate-200/50 p-2 cursor-pointer flex items-center gap-2 whitespace-nowrap'><CIAddSquare/> Copy this message</li>
-                      <li  onClick={() => {handleModalOpen(message._id); setShowMore(false)}} className='hover:bg-slate-200/50 p-2 cursor-pointer flex items-center gap-2 whitespace-nowrap'><RiDeleteBinLine className="text-2xl"/> Delete for you</li>
+                      <li  onClick={() => {handleModalOpen(message.message_id); setShowMore(false)}} className='hover:bg-slate-200/50 p-2 cursor-pointer flex items-center gap-2 whitespace-nowrap'><RiDeleteBinLine className="text-2xl"/> Delete for you</li>
+                      
+                      {/* message still in redis then del for everyone:  since back is set to experire after 20 we set this to 15 to be safe minute
+                      so user has 15 minutes to delete message for everyone 
+                      */}
+                      {new Date(message.date) > new Date() - 1000 * 60 * 15  && messageType === 'sent' && 
+                        <li onClick={() => {handleModalOpen(message.message_id, true); setShowMore(false)}} className='hover:bg-slate-200/50 p-2 cursor-pointer flex items-center gap-2 whitespace-nowrap'>
+                          <RiDeleteBin2Fill className="text-2xl"/> Delete for everyone </li>
+                      }
                   </ul>
               </PopoverContent>
             </Popover>
+      }
 
 
             <div
               className={cn('rounded-3xl py-3 w-fit px-4 max-w-[75%] break-all', {
-                'bg-twitter-blue text-white': messageType === 'sent',
-                'bg-gray-100': messageType === 'received',
+                'bg-twitter-blue text-white': messageType === 'sent' && !message.is_deleted_for_everyone,
+                'bg-gray-100': messageType === 'received' && !message.is_deleted_for_everyone,
                 'rounded-br-none': isLastMessage && messageType === 'sent',
                 'rounded-bl-none': isLastMessage && messageType === 'received',
+                'bg-blue-gray-100 bg-opacity-50 text-gray-400': message.is_deleted_for_everyone,
                 
               })}
             >

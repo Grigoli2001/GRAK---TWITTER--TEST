@@ -32,7 +32,7 @@ const initSockets = (app) => {
     // Join a room
     socket.on("joinRoom", (roomId) => {
       socket.join(roomId);
-      console.log(`User ${socket.id} joined room ${roomId}`);
+      // console.log(`User ${socket.id} joined room ${roomId}`);
     });
 
     // Leave a room

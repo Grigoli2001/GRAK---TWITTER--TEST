@@ -34,8 +34,8 @@ export const UserProvider = ({ children }) => {
 
   useEffect(() => {
     socket.on("connect_error", (err) => {
-      createToast("error", "Socket connection failed");
-      dispatch({ type: "LOGOUT" });
+      // createToast("error", "Socket connection failed");
+      // dispatch({ type: "LOGOUT" });
     });
 
     return () => {
@@ -43,11 +43,6 @@ export const UserProvider = ({ children }) => {
     }
   }, [socket]);
     
-socket.on("connect_error", (err) => {
-  createToast("error", "Socket connection failed");
-});
-
-  
 
   return (
     <UserContext.Provider value={{ user: userState.user,token: userState.token, isAuthenticated: userState.isAuthenticated , dispatch }}>

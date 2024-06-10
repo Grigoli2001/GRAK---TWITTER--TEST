@@ -1,22 +1,46 @@
 const messageModel = require('../models/messageModel');
 const statusCode = require('../constants/statusCode');
-// const pool = require("../database/db_setup");
-const { error } = require('winston');
+const { redisClient } = require('../database/redis_setup');
+const mongoose = require('mongoose');
+const { getDriver } = require('../database/neo4j_setup');
 
 const MESSAGE_PAGE_SIZE = 20;
 
 const getAllMessages = async (req, res) => {
 
+    let messages = [];
     try {
         let skip = req.query.page ? parseInt(req.query.page) : 0;
-        const messages = await messageModel.find({ 
-            room_id: req.params.room, 
-            is_deleted_for: { $nin: [req.user.id] }, 
-            is_room_deleted_for: { $nin: [req.user.id] }
-        })
-        .sort({ date: -1 })
-        .skip(skip * MESSAGE_PAGE_SIZE)
-        .limit(MESSAGE_PAGE_SIZE)
+        let totalToSkip = skip * MESSAGE_PAGE_SIZE
+
+
+        // fisrt check redis
+        // TODO: filter out deleted messages
+        messages = await redisClient.zRange(req.params.room, totalToSkip, totalToSkip + MESSAGE_PAGE_SIZE, {"REV": true})
+        // get size of messages
+       
+        messages = messages.map(msg => JSON.parse(msg))
+
+        if (messages.length < MESSAGE_PAGE_SIZE) {
+            remaining = MESSAGE_PAGE_SIZE - messages.length
+         
+            mongoskip = Math.floor(totalToSkip / MESSAGE_PAGE_SIZE) * MESSAGE_PAGE_SIZE
+            // console.log('remaining', remaining, 'mongoskip', mongoskip)
+            // get from db
+            
+            persistedMessages = await messageModel.find({ 
+                room_id: req.params.room, 
+                is_deleted_for: { $nin: [req.user.id] }, 
+                is_room_deleted_for: { $nin: [req.user.id] }
+            })
+            .sort({ date: -1 })
+            .skip(mongoskip)
+            .limit(remaining)
+
+            messages = [...messages, ...persistedMessages]
+
+        }
+
         res.status(statusCode.success).json({ messages })
     } catch (err) {
         console.log(err);
@@ -30,23 +54,76 @@ const deleteMessage = async (req, res) => {
 
     try {
         let { msg_id } = req.body
+        console.log('msg_id', msg_id)
 
         if (!msg_id) {
-            throw new Error('msg_id is required')
+            return res.status(statusCode.badRequest).json({
+                message: 'msg_id is required'
+            })
         }
-    
-       const deleted = await messageModel.updateOne({_id: msg_id}, {$addToSet: {is_deleted_for: req.user.id}})
+
+        pos = msg_id.lastIndexOf(':')
+        let room = msg_id.substring(0, pos)
+        console.log('room', room)
+        if (!room || !room.startsWith('message-room:')) {
+          console.log('Invalid message id (room)') 
+            return res.status(statusCode.badRequest).json({
+                message: 'Invalid message id (room)'
+            })
+        }
+
+        let score = msg_id.split(':')[2] // should be in format message-room:<room>:<score>
+        console.log('score', score, /^\d+$/.test(score))
+        if (!score || !/^\d+$/.test(score)) {
+          console.log('Invalid message id (score)') 
+            return res.status(statusCode.badRequest).json({
+                message: 'Invalid message id (score)'
+            })
+        }
+
+        score = parseInt(score)
+
+        let messageToDelete = await redisClient.zRangeByScore(room, score, score)
+
+        if (messageToDelete && messageToDelete.length > 0) {
+          messageToDelete = messageToDelete.map(msg => JSON.parse(msg)) 
+          messageToDelete = messageToDelete[0]
+
+          if (!messageToDelete.is_deleted_for) { // should be an array
+            messageToDelete.is_deleted_for = [req.user.id]
+          }else{
+            // psuh only if not already in the array
+            if (!messageToDelete.is_deleted_for.includes(req.user.id)) {
+              messageToDelete.is_deleted_for.push(req.user.id)
+            }
+
+            // replace message with updated message instead of full delete
+            const delResp = await redisClient.zRemRangeByScore(room, score, score)
+            if (delResp === 0) {
+              return res.status(statusCode.notModified).send()
+            }
+
+            const resp = await redisClient.zAdd(room, [{score: score, value: JSON.stringify(messageToDelete)}])
+            if (resp === 0) {
+              return res.status(statusCode.notModified).send()
+            }
+          }
+          return res.status(statusCode.success).send({ message: 'Message deleted for you!'})
+        }
+
+        // otherwise delete from mongo
+        deleted = await messageModel.updateOne({message_id: msg_id}, {$addToSet: {is_deleted_for: req.user.id}})
        
-       if (deleted.modifiedCount === 1){
-        // console.log('sending success')
-        return res.status(statusCode.success).send()
-       }else{
+       if (deleted.modifiedCount === 0){
         return res.status(statusCode.notModified).send()
+       }else{
+        // console.log('sending success')
+        return res.status(statusCode.success).send({ message: 'Message deleted for you!'})
        }
 
     }catch(err) {
         console.log(err)
-        return res.status(statusCode.badRequest).json({
+        return res.status(statusCode.serverError).json({
             message: err
         })
     }
@@ -62,6 +139,28 @@ const deleteRoom = async(req, res) => {
             throw new Error('room_id is required')
         }
 
+        const session = await mongoose.startSession()
+        await session.withTransaction(async () => {
+
+        // check if redis has the room
+        const roomExists = await redisClient.exists(room_id)
+        if (roomExists) {
+          // persist to mongo as is_deleted_for
+          const messages = await redisClient.zRange(room_id, 0, -1)
+          const messageObjects = messages.map(msg => JSON.parse(msg)).map(msg => {
+            if (!msg.is_deleted_for) {
+              msg.is_deleted_for = [req.user.id]
+            }
+            else if (!msg.is_deleted_for.includes(req.user.id)) {
+              msg.is_deleted_for.push(req.user.id)
+            }
+            return msg
+          }
+          )
+          await messageModel.insertMany(messageObjects, {session})
+          await redisClient.del(room_id)
+        }
+
        const deleted = await messageModel.updateMany({
                     room_id: room_id,
                     date: { $lt: new Date() } 
@@ -69,14 +168,16 @@ const deleteRoom = async(req, res) => {
                 {
                     $addToSet: {is_deleted_for: req.user.id}
                 }
+                , {session}
         )
     
-       if (deleted.modifiedCount > 0){
+       if (deleted.modifiedCount > 0 || roomExists){
         res.status(statusCode.success).send()
        }else{
         console.log('not modified')
         res.status(statusCode.notModified).send()
        }
+    })
 
     }catch(err) {
       console.log(err)
@@ -87,13 +188,20 @@ const deleteRoom = async(req, res) => {
 }
 
 const getActiveChats = async (req, res) => {
-
-
-  
-
     try {
 
-      const { q } = req.query
+
+      let checkRedis1 = await redisClient.keys(`message-room:*-${req.user.id}`)
+      let checkRedis2 = await redisClient.keys(`message-room:${req.user.id}-*`)
+
+      keys = [...checkRedis1, ...checkRedis2]
+      let userIds = [];
+      if (keys.length > 0) {
+        keys = keys.map(key => key.split(':')[1])
+        userIds = keys.map(key => key.split('-')).map(key => key[0] === req.user.id ? key[1] : key[0])
+      }
+
+      
         // get any message where the current user is the send er or receiver and the message is not deleted
         const activeChatsQuery = await messageModel.aggregate([
             {
@@ -135,33 +243,38 @@ const getActiveChats = async (req, res) => {
             }, {
               '$project': {
                 '_id': 0, 
-                'combined_ids': 1
+                'combined_ids': {
+                  '$setDifference': ['$combined_ids', userIds]
+                }
               }
             }
           ])
 
-        
-        if (activeChatsQuery?.length<=0) {
-            return res.status(statusCode.success).json({ users: [] })
+
+        if (activeChatsQuery.length > 0) {
+        userIds = [...userIds, ...activeChatsQuery[0].combined_ids]
         }
+        const session = getDriver().session();
+        const result = await session.run(
+          `MATCH (u:User) WHERE u.id <> $current_userid AND u.id IN $userIds
+          RETURN 
+          {
+            id: u.id, 
+            name: u.name, 
+            username: u.username, 
+            email: u.email, 
+            profile_pic: u.profile_pic, 
+            created_at: u.created_at
+            } as u
+          `,
+          { current_userid: req.user.id, userIds}
+        );
 
-        console.log(activeChatsQuery[0].combined_ids)
-
+      const users = result.records.map(record => record.get('u'));
         // user array order to match the combined_ids array which has the is sorted by latest date
-        const userData = await pool.query(
-          `SELECT id, username, name, profile_pic 
-           FROM users 
-           WHERE id = ANY($1)
-           AND username like $2
-           ORDER BY ARRAY_POSITION($1, id) 
-           LIMIT 10`,
-          [activeChatsQuery[0].combined_ids, q ? `%${q}%` : '%']
-      )
-
-
-        res.status(statusCode.success).json({ users: userData.rows })
+        res.status(statusCode.success).json({ users })
     }catch (err) {
-        console.log(error)
+        console.log(err)
         res.status(statusCode.badRequest).json({
             message: err
         })
@@ -175,3 +288,80 @@ module.exports = {
     deleteRoom,
     getActiveChats
 }
+
+        
+ //   const userData = await pool.query(
+      //     `SELECT id, username, name, profile_pic 
+      //      FROM users 
+      //      WHERE id = ANY($1)
+      //      AND username like $2
+      //      ORDER BY ARRAY_POSITION($1, id) 
+      //      LIMIT 10`,
+      //     [activeChatsQuery[0].combined_ids, q ? `%${q}%` : '%']
+      // )
+        // const messages = await messageModel.find({ 
+        //     room_id: req.params.room, 
+        //     is_deleted_for: { $nin: [req.user.id] }, 
+        //     is_room_deleted_for: { $nin: [req.user.id] }
+        // })
+        // .sort({ date: -1 })
+        // .skip(totalToSkip)
+        // .limit(MESSAGE_PAGE_SIZE)
+
+//-------------------------------------------------------
+            // changed to handle with socket
+        // // update redis via score
+        // // get last index of : to get the score and room
+        // pos = msg_id.lastIndexOf(':')
+        // let room = msg_id.substring(0, pos)
+        // console.log('room', room)
+        // if (!room || !room.startsWith('message-room:')) {
+        //   console.log('Invalid message id (room)') 
+        //     return res.status(statusCode.badRequest).json({
+        //         message: 'Invalid message id (room)'
+        //     })
+        // }
+
+        // let score = msg_id.split(':')[2] // should be in format message-room:<room>:<score>
+        // console.log('score', score, /^\d+$/.test(score))
+        // if (!score || !/^\d+$/.test(score)) {
+        //   console.log('Invalid message id (score)') 
+        //     return res.status(statusCode.badRequest).json({
+        //         message: 'Invalid message id (score)'
+        //     })
+        // }
+
+
+        // score = parseInt(score)
+
+        // console.log('room', room, 'score', typeof score) 
+        // let outputMessage
+        // let messageToDelete = await redisClient.zRangeByScore(room, score, score)
+        // let newMessage = null
+
+        // if (messageToDelete && messageToDelete.length > 0) {
+        //   messageToDelete = messageToDelete.map(msg => JSON.parse(msg)) 
+        //   messageToDelete = messageToDelete[0]
+        //   newMessage = {...messageToDelete}
+
+        //   if (!newMessage.is_deleted_for) { // should be an array
+        //     newMessage.is_deleted_for = [req.user.id]
+        //   }else{
+        //     // psuh only if not already in the array
+        //     if (!newMessage.is_deleted_for.includes(req.user.id)) {
+        //       newMessage.is_deleted_for.push(req.user.id)
+        //     }
+        //   }
+
+        //   outputMessage = "Message deleted for you!"
+
+        //   if (deletefor === 'everyone') {
+        //     // remove from redis
+        //     await redisClient.zRemRangeByScore(room, score, score)
+        //     // let otherUser = newMessage.sender_id === req.user.id ? newMessage.receiver_id : newMessage.sender_id
+        //     // if (!newMessage.is_deleted_for.includes(otherUser) && !newMessage.is_read) {
+        //     //   newMessage.is_deleted_for.push(otherUser)
+        //       outputMessage = "Message deleted for everyone!"
+        //     }
+        //     return res.status(statusCode.success).send({ message: outputMessage })
+        //   }
