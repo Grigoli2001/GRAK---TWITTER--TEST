@@ -12,7 +12,12 @@ import { CICameraPlus } from "../customIcons";
 
 import { cn } from "../../utils/style";
 import OptionSelector from "../OptionSelector";
-import { months, getDaysInMonth, getYears, defaultAvatar } from "../../utils/utils";
+import {
+  months,
+  getDaysInMonth,
+  getYears,
+  defaultAvatar,
+} from "../../utils/utils";
 import instance from "../../constants/axios";
 import { requests } from "../../constants/requests";
 
@@ -24,15 +29,18 @@ const PhotoModal = ({ type, backTo }) => {
 
   // demo
   const { username } = useParams();
-  const [user , setUser] = useState({})
-  
+  const [user, setUser] = useState({});
+
   useEffect(() => {
-    instance.get(requests.getUser, {params:{username: username}}).then(res => {
-      setUser(res.data.user)
-    }).catch(err => {
-      console.error(err)
-    })
-  },[username])
+    instance
+      .get(requests.getUser, { params: { username: username } })
+      .then((res) => {
+        setUser(res.data.user);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  }, [username]);
   const navigate = useNavigate();
 
   return (
@@ -96,72 +104,85 @@ const EditProfileModal = ({ backTo }) => {
   };
 
   const [loading, setLoading] = useState(true);
-  const [day, setDay] = useState(null);
-  const [month, setMonth] = useState(null);
-  const [year, setYear] = useState(null);
+  const [day, setDay] = useState();
+  const [month, setMonth] = useState();
+  const [year, setYear] = useState();
   const [dayOptions, setDayOptions] = useState();
   const years = getYears(16, 100);
 
-  const [formState, setFormState] = useState({})
-  const [formProfilePic, setFormProfilePic] = useState()
-  const [formCoverPic, setFormCoverPic] = useState()
+  const [formState, setFormState] = useState({});
+  const [formProfilePic, setFormProfilePic] = useState();
+  const [formCoverPic, setFormCoverPic] = useState();
 
-  const queryClient = useQueryClient()
- 
+  const queryClient = useQueryClient();
+
   useEffect(() => {
-    instance.get(requests.getUser, {params: {id: user.id}}).then(res => {
+    setLoading(true);
+    instance
+      .get(requests.getUser, { params: { id: user.id } })
+      .then((res) => {
+        // remove unneeded fields
+        const { email, dob, created_at, ...formData } = res.data.user;
+        setFormState(formData);
 
-      // remove unneeded fields
-      const { email, dob,  created_at,  ...formData } = res.data.user;
-      setFormState(formData)          
+        // set dob for option selector
+        const date = res.data.user.dob;
+        console.log(date, "date");
+        setDay(date.day);
+        console.log(date.day, "day");
+        console.log(getMonthCounterpart(date.month), "month");
 
-      // set dob for option selector
-      const date = res.data.user.dob;
-      setDay(date.day);
+        setMonth(getMonthCounterpart(date.month));
 
-      setMonth(getMonthCounterpart(date.month));
+        setYear(date.year);
+        setDayOptions(
+          getDaysInMonth(
+            date.year,
+            months.indexOf(getMonthCounterpart(date.month))
+          )
+        );
 
-      setYear(date.year);
-      setDayOptions(getDaysInMonth(date.year, months.indexOf(getMonthCounterpart(date.month))))
-
-      setLoading(false)
-      
-    }).catch(err => {
-      console.error(err)
-    })
-  },[])
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [user.id]);
 
   function getMonthCounterpart(month) {
     const monthMap = {
-        '0': 'January',
-        '1': 'February',
-        '2': 'March',
-        '3': 'April',
-        '4': 'May',
-        '5': 'June',
-        '6': 'July',
-        '7': 'August',
-        '8': 'September',
-        '9': 'October',
-        '10': 'November',
-        '11': 'December',
-        'January': '1',
-        'February': '2',
-        'March': '3',
-        'April': '4',
-        'May': '5',
-        'June': '6',
-        'July': '7',
-        'August': '8',
-        'September': '9',
-        'October': '10',
-        'November': '11',
-        'December': '12'
+      1: "January",
+      2: "February",
+      3: "March",
+      4: "April",
+      5: "May",
+      6: "June",
+      7: "July",
+      8: "August",
+      9: "September",
+      10: "October",
+      11: "November",
+      12: "December",
+      January: "1",
+      February: "2",
+      March: "3",
+      April: "4",
+      May: "5",
+      June: "6",
+      July: "7",
+      August: "8",
+      September: "9",
+      October: "10",
+      November: "11",
+      December: "12",
     };
 
     // If the month is a number, convert it to string and return its counterpart
     if (!isNaN(month)) {
-        month = month.toString();
+      month = month.toString();
     }
 
     return monthMap[month];
@@ -179,58 +200,108 @@ const EditProfileModal = ({ backTo }) => {
     });
   };
 
-  const handleUpdateProfilePic = ( image ) => {
+  const handleUpdateProfilePic = (image) => {
     if (!image) return;
-    const imageUrl = URL.createObjectURL(image)
-    setFormState({...formState, profile_pic: imageUrl})
-    setFormProfilePic(image)
-    
+    const imageUrl = URL.createObjectURL(image);
+    setFormState({ ...formState, profile_pic: imageUrl });
+    setFormProfilePic(image);
   };
 
-  const handleUpdateCoverPic = ( image ) => {
+  const handleUpdateCoverPic = (image) => {
     if (!image) return;
-    const imageUrl = URL.createObjectURL(image)
-    setFormState({...formState, cover: imageUrl})
-    setFormCoverPic(image)
+    const imageUrl = URL.createObjectURL(image);
+    setFormState({ ...formState, cover: imageUrl });
+    setFormCoverPic(image);
   };
 
   const handleRemoveCover = () => {
-    setFormState({...formState, cover: ''})
-    setFormCoverPic("default")
-  }
+    setFormState({ ...formState, cover: "" });
+    setFormCoverPic("default");
+  };
 
   const updateProfile = () => {
-    console.log(year, month, day, 'date')
+    console.log(year, month, day, "date");
     // const dob = new Date(`${year}-${months.indexOf(month) + 1}-${day}`).toISOString();
-    const dob = {year, month: parseInt(getMonthCounterpart(month)), day}
+    const dob = { year, month: parseInt(getMonthCounterpart(month)), day };
     // change to formdata
-    const sendForm = new FormData()
-    sendForm.append('profile_pic', formProfilePic)
-    sendForm.append('cover', formCoverPic)
-    sendForm.append('dob', JSON.stringify(dob))
+    const sendForm = new FormData();
+    sendForm.append("profile_pic", formProfilePic);
+    sendForm.append("cover", formCoverPic);
+    sendForm.append("dob", JSON.stringify(dob));
     for (const key in formState) {
-      if (key !== 'profile_pic' && key !== 'cover' && key !== 'id' && key !== 'dob') {
-        sendForm.append(key, formState[key])
+      if (
+        key !== "profile_pic" &&
+        key !== "cover" &&
+        key !== "id" &&
+        key !== "dob"
+      ) {
+        sendForm.append(key, formState[key]);
       }
     }
     for (var pair of sendForm.entries()) {
-      console.log(pair[0]+ ', ' + pair[1]); 
+      console.log(pair[0] + ", " + pair[1]);
     }
 
-    instance.patch(requests.updateUser, sendForm, {
-      headers: {
-      'Content-Type': 'multipart/form-data'
-    }
-  })
-    .then(res => {
-      createToast('Profile updated', 'success', 'profile-updated', {limit: 1})
-     queryClient.invalidateQueries({queryKey: ['user', user.username]})
-      dispatch({type: 'UPDATE', payload: formState})
-      navigate(`/${formState.username}`)
-      
-    }).catch(err => {
-      createToast('Error updating profile', 'error', 'errorr-updating-profile', {limit: 1})
-    })
+    instance
+      .patch(requests.updateUser, sendForm, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      })
+      .then((res) => {
+        createToast("Profile updated", "success", "profile-updated", {
+          limit: 1,
+        });
+        queryClient.invalidateQueries({ queryKey: ["user", user.username] });
+        dispatch({ type: "UPDATE", payload: formState });
+        navigate(`/${formState.username}`);
+      })
+      .catch((err) => {
+        createToast(
+          "Error updating profile",
+          "error",
+          "errorr-updating-profile",
+          { limit: 1 }
+        );
+      });
+  };
+
+  const renderDobOptions = () => {
+    return day ? (
+      <div className="flex gap-x-2 ">
+        <OptionSelector
+          title={"Day"}
+          options={dayOptions}
+          name={"day"}
+          defaultValue={day}
+          onChange={(e, newVal) => {
+            setDay(newVal);
+          }}
+        />
+
+        <OptionSelector
+          title="Month"
+          options={months}
+          defaultValue={month}
+          onChange={(e, newVal) => {
+            setMonth(newVal);
+            setDayOptions(getDaysInMonth(year, months.indexOf(newVal)));
+          }}
+        />
+
+        <OptionSelector
+          title="Year"
+          options={years}
+          defaultValue={year}
+          onChange={(e, newVal) => {
+            setYear(newVal);
+            setDayOptions(getDaysInMonth(newVal, months.indexOf(month)));
+          }}
+        />
+      </div>
+    ) : (
+      <div className="flex gap-x-2 "></div>
+    );
   };
 
   return (
@@ -259,15 +330,13 @@ const EditProfileModal = ({ backTo }) => {
 
         <div className="h-48 w-full relative mb-6 bg-slate-300 col-span-full flex items-center justify-center gap-x-4 bm-8">
           <div id="cover_photo" className="h-full w-full absolute z-10">
-              {
-                formState.cover && 
-                  <img
-                  src={formState.cover}
-                  alt="cover"
-                  className="w-full h-full object-cover"
-                />
-
-              }
+            {formState.cover && (
+              <img
+                src={formState.cover}
+                alt="cover"
+                className="w-full h-full object-cover"
+              />
+            )}
           </div>
 
           <div className="z-20 flex items-center justify-center gap-x-4">
@@ -291,9 +360,8 @@ const EditProfileModal = ({ backTo }) => {
             </Button>
 
             {formState?.cover && (
-
               <Button
-              onClick={handleRemoveCover}
+                onClick={handleRemoveCover}
                 variant="icon"
                 size="icon-sm"
                 tooltip="Remove cover photo"
@@ -338,57 +406,36 @@ const EditProfileModal = ({ backTo }) => {
 
         {/* place all fields here */}
         <div className="p-4 mt-10 grid gap-y-3">
-          {Object.keys(formState).filter(key => !['profile_pic', 'profile_pic_url', 'cover', 'cover_url', 'id', 'dob'].includes(key)).map((field, index) => {
-            return (
-              <CustomInput
-                key={index}
-                name={field}
-                maxLength={formConstant[field]?.maxLength}
-                value={formState[field]}
-                placeholder={formConstant[field]?.placeholder}
-                handleUpdate={handleUpdateForm}
-                withTextCount={true}
-                asTextArea={field === "bio"}
-              />
-            );
-          })}
+          {Object.keys(formState)
+            .filter(
+              (key) =>
+                ![
+                  "profile_pic",
+                  "profile_pic_url",
+                  "cover",
+                  "cover_url",
+                  "id",
+                  "dob",
+                ].includes(key)
+            )
+            .map((field, index) => {
+              return (
+                <CustomInput
+                  key={index}
+                  name={field}
+                  maxLength={formConstant[field]?.maxLength}
+                  value={formState[field]}
+                  placeholder={formConstant[field]?.placeholder}
+                  handleUpdate={handleUpdateForm}
+                  withTextCount={true}
+                  asTextArea={field === "bio"}
+                />
+              );
+            })}
 
           <div>
             <span className="text-sm">Birth date</span>
-            <div className="flex gap-x-2">
-              <OptionSelector
-                title={"Day"}
-                options={dayOptions}
-                name={"day"}
-                defaultValue={day}
-                onChange={(e, newVal) => {
-                  setDay(newVal)
-                  // setDob()
-                }}
-              />
-
-              <OptionSelector
-                title="Month"
-                options={months}
-                defaultValue={month}
-                onChange={(e, newVal) => {
-                  setMonth(newVal);
-                  setDayOptions(getDaysInMonth(year, months.indexOf(newVal)))
-                  // setDob()
-                }}
-              />
-
-              <OptionSelector
-                title="Year"
-                options={years}
-                defaultValue={year}
-                onChange={(e, newVal) => {
-                  setYear(newVal);
-                  setDayOptions(getDaysInMonth(newVal, months.indexOf(month)))
-                  // setDob()
-                }}
-              />
-            </div>
+            <div className="">{renderDobOptions()}</div>
           </div>
         </div>
       </div>
@@ -415,7 +462,7 @@ export const ProfileEditRoutes = (backTo) => {
   return (
     <Route
       path="/settings/profile"
-    element={<EditProfileModal backTo={backTo} />}
+      element={<EditProfileModal backTo={backTo} />}
     />
   );
 };
