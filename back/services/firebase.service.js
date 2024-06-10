@@ -1,41 +1,34 @@
 const statusCodes = require("../constants/statusCode");
 const logger = require("../middleware/winston");
-const { getBucket } = require("../database/firebase_setup");
+const { firebaseUpload, validateFiles } = require("../utils/firebase.utils");
 
 const uploadImage = async (req, res) => {
-  // havent tested this yet but should work
-  const bucket = getBucket();
-  const { file } = req.body;
-  const { originalname, buffer } = file;
 
-  if (!buffer) {
-    return res
-      .status(statusCodes.badRequest)
-      .json({ error: "No image provided" });
-  }
+    console.log("FILES", req.files)
 
-  console.log("file", file);
-  const blob = bucket.file(originalname);
-  const blobStream = blob.createWriteStream({
-    resumable: false,
-    metadata: {
-      contentType: file.mimetype,
-    },
-  });
+    try {
+        if (!req.files) {
+            return res.status(statusCodes.badRequest).json({ error: "No file uploaded" });
+        }
+        const files = await validateFiles(req.files);
+        console.log("VALIDATED FILES", files)
+        if (!files) {
+            return res.status(statusCodes.badRequest).json({ error: "file could not be validated" });
+        }
+        let image = files.image?.[0]
 
-  blobStream.on("error", (err) => {
-    logger.error(err);
-    return res
-      .status(statusCodes.serverError)
-      .json({ error: "Error uploading image" });
-  });
+        console.log("IMAGE", image)
+        
+        console.log("USER", req.user.id)
+        const imageUrl = await firebaseUpload(image, req.user.id, 'profile_pic');
 
-  blobStream.on("finish", async () => {
-    const publicUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
-    return res.status(statusCodes.success).json({ url: publicUrl });
-  });
+        console.log("IMAGE URL", imageUrl)
+        return res.status(statusCodes.success).json({ imageUrl });
+    } catch (err) {
+        logger.error(err);
+        return res.status(statusCodes.serverError).json({ error: "Server Error" });
+    }
 
-  blobStream.end(buffer);
 };
 
 module.exports = { uploadImage };

@@ -1,6 +1,8 @@
 const statusCodes = require("../constants/statusCode");
 const logger = require("../middleware/winston");
 const { getDriver } = require("../database/neo4j_setup");
+const { redisClient } = require("../database/redis_setup");
+
 const {
   makeUsername,
   checkExisting,
@@ -218,6 +220,14 @@ const sendOTP = async (req, res) => {
   const mailSent = await sendEmail(email, subject, text);
   console.log(mailSent);
   if (mailSent) {
+    const resp = await redisClient.set(`otp:${email}`, otp);
+    await redisClient.expire(`otp:${email}`, 60 * 3);
+    if (resp !== 0) {
+      console.log("OTP set in redis");
+    }
+    else{
+      throw new Error("Error while setting OTP in redis");
+    }
     return res
       .status(statusCodes.success)
       .json({ message: "OTP sent", otp: otp });
@@ -225,6 +235,33 @@ const sendOTP = async (req, res) => {
     return res
       .status(statusCodes.serverError)
       .json({ message: "Error while sending OTP" });
+  }
+};
+
+const verifyOTP = async (req, res) => {
+  const { email, otp } = req.body;
+
+  console.log(req.body)
+  
+  try {
+    if (!email || !otp) {
+      return res.status(statusCodes.badRequest).json({ message: "Missing fields" });
+    }
+    const otpInRedis = await redisClient.get(`otp:${email}`);
+
+    console.log("INPUT OTP", otp, "OTP IN REDIS", otpInRedis)
+
+    if (otpInRedis === otp) {
+      await redisClient.del(`otp:${email}`);
+      return res.status(statusCodes.success).json({ message: "OTP verified" });
+    }
+    return res.status(statusCodes.notFound).json({ message: "Incorrect OTP" });
+  } catch (error) {
+    logger.error(error);
+
+    return res
+      .status(statusCodes.serverError)
+      .json({ message: "Error while verifying OTP" });
   }
 };
 
@@ -265,6 +302,8 @@ const userPreferences = async (req, res) => {
   try {
     session = getDriver()?.session();
 
+    console.log("USER PREFS BODY", req.body)
+
     const params = {
       1: userId,
       2: selectedTopics,
@@ -285,6 +324,7 @@ const userPreferences = async (req, res) => {
     }
     return res.status(statusCodes.notFound).json({ message: "User not found" });
   } catch (error) {
+    console.log(error);
     logger.error(error);
     return res
       .status(statusCodes.serverError)
@@ -302,4 +342,5 @@ module.exports = {
   sendOTP,
   changePassword,
   userPreferences,
+  verifyOTP,
 };

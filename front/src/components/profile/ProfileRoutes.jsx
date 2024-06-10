@@ -238,9 +238,9 @@ const EditProfileModal = ({ backTo }) => {
         sendForm.append(key, formState[key]);
       }
     }
-    for (var pair of sendForm.entries()) {
-      console.log(pair[0] + ", " + pair[1]);
-    }
+    // for (var pair of sendForm.entries()) {
+    //   console.log(pair[0] + ", " + pair[1]);
+    // }
 
     instance
       .patch(requests.updateUser, sendForm, {
