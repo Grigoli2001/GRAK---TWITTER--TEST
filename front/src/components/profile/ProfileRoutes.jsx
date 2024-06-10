@@ -267,8 +267,8 @@ const EditProfileModal = ({ backTo }) => {
   };
 
   const renderDobOptions = () => {
-    return (
-      <div className="flex gap-x-2">
+    return day ? (
+      <div className="flex gap-x-2 ">
         <OptionSelector
           title={"Day"}
           options={dayOptions}
@@ -299,6 +299,8 @@ const EditProfileModal = ({ backTo }) => {
           }}
         />
       </div>
+    ) : (
+      <div className="flex gap-x-2 "></div>
     );
   };
 
