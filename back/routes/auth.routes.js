@@ -8,6 +8,7 @@ router.post("/check", rateLimit(60, 20), authServices.checkExistingUser);
 router.post("/signup", rateLimit(60, 10), authServices.signup);
 router.get("/logout", authServices.logout);
 router.post("/sendotp",rateLimit(60, 10), authServices.sendOTP);
+router.post("/verifyotp", rateLimit(60, 10), authServices.verifyOTP);
 router.post("/change-password", rateLimit(60, 10), authServices.changePassword);
 router.post("/user-preferences", authServices.userPreferences);
 module.exports = router;

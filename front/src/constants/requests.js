@@ -4,6 +4,7 @@ export const requests = {
   check: "/auth/check",
   logout: "/auth/logout",
   sendOTP: "/auth/sendotp",
+  verifyOTP: "/auth/verifyotp",
 
   getUsers: "/users",
   getUser: "/users/user",
@@ -11,7 +12,7 @@ export const requests = {
   change_password: "/auth/change-password",
   changeUsername: "/profile/changeUsername",
   userPreferences: "/auth/user-preferences",
-  // uploadImage: "/firebase/upload-image",
+  uploadImage: "/firebase/upload-image",
 
   exploreUsers: "/users/explore-users",
   getActiveChats: "/messages/active-chats",

@@ -17,16 +17,15 @@ const ForgotPassword = () => {
   const [togglePassword, setTogglePassword] = useState(false);
   const [isNameFocused, setIsNameFocused] = useState(false);
   const [verificationInput, setverificationInput] = useState("");
-  const [VerificationCode, setVerificationCode] = useState("");
+  // const [VerificationCode, setVerificationCode] = useState("");
   const [newPassword, setNewPassword] = useState("");
 
   const navigate = useNavigate();
 
 
-  const handleNext = (page) => {
+  const handleNext = async (page) => {
     switch (page) {
       case 1:
-        console.log("heree" + email);
         if (email) {
           instance
             .post(requests.check, { userInfo: email })
@@ -45,11 +44,18 @@ const ForgotPassword = () => {
         }
         break;
       case 2:
-        if (verificationInput === VerificationCode) {
-          setCurrentPage(3);
-        } else {
-          createToast("Invalid verification code", "warn", "invalid-verification-code", {limit: 1});
-        }
+        try{
+        const resp = await instance.post(requests.verifyOTP, { otp: verificationInput, email })
+        resp?.status === 200 ? setCurrentPage(currentPage + 1) : createToast("Verification code is not correct", "warn");
+      }catch(error){
+        console.log(error); 
+          createToast("Error verifying code", "warn");
+      }
+          // if (verificationInput === VerificationCode) {
+        //   setCurrentPage(3);
+        // } else {
+        //   createToast("Invalid verification code", "warn", "invalid-verification-code", {limit: 1});
+        // }
         break;
       case 3:
         if (newPassword.length < 8) {
@@ -86,7 +92,7 @@ const ForgotPassword = () => {
       const response = await instance.post(requests.sendOTP, {
         email: email,
       });
-      setVerificationCode(response.data.otp);
+      // setVerificationCode(response.data.otp);
       console.log(response.data.otp);
       setLoading(false);
     } catch (error) {
@@ -189,7 +195,7 @@ const ForgotPassword = () => {
                       We sent you a code
                     </h2>
                     <p className="text-gray-600 text-sm mt-2">
-                      Enter it below to verify <br /> {email}
+                      Enter it below to verify (Expires in 10 mins) <br /> {email}
                     </p>
                     <div className="relative h-14 mt-10">
                       <input
@@ -212,7 +218,7 @@ const ForgotPassword = () => {
                         className={`absolute left-3 top-4 m-0 p-0 dark:bg-black ${
                           isNameFocused ? "text-blue-600" : "text-gray-600"
                         } transition-all ${
-                          isNameFocused || VerificationCode
+                          isNameFocused
                             ? "translate-y-[-12px] text-xs"
                             : "text-sm"
                         }`}
@@ -233,7 +239,7 @@ const ForgotPassword = () => {
                       <button
                         onClick={handleNext.bind(this, 2)}
                         className={`bg-black dark:bg-white dark:hover:bg-gray-200 hover:bg-gray-800 text-white dark:text-black text-base font-semibold py-2 px-4 rounded-full w-full h-12 disabled:opacity-50 transition-all`}
-                        disabled={VerificationCode.length < 6}
+                        disabled={verificationInput.length !== 6}
                       >
                         Next
                       </button>

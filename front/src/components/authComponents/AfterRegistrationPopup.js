@@ -25,11 +25,12 @@ const AfterRegistrationPopup = ({ onClose }) => {
     ? JSON.parse(localStorage.getItem("user")).token
     : null;
   const { user } = useUserContext();
-  console.log(user);
+  // console.log(user);
   // const [userName, setUserName] = useState('runak');
   const [userName, setUserName] = useState(user.username);
   const [profilePic, setProfilePic] = useState(null);
-  const [display, setDisplay] = useState("/static/default_profile_pic.png");
+  const defaultDisplay = "/static/default_profile_pic.png";
+  const [display, setDisplay] = useState(defaultDisplay);
   const justRegistered = localStorage.getItem("justRegistered");
   const Navigate = useNavigate();
   useEffect(() => {
@@ -39,49 +40,14 @@ const AfterRegistrationPopup = ({ onClose }) => {
   }, [justRegistered, Navigate]);
   console.log(display);
 
-  const handleUpdateProfilePic = async (image) => {
+  const handleUpdateProfileDisplay = (image) => {
     if (!image) return;
-
-    // const storageRef = ref(storage, `profile_pics/${user.id}/profile_image`);
-    // uploadBytesResumable(storageRef, image)
-    //   .then((snapshot) => {
-    //     console.log("Uploaded a blob or file!", snapshot);
-    //     getDownloadURL(snapshot.ref)
-    //       .then((downloadURL) => {
-    //         console.log("File available at", downloadURL);
-    //         setDisplay(downloadURL);
-    //         setProfilePic(downloadURL);
-    //       })
-    //       .catch((error) => {
-    //         console.error("Error getting download URL:", error);
-    //       });
-    //   })
-    //   .catch((error) => {
-    //     console.error("Error uploading file:", error);
-    //   });
-    // does not work for now
-    const formData = new FormData();
-    formData.append("file", image);
-    console.log(formData);
-    console.log(`image ${image}`);
-
-    instance
-      .post(requests.uploadImage, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      })
-      .then((res) => {
-        console.log(res.data);
-        setDisplay(res.data.url);
-        setProfilePic(res.data.url);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    console.log(image);
+    setDisplay(URL.createObjectURL(image));
+    setProfilePic(image);
   };
 
-  const handleNext = (page) => {
+  const handleNext = async (page) => {
     switch (page) {
       case 1:
         setCurrentPage(2);
@@ -133,35 +99,79 @@ const AfterRegistrationPopup = ({ onClose }) => {
         break;
 
       case 7:
+        try {
         setLoading(true);
-        const data = {
-          userId: user.id,
-          selectedTopics: selectedTopics,
-          selectedCategories: selectedCategories,
-          selectedLanguages: selectedLanguages,
-          userName: userName,
-          profile_pic: profilePic,
-        };
-        instance
-          .post(requests.userPreferences, data)
-          .then((res) => {
-            if (res.status === 200) {
-              setLoading(false);
-              localStorage.removeItem("justRegistered");
-              Navigate("/home");
-            }
-            setLoading(false);
-          })
-          .catch((err) => {
-            console.log(err);
-            setLoading(false);
-          });
+
+              const sendForm = new FormData();
+              sendForm.append("image", profilePic);
+                // console.log(sendForm);
+                for (var pair of sendForm.entries()) {
+                  console.log(pair[0] + ", " + pair[1]);
+                }
+                console.log(`image ${profilePic}`);
+                const resp = await instance
+                  .post(requests.uploadImage, sendForm, {
+                    headers: {
+                      "Content-Type": "multipart/form-data",
+                    },
+                  })
+                  console.log("RESP IMAGE", resp.data.imageUrl.media);
+           
+          console.log("PROFILE PIC AFTER SET", profilePic);
+          const data = {
+            userId: user.id,
+            selectedTopics: selectedTopics,
+            selectedCategories: selectedCategories,
+            selectedLanguages: selectedLanguages,
+            userName: userName,
+            profile_pic: resp.data.imageUrl.media,
+          };
+
+
+          const res = await instance.post(requests.userPreferences, data)
+          if (res.status === 200) {
+            localStorage.removeItem("justRegistered");
+            Navigate("/home");
+          }
+
+      
+      } catch (error) {
+        console.log(error);
+      }
+      finally {
         setLoading(false);
+      }
+
+    
+      
         break;
       default:
         break;
     }
   };
+
+    //         .then((res) => {
+        //           console.log(res.data);
+        //         })
+        //         .catch((err) => {
+        //           console.log(err);
+        //         })
+        //       )
+        //   .catch((err) => {
+        //     console.log(err);
+        //     setLoading(false);
+          // });
+        // setLoading(false);
+
+         // .then((res) => {
+          //   if (res.status === 200) {
+          //     setLoading(false);
+          //     localStorage.removeItem("justRegistered");
+          //     Navigate("/home");
+          //   }
+          //   setLoading(false);
+          // })
+          // .then(() => {
   const renderTopicsGrid = () => {
     return topics.map(({ category, topic }) => (
       <div key={category} className="mb-6 border-b-2 border-gray-800">
@@ -534,10 +544,7 @@ const AfterRegistrationPopup = ({ onClose }) => {
                             accept="image/*"
                             id="profilePic"
                             onChange={(e) => {
-                              setDisplay(
-                                URL.createObjectURL(e.target.files[0])
-                              );
-                              handleUpdateProfilePic(e.target.files[0]);
+                              handleUpdateProfileDisplay(e.target.files[0]);
                             }}
                           />
                           <div className="bg-gray-500/60 h-[200px] w-[200px] rounded-full absolute top-0 right-0 align-middle justify-center items-center hidden group-hover:flex">
@@ -549,12 +556,12 @@ const AfterRegistrationPopup = ({ onClose }) => {
                       </label>
                     </div>
                     <div className="flex justify-center mt-40">
-                      {profilePic ? (
+                      { display !== defaultDisplay ? (
                         <button
                           onClick={() => handleNext(7)}
                           className="font-medium bg-twitter-blue p-2 rounded-full w-full h-12"
                         >
-                          finish
+                          Finish
                         </button>
                       ) : (
                         <button

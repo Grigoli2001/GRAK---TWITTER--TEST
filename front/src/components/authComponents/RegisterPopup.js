@@ -25,7 +25,7 @@ const RegisterPopup = ({ onClose, user, setUser }) => {
   const [isPasswordFocused, setIsPasswordFocused] = useState(false);
   const [invalidEmail, setInvalidEmail] = useState(false);
   // Temporary variables
-  const [VerificationCode, setVerificationCode] = useState(123456);
+  // const [VerificationCode, setVerificationCode] = useState(123456);
   const [verificationInput, setverificationInput] = useState("");
   const [emailAlreadyExists, setEmailAlreadyExists] = useState(false);
 
@@ -106,7 +106,7 @@ const RegisterPopup = ({ onClose, user, setUser }) => {
   };
 
   // This handles next button clicks
-  const handleNextClick = (page) => {
+  const handleNextClick = async (page) => {
     switch (page) {
       case 1:
         if (emailAlreadyExists) {
@@ -130,27 +130,36 @@ const RegisterPopup = ({ onClose, user, setUser }) => {
         setCurrentPage(currentPage + 1);
         break;
       case 4:
-        console.log(VerificationCode, verificationInput);
-        if (verificationInput === VerificationCode.toString()) {
-          setCurrentPage(currentPage + 1);
-        } else {
-          createToast("Verification code is not correct", "warn");
-          // toast.warn("Verification code is not correct", {
-          // position: "bottom-center",
-          // autoClose: 2000,
-          // hideProgressBar: true,
-          // closeOnClick: true,
-          // pauseOnHover: false,
-          // draggable: false,
-          // progress: undefined,
-          // style: {
-          //   backgroundColor: "#1da1f2",
-          //   color: "white",
-          // },
-          // I tried to change toastify entreance animation but it does not work
-          // transition: "spin",
-          // });
+        try{
+
+          const resp = await instance.post(requests.verifyOTP, { otp: verificationInput, email: user.email })
+          resp?.status === 200 ? setCurrentPage(currentPage + 1) : createToast("Verification code is not correct", "warn");
+        }catch(error){
+          console.log(error); 
+            createToast("Error verifying code", "warn");
         }
+        
+
+        // console.log(VerificationCode, verificationInput);
+        // if (verificationInput === VerificationCode.toString()) {
+        //   setCurrentPage(currentPage + 1);
+        // } else {
+        //   // toast.warn("Verification code is not correct", {
+        //   // position: "bottom-center",
+        //   // autoClose: 2000,
+        //   // hideProgressBar: true,
+        //   // closeOnClick: true,
+        //   // pauseOnHover: false,
+        //   // draggable: false,
+        //   // progress: undefined,
+        //   // style: {
+        //   //   backgroundColor: "#1da1f2",
+        //   //   color: "white",
+        //   // },
+        //   // I tried to change toastify entreance animation but it does not work
+        //   // transition: "spin",
+        //   // });
+        // }
         break;
       case 5:
         finishRegistration();
@@ -186,8 +195,13 @@ const RegisterPopup = ({ onClose, user, setUser }) => {
       const response = await instance.post(requests.sendOTP, {
         email: user.email,
       });
-      setVerificationCode(response.data.otp);
-      console.log(response.data.otp);
+
+      if (response.status !== 200) {
+        createToast("Error while sending OTP", "error");
+      }
+
+      // setVerificationCode(response.data.otp);
+      // console.log(response.data.otp);
       setLoading(false);
     } catch (error) {
       console.log(error);
@@ -674,7 +688,7 @@ const RegisterPopup = ({ onClose, user, setUser }) => {
                       We sent you a code
                     </h2>
                     <p className="text-gray-600 text-sm mt-2">
-                      Enter it below to verify <br /> {user.email}
+                      Enter it below to verify (Expires in 10 mins)  <br /> {user.email}
                     </p>
                     <div className="relative h-14 mt-10">
                       <input
@@ -697,7 +711,7 @@ const RegisterPopup = ({ onClose, user, setUser }) => {
                         className={`absolute left-3 top-4 m-0 p-0 dark:bg-black ${
                           isNameFocused ? "text-blue-600" : "text-gray-600"
                         } transition-all ${
-                          isNameFocused || VerificationCode
+                          isNameFocused 
                             ? "translate-y-[-12px] text-xs"
                             : "text-sm"
                         }`}
@@ -718,7 +732,7 @@ const RegisterPopup = ({ onClose, user, setUser }) => {
                       <button
                         onClick={handleNextClick.bind(this, 4)}
                         className={`bg-black dark:bg-white dark:hover:bg-gray-200 hover:bg-gray-800 text-white dark:text-black text-base font-semibold py-2 px-4 rounded-full w-full h-12 disabled:opacity-50 transition-all`}
-                        disabled={VerificationCode.length < 6}
+                        disabled={verificationInput.length !== 6}
                       >
                         Next
                       </button>

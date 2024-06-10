@@ -6,6 +6,10 @@ const maxSizes = {
 };
 
 const validateFiles = async (files) => {
+  if (!files) {
+    return null;
+  }
+
   let filesArray = Object.values(files);
   if (!filesArray.length) {
     return null;
@@ -114,6 +118,8 @@ const firebaseUpload = async (file, userid, path) => {
       console.log(err);
       reject(new Error("Error uploading image"));
     });
+
+    // deleteImagesInPath(bucket, userid, path);
 
     blobStream.on("finish", async () => {
       try {
