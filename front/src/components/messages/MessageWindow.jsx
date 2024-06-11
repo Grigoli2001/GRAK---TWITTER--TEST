@@ -413,10 +413,12 @@ export const MessageWindow = () => {
                         }
 
                         <div className="flex flex-col items-center justify-center pt-20 pb-8 mx-auto text-sm border-b border-b-gray-200 w-full">
-                            <ExtAvatar size="lg" src={chatTo?.profile_pic} />
-                            <p className='font-bold'>{chatTo?.name}</p>
-                            <p>{showUsername(chatTo)}</p>
-                            <p>Joined {getJoinDate(chatTo.created_at)}</p>
+                            <NavLink to={`/${chatTo.username}`} className="flex flex-col items-center justify-center mx-auto w-fit">
+                                <ExtAvatar size="lg" src={chatTo?.profile_pic} />
+                                <p className='font-bold'>{chatTo?.name}</p>
+                                <p>{showUsername(chatTo)}</p>
+                                <p>Joined {getJoinDate(chatTo.created_at)}</p>
+                            </NavLink>
                         </div>
 
 

@@ -351,7 +351,7 @@ const addFollower = async (req, res) => {
         } 
        
         const session = getDriver().session();
-        const result = await session.run(
+        await session.run(
           `MATCH (u:User {id: $userid}), (f:User {id: $followerId}) MERGE (u)-[:FOLLOWS]->(f)`,
           { userid: req.user.id, followerId }
         );
@@ -384,6 +384,80 @@ const removeFollower = async (req, res) => {
         } 
 }
 
+const setPostNotification = async (req, res) => {
+  const { otherUserId, postNotification } = req.body;
+  try {
+    if (!otherUserId || !postNotification) {
+      return res.status(statusCodes.badRequest).json({ message: "Missing fields" });
+    }
+    const session = getDriver().session();
+    await session.run(
+      `MATCH (u:User {id: $1}), (f:User {id: $2}) MERGE (u)-[:NOTIFIES]->(f)`,
+      [req.user.id, otherUserId]
+    );
+    res.status(statusCodes.success).json({ message: "Notification set" });
+  } catch (error) {
+    logger.error("Error setting post notification", error);
+    res.status(statusCodes.serverError).json({ message: "Error setting post notification" });
+  }
+}
+
+const removePostNotification = async (req, res) => {
+  const { otherUserId } = req.body;
+  try {
+    if (!otherUserId) {
+      return res.status(statusCodes.badRequest).json({ message: "Missing fields" });
+    }
+    const session = getDriver().session();
+    await session.run(
+      `MATCH (u:User {id: $1})-[r:NOTIFIES]->(f:User {id: $2}) DELETE r`,
+      [req.user.id, otherUserId]
+    );
+    res.status(statusCodes.success).json({ message: "Notification removed" });
+  } catch (error) {
+    logger.error("Error removing post notification", error);
+    res.status(statusCodes.serverError).json({ message: "Error removing post notification" });
+  }
+}
+
+const blockUser = async (req, res) => {
+  const { blockedUserId } = req.body;
+  try {
+    if (!blockedUserId) {
+      return res.status(statusCodes.badRequest).json({ message: "Missing fields" });
+    }
+    const session = getDriver().session();
+    await session.run(
+      `MATCH (u:User {id: $1}), (f:User {id: $2}) MERGE (u)-[:BLOCKS]->(f)`,
+      [req.user.id, blockedUserId]
+    );
+    res.status(statusCodes.success).json({ message: "User blocked" });
+  } catch (error) {
+    logger.error("Error blocking user", error);
+    res.status(statusCodes.serverError).json({ message: "Error blocking user" });
+  }
+}
+
+const unblockUser = async (req, res) => {
+  const { blockedUserId } = req.body;
+  try {
+    if (!blockedUserId) {
+      return res.status(statusCodes.badRequest).json({ message: "Missing fields" });
+    }
+    const session = getDriver().session();
+    await session.run(
+      `MATCH (u:User {id: $1})-[r:BLOCKS]->(f:User {id: $2}) DELETE r`,
+      [req.user.id, blockedUserId]
+    );
+    res.status(statusCodes.success).json({ message: "User unblocked" });
+  } catch (error) {
+    logger.error("Error unblocking user", error);
+    res.status(statusCodes.serverError).json({ message: "Error unblocking user" });
+  }
+}
+ 
+
+
 module.exports = {
     getUsers,
     getUserSimple,
@@ -392,7 +466,11 @@ module.exports = {
     updateUser,
     addFollower,
     removeFollower,
-    getFollowData
+    getFollowData,
+    setPostNotification, 
+    removePostNotification,
+    blockUser,
+    unblockUser
 };
 
 

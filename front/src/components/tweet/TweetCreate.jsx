@@ -372,12 +372,18 @@ const TweetCreate = ({type = 'Post', reference_id = null, quote, editTweet, edit
       if(location.pathname === `/${user.username}`) queryClient.invalidateQueries({queryKey: [tweetRequests.myTweets]})
 
       invalidateQueries(data)
-
-        
-      
       // resetComponent()
       createToast(`Nice ${type}🥳`, 'success', 'success-create-post', {limit: 1})
-      socket.emit('feed:notify-create-post', { user })
+
+      console.log('create', data)
+      if (data?.notifyUsers.length > 0) {
+          data.notifyUsers.forEach(user => {
+            socket.emit('feed:personalised-notify-create-post', { user })
+            // @gega TODO: Add socket handler to notify users, feel free to change the the event name to send the socket
+        })
+      }
+
+      // check if the user is on the compose page
       if ((location.pathname) === '/compose/tweet' || location.pathname === '/compose/post'){
         if (location.state?.background){
           return navigate(-1)
