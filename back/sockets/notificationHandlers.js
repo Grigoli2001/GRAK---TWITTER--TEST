@@ -7,7 +7,6 @@ module.exports = (io, socket) => {
   socket.on("notification:new", async (data) => {
     // find author of the tweet by tweet id
     try {
-
       if (data.tweetId) {
         const tweet = await tweetModel.findOne({ _id: data.tweetId });
         const author = tweet?._doc?.userId;
@@ -23,7 +22,10 @@ module.exports = (io, socket) => {
         status: (statusCode) => ({
           json: (response) => {
             logger.info("Notification created");
-            io.to(data.userId).emit("notification:created", response.notification);
+            io.to(data.userId).emit(
+              "notification:created",
+              response.notification
+            );
             // console.log("author  ", author, "  emitted");
           },
         }),

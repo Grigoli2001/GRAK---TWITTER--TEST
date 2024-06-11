@@ -16,7 +16,7 @@ const makeUsername = (name) => {
 };
 
 function generateNumberUUID() {
-  const uuid = uuidv4().replace(/-/g, ''); // generate UUID and remove hyphens
+  const uuid = uuidv4().replace(/-/g, ""); // generate UUID and remove hyphens
   return uuid;
 }
 

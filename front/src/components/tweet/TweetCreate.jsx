@@ -380,6 +380,14 @@ const TweetCreate = ({type = 'Post', reference_id = null, quote, editTweet, edit
           data.notifyUsers.forEach(user => {
             socket.emit('feed:personalised-notify-create-post', { user })
             // @gega TODO: Add socket handler to notify users, feel free to change the the event name to send the socket
+
+  
+            socket.emit('notification:new', {
+              userId: user,
+              triggeredByUserId: user.id,
+              notificationType: "newTweet",
+            });
+
         })
       }
 
