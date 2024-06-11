@@ -688,7 +688,7 @@ const RegisterPopup = ({ onClose, user, setUser }) => {
                       We sent you a code
                     </h2>
                     <p className="text-gray-600 text-sm mt-2">
-                      Enter it below to verify <br /> {user.email}
+                      Enter it below to verify (Expires in 10 mins)  <br /> {user.email}
                     </p>
                     <div className="relative h-14 mt-10">
                       <input
