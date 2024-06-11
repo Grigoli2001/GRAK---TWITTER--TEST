@@ -9,6 +9,7 @@ const tooManyRequests = 429;
 const notModified = 204;
 const fileTooLarge = 413;
 const invalidFileType = 415;
+const forbidden = 403;
 
 module.exports = {
   serverError,
@@ -22,4 +23,5 @@ module.exports = {
   fileTooLarge,
   invalidFileType,
   tooManyRequests,
+  forbidden,
 };
