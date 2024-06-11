@@ -28,7 +28,7 @@ export const FollowButton = ({followed ,setFollowerCount, followerid, userid, ..
 
         instance
         .post(followRequests.follow, {
-            followerId: followerid
+            otherUserId: followerid
         })
         .then(res => {  
             setIsFollowed(true)
@@ -54,7 +54,7 @@ export const FollowButton = ({followed ,setFollowerCount, followerid, userid, ..
         }
 
         instance
-        .post(followRequests.unfollow, {userId: userid, followerId: followerid})
+        .post(followRequests.unfollow, {otherUserId: followerid})
         .then(res =>{ 
             setIsFollowed(false); 
             if (setFollowerCount) setFollowerCount((prev) => prev <= 0 ? 0 : prev - 1)

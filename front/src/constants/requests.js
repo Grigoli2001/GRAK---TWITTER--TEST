@@ -14,6 +14,11 @@ export const requests = {
   userPreferences: "/auth/user-preferences",
   uploadImage: "/firebase/upload-image",
 
+  blockUser: "/users/block",
+  unblockUser: "/users/unblock",
+  setPostNotifications: "/users/set-post-notifications",
+  removePostNotifications: "/users/remove-post-notifications",
+
   exploreUsers: "/users/explore-users",
   getActiveChats: "/messages/active-chats",
 };

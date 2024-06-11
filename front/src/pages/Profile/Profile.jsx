@@ -22,6 +22,8 @@ import { ValidUserContext } from '../../components/RequireValidUser'
 import { createToast } from '../../hooks/createToast'
 import { CgUnblock } from "react-icons/cg";
 
+import instance from '../../constants/axios'
+
 const MediaFallBack = ({user, isUser}) => { 
   return (
 
@@ -182,20 +184,89 @@ const Profile = () => {
     </div>
   )
 
-  const handleBlock = () => {
-    createToast('This feature is not yet available', 'info')
+  const handleBlock = async () => {
+    try {
+      const res = await instance.post(requests.blockUser, { otherUserId: userProfile.id })
+
+      console.log(res)
+      if (res.status === 200) {
+        
+        createToast(`You have blocked @${userProfile.username}`, 'info')
+        // navigate('/home')
+      }else{
+        throw new Error('Could not block user')
+      }
+
+    }catch (err) {
+      if (err.response && err.response.status === 403) {
+        createToast(`@${username} has already been blocked`, 'info');
+      } else {
+        createToast("We couldn't process this request at the moment", 'error');
+      }
+    }
   }
 
-  const handleUnblock = () => {
-    createToast('This feature is not yet available', 'info')
+  const handleUnblock = async() => {
+    try {
+      const res = await instance.post(requests.unblockUser, { otherUserId: userProfile.id })
+
+      console.log(res)
+      if (res.status === 200) {
+        
+        createToast(`You have unblocked @${userProfile.username}`, 'info')
+      }else{
+        throw new Error('Could not unblock user')
+      }
+
+    }catch (err) {
+      if (err.response && err.response.status === 403) {
+        createToast(`@${username} has already been blocked`, 'info');
+      } else {
+        createToast("We couldn't process this request at the moment", 'error');
+      }
+    }
   }
 
-  const handleTurnOnPostNotifications = () => {
-    createToast('This feature is not yet available', 'info')
+  const handleTurnOnPostNotifications = async() => {
+
+    try {
+      const res = await instance.post(requests.setPostNotifications, { otherUserId: userProfile.id })
+
+      console.log(res)
+      if (res.status === 200) {
+        
+        createToast(`You have turned on post notifications for @${userProfile.username}`, 'info')
+      }else{
+        throw new Error('Could not unblock user')
+      }
+    }catch (err) {
+      if (err.response && err.response.status === 403) {
+        createToast(`@${username} has already been blocked`, 'info');
+      } else {
+        createToast("We couldn't process this request at the moment", 'error');
+      }
+    }
   }
 
-  const handleTurnOffPostNotifications = () => {
-    createToast('This feature is not yet available', 'info')
+  const handleTurnOffPostNotifications = async() => {
+
+    try {
+      const res = await instance.post(requests.removePostNotifications, { otherUserId: userProfile.id })
+
+        console.log(res)
+        if (res.status === 200) {
+          
+          createToast(`You have turned off post notifications for @${userProfile.username}`, 'info')
+        }else{
+          throw new Error('Could not unblock user')
+        }
+      }catch (err) {
+        if (err.response && err.response.status === 403) {
+          createToast(`@${username} has already been blocked`, 'info');
+        } else {
+          createToast("We couldn't process this request at the moment", 'error');
+        }
+      }
   }
 
   
@@ -291,7 +362,7 @@ const Profile = () => {
                     <CgUnblock />
                   </Button>
 
-                  <Button onClick={handleBack} variant="icon" size="icon-sm" className="text-red-500 hover:bg-gray-300/50 border" tooltip={`Block @${username}`}>
+                  <Button onClick={handleBlock} variant="icon" size="icon-sm" className="text-red-500 hover:bg-gray-300/50 border" tooltip={`Block @${username}`}>
                     <MdBlock />
                   </Button>
 
