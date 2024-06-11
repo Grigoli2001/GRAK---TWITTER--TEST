@@ -12,14 +12,15 @@ import ReactLoading from 'react-loading'
 import { requests } from '../../constants/requests'
 
 // icons
-import { FaRegCalendarAlt } from "react-icons/fa";
+import { FaRegBell, FaBellSlash, FaRegCalendarAlt } from "react-icons/fa";
+import { MdBlock } from "react-icons/md";
 import { FaArrowLeftLong, FaLink, FaRegEnvelope} from "react-icons/fa6";
 import { IoLocationOutline } from "react-icons/io5";
 import { UserDisplayer } from '../../components/User'
 import {  tweetRequests } from '../../constants/requests'
 import { ValidUserContext } from '../../components/RequireValidUser'
 import { createToast } from '../../hooks/createToast'
-
+import { CgUnblock } from "react-icons/cg";
 
 const MediaFallBack = ({user, isUser}) => { 
   return (
@@ -181,7 +182,25 @@ const Profile = () => {
     </div>
   )
 
-  // if (hasLoaded) 
+  const handleBlock = () => {
+    createToast('This feature is not yet available', 'info')
+  }
+
+  const handleUnblock = () => {
+    createToast('This feature is not yet available', 'info')
+  }
+
+  const handleTurnOnPostNotifications = () => {
+    createToast('This feature is not yet available', 'info')
+  }
+
+  const handleTurnOffPostNotifications = () => {
+    createToast('This feature is not yet available', 'info')
+  }
+
+  
+
+ 
   return (
 
     <>
@@ -258,7 +277,6 @@ const Profile = () => {
           <div className="grid">
 
             <div className="ml-auto mr-4 self-end">
-
             {
               isUser ?
                 <NavLink to={`/settings/profile`} state={{ background : location }}>
@@ -268,12 +286,31 @@ const Profile = () => {
                 </NavLink>
               :    
               <span className='space-x-2'>
-              <NavLink to={`/messages/${username}`}>
-                  <Button variant="icon" size="icon-sm" className="text-black hover:bg-gray-300/50 border">
-                    <FaRegEnvelope />
+
+                  <Button onClick={handleUnblock} variant="icon" size="icon-sm" className="text-black hover:bg-gray-300/50 border" tooltip={`Unblock @${username}`} >
+                    <CgUnblock />
                   </Button>
-                </NavLink>
-              <FollowButton followed={userProfile.is_followed} userid={user.id} followerid={userProfile.id} setFollowerCount={setFollowerCount} size='md' />
+
+                  <Button onClick={handleBack} variant="icon" size="icon-sm" className="text-red-500 hover:bg-gray-300/50 border" tooltip={`Block @${username}`}>
+                    <MdBlock />
+                  </Button>
+
+                  
+
+                  <Button onClick={handleTurnOnPostNotifications} variant="icon" size="icon-sm" className="text-black hover:bg-gray-300/50 border" tooltip="Turn on post notifications">
+                    <FaRegBell />
+                  </Button>
+
+                  <Button onClick={handleTurnOffPostNotifications} variant="icon" size="icon-sm" className="text-black hover:bg-gray-300/50 border" tooltip="Turn on post notifications">
+                    <FaBellSlash />
+                  </Button>
+
+                  <NavLink to={`/messages/${username}`}>
+                      <Button variant="icon" size="icon-sm" className="text-black hover:bg-gray-300/50 border" tooltip={`Message @${username}`}>
+                        <FaRegEnvelope />
+                      </Button>
+                    </NavLink>
+                  <FollowButton followed={userProfile.is_followed} userid={user.id} followerid={userProfile.id} setFollowerCount={setFollowerCount} size='md' />
               </span>
             }
             </div>

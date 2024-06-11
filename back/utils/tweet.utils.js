@@ -262,17 +262,11 @@ const tweetQuery = async ({
         tweet.reference.user = await getUserFullDetails(tweet.reference.userId, currentUID, "id");
       }
       if (tweet.reference && tweet.reference.poll) {
-        console.log("TWEET REFERENCE POLL: ", tweet.reference.poll);
         refpoll = await pollModel.findOne({ _id: tweet.reference.poll });
-        console.log("REFPOLL: ", refpoll, 'currentREFPOLL');
-        console.log("SEttiNG REFERENCE POLL: ", tweet.reference.poll, "TO: ", refpoll);
-        
             tweet.reference.poll = refpoll;
         }
     })
   );
-
-  console.log("ALL TWEETS: ",JSON.stringify(matchOptions), tweets);
   return tweets;
 };
 

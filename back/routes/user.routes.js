@@ -17,6 +17,11 @@ router.patch('/update', upload.fields([
 ]), userServices.updateUser);
 router.post("/follow", userServices.addFollower);
 router.post("/unfollow", userServices.removeFollower);
+router.post("/block", userServices.blockUser);
+router.post("/unblock", userServices.unblockUser);
+router.post("/set-post-notifications", userServices.setPostNotification);
+router.post("/remove-post-notifications", userServices.removePostNotification);
+
 
 router.get('', userServices.getUsers);
 

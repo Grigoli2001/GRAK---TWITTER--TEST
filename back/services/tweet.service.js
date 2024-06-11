@@ -9,6 +9,7 @@ const { tweetQuery, checkTweetText } = require('../utils/tweet.utils');
 const { getUserFullDetails, allFollowers } = require('../utils/user.utils');
 const { validateFiles, firebaseUpload } = require('../utils/firebase.utils');
 const { json } = require("express");
+const { getDriver } = require("../database/neo4j_setup");
 
 const getAllTweets = async (req, res) => {
   try {
@@ -284,7 +285,19 @@ const createTweet = async (req, res) => {
 
         const user = await getUserFullDetails(req.user.id, req.user.id, 'id');
         
+        // check all users who have post notifications on for this user
+        const neo4jSession = getDriver().session();
+        const allNotifyUsers = await neo4jSession.run(
+            `MATCH (u:User {id: $userId})-[:NOTIFIES]->(f:User) RETURN f.id as id`,
+            { userId: req.user.id }
+        );
+
+    
+
+        const notifyUsers = allNotifyUsers.records.map(record => record.get('id'));
+
         let tweetData = tweet.toObject();
+
         // Adding since front end is different query
         tweetData.user = user
         tweetData.totalLikes = 0,
@@ -305,7 +318,8 @@ const createTweet = async (req, res) => {
             tweet: tweetData,
             data: {
                 is_retweeted: tweetType === 'retweet',
-            }
+            },
+            notifyUsers // use sockets to notify users
         });
 
     } catch (err) {
