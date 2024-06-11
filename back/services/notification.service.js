@@ -11,11 +11,13 @@ const createNotification = async (req, res) => {
   const { userId, tweetId, triggeredByUserId, notificationType, fromTwitter } =
     req.body;
   if (!userId || !triggeredByUserId || !notificationType) {
+    console.error("missing required fields");
     return res
       .status(statusCode.badRequest)
       .json({ message: "Missing required fields" });
   }
   if (userId === triggeredByUserId) {
+    console.error("userId and triggeredByUserId cannot be the same");
     return res;
   }
   try {

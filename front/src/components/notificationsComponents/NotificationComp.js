@@ -162,7 +162,9 @@ export const NotificationComp = ({ NotificationType }) => {
                   ? "Quoted Your Tweet"
                   : notification.notificationType === "message"
                   ? "Messaged You"
-                  : ""}
+                  : notification.notificationType === "newTweet"
+                  ? "Created a new tweet"
+                  : " "}
                 {" - "}
                 <span
                   className="hover:underline ml-2 cursor-pointer"

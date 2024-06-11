@@ -5,6 +5,7 @@ const tweetModel = require("../models/tweetModel");
 
 module.exports = (io, socket) => {
   socket.on("notification:new", async (data) => {
+    console.log("notification:new", data);
     // find author of the tweet by tweet id
     try {
       if (data.tweetId) {
