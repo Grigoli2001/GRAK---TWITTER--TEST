@@ -410,7 +410,7 @@ const setPostNotification = async (req, res) => {
     }
     const session = getDriver().session();
     await session.run(
-      `MATCH (u:User {id: $currentUser}), (f:User {id: $otherUser}) MERGE (u)-[:NOTIFIES]->(f)`,
+      `MATCH (u:User {id: $currentUser}), (f:User {id: $otherUser}) MERGE (f)-[:NOTIFIES]->(u)`,
       { currentUser: req.user.id, otherUser: otherUserId }
     );
     res.status(statusCodes.success).json({ message: "Notification set" });
@@ -433,7 +433,7 @@ const removePostNotification = async (req, res) => {
     }
     const session = getDriver().session();
     await session.run(
-      `MATCH (u:User {id: $currentUser})-[r:NOTIFIES]->(f:User {id: $otherUser}) DELETE r`,
+      `MATCH (u:User {id: $currentUser})<-[r:NOTIFIES]-(f:User {id: $otherUser}) DELETE r`,
       { currentUser: req.user.id, otherUser: otherUserId }
     );
     res.status(statusCodes.success).json({ message: "Notification removed" });

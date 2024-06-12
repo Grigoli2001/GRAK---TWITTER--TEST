@@ -17,7 +17,6 @@ const getUserById = async (userId) => {
       `,
       { userId: userId }
     );
-    console.log(result);
     const user = result.records.map((record) => record.toObject().user)[0];
     return user || null;
   } catch (err) {
