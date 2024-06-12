@@ -224,8 +224,7 @@ const sendOTP = async (req, res) => {
     await redisClient.expire(`otp:${email}`, 60 * 10); // expire otp  10 minutes
     if (resp !== 0) {
       console.log("OTP set in redis");
-    }
-    else{
+    } else {
       throw new Error("Error while setting OTP in redis");
     }
     return res
@@ -241,15 +240,17 @@ const sendOTP = async (req, res) => {
 const verifyOTP = async (req, res) => {
   const { email, otp } = req.body;
 
-  console.log(req.body)
-  
+  console.log(req.body);
+
   try {
     if (!email || !otp) {
-      return res.status(statusCodes.badRequest).json({ message: "Missing fields" });
+      return res
+        .status(statusCodes.badRequest)
+        .json({ message: "Missing fields" });
     }
     const otpInRedis = await redisClient.get(`otp:${email}`);
 
-    console.log("INPUT OTP", otp, "OTP IN REDIS", otpInRedis)
+    console.log("INPUT OTP", otp, "OTP IN REDIS", otpInRedis);
 
     if (otpInRedis === otp) {
       await redisClient.del(`otp:${email}`);
@@ -302,7 +303,7 @@ const userPreferences = async (req, res) => {
   try {
     session = getDriver()?.session();
 
-    console.log("USER PREFS BODY", req.body)
+    console.log("USER PREFS BODY", req.body);
 
     const params = {
       1: userId,

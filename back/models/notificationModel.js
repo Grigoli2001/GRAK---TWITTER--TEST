@@ -29,6 +29,7 @@ const NotificationSchema = new Schema(
         "mention",
         "comment",
         "message",
+        "newTweet",
       ],
     },
     seen: {

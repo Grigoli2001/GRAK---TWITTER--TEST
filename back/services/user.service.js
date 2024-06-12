@@ -2,23 +2,20 @@ const statusCodes = require("../constants/statusCode");
 const { getDriver } = require("../database/neo4j_setup");
 const logger = require("../middleware/winston");
 // const jwt = require("jsonwebtoken");
-var neo4j = require('neo4j-driver');
+var neo4j = require("neo4j-driver");
 const tweetModel = require("../models/tweetModel");
 const { getUserFullDetails } = require("../utils/user.utils");
 const { firebaseUpload, validateFiles } = require("../utils/firebase.utils");
 
-
 const getUserSimple = async (req, res) => {
-
-  try{
-
-  const { id, username } = req.query;
-  if (id) {
-    return getUserById(req, res);
-  } else if (username) {
-    const session = getDriver().session();  
-    const result = await session.run(
-      `MATCH (u:User) WHERE u.username = $username 
+  try {
+    const { id, username } = req.query;
+    if (id) {
+      return getUserById(req, res);
+    } else if (username) {
+      const session = getDriver().session();
+      const result = await session.run(
+        `MATCH (u:User) WHERE u.username = $username 
       RETURN {
         id: u.id,
         name: u.name,
@@ -33,26 +30,29 @@ const getUserSimple = async (req, res) => {
         location: u.location
       } as u
       `,
-      { username }
-    );
-    const user = result.records.map(record => record.get('u').properties)?.[0];
-    if (!user) {
-      return res.status(statusCodes.notFound).json({ message: "User not found" });
+        { username }
+      );
+      const user = result.records.map(
+        (record) => record.get("u").properties
+      )?.[0];
+      if (!user) {
+        return res
+          .status(statusCodes.notFound)
+          .json({ message: "User not found" });
+      }
+
+      return res.status(statusCodes.success).json({ user });
+    } else {
+      res.status(statusCodes.badRequest).json({ message: "Missing fields" });
     }
-
-    return res.status(statusCodes.success).json({ user });
-
-  } else {
-    res.status(statusCodes.badRequest).json({ message: "Missing fields" });
-  }
   } catch (err) {
     // logger.error(err);
-    console.log(err)
-    res.status(statusCodes.serverError).json({ message: "Error fetching user" });
-  };
-}
-
-
+    console.log(err);
+    res
+      .status(statusCodes.serverError)
+      .json({ message: "Error fetching user" });
+  }
+};
 
 const getUsers = async (req, res) => {
   const { q } = req.query;
@@ -78,12 +78,14 @@ const getUsers = async (req, res) => {
       ORDER BY u.username LIMIT 6`,
       { current_userid: req.user.id, query_user: qformat }
     );
-    const users = result.records.map(record => record.get('u'));
+    const users = result.records.map((record) => record.get("u"));
     return res.status(statusCodes.success).json({ users });
   } catch (err) {
-    console.log(err)
+    console.log(err);
     logger.error(err);
-   return  res.status(statusCodes.serverError).json({ message: "Error fetching users" });
+    return res
+      .status(statusCodes.serverError)
+      .json({ message: "Error fetching users" });
   }
 };
 
@@ -111,7 +113,7 @@ const getUserById = async (req, res) => {
      `,
       { userid: id }
     );
-    const user = result.records.map(record => record.get('u'))?.[0];
+    const user = result.records.map((record) => record.get("u"))?.[0];
     // console.log(user, 'user')
     if (!user) {
       return res
@@ -120,7 +122,7 @@ const getUserById = async (req, res) => {
     }
     return res.status(statusCodes.success).json({ user });
   } catch (err) {
-    console.log(err)
+    console.log(err);
     logger.error(err);
     res
       .status(statusCodes.serverError)
@@ -138,9 +140,11 @@ const getUserByUsername = async (req, res) => {
       });
     }
 
-      const user = await getUserFullDetails(username, req.user.id, 'username');
+    const user = await getUserFullDetails(username, req.user.id, "username");
     if (!user) {
-      return res.status(statusCodes.notFound).json({ message: "User not found" });
+      return res
+        .status(statusCodes.notFound)
+        .json({ message: "User not found" });
     }
     
         let postcount = await tweetModel.countDocuments({ userId: user.id,  $or: [
@@ -182,9 +186,13 @@ const getExploreUsers = async (req, res) => {
       count(distinct f) as following_count, 
       count( distinct f2) as followers_count
       ORDER BY rand() SKIP $skip LIMIT $limit`,
-      { userid: req.user.id, limit: neo4j.int(intLimit), skip: neo4j.int(intSkip)}
-    ); 
-    const users = result.records.map(record => record.toObject());
+      {
+        userid: req.user.id,
+        limit: neo4j.int(intLimit),
+        skip: neo4j.int(intSkip),
+      }
+    );
+    const users = result.records.map((record) => record.toObject());
 
     return res.status(statusCodes.success).json({ users });
   } catch (err) {
@@ -197,16 +205,13 @@ const getExploreUsers = async (req, res) => {
 };
 
 const updateUser = async (req, res) => {
-
-  const { name, username, bio, location, website, profile_pic, cover, dob } = req.body;
+  const { name, username, bio, location, website, profile_pic, cover, dob } =
+    req.body;
   if (!dob || !username) {
-    return res
-      .status(statusCodes.badRequest)
-      .json({
-        message: "Missing fields must provide at lease dob and username",
-      });
+    return res.status(statusCodes.badRequest).json({
+      message: "Missing fields must provide at lease dob and username",
+    });
   }
-
 
   if (username.length < 3 || username.length > 50 || username.includes(" "))
     return res
@@ -225,19 +230,25 @@ const updateUser = async (req, res) => {
       .status(statusCodes.badRequest)
       .json({ message: "Invalid website" });
 
-      let formatDob = JSON.parse(dob);
-      console.log(formatDob, 'formatDob')
+  let formatDob = JSON.parse(dob);
+  console.log(formatDob, "formatDob");
   if (!formatDob || !formatDob.year || !formatDob.month || !formatDob.day)
     return res.status(statusCodes.badRequest).json({ message: "Invalid dob" });
-  
 
-    await validateFiles(req.files);
-    let {media: firebaseProfilePic}  = await firebaseUpload(req.files.profile_pic?.[0], req.user.id, 'profile_pic');
-    let { media: firebaseCover} = await firebaseUpload(req.files.cover?.[0], req.user.id, 'cover');
-    if (cover === "default") firebaseCover = "";
+  await validateFiles(req.files);
+  let { media: firebaseProfilePic } = await firebaseUpload(
+    req.files.profile_pic?.[0],
+    req.user.id,
+    "profile_pic"
+  );
+  let { media: firebaseCover } = await firebaseUpload(
+    req.files.cover?.[0],
+    req.user.id,
+    "cover"
+  );
+  if (cover === "default") firebaseCover = "";
 
   try {
-
     formatDob.year = neo4j.int(formatDob.year);
     formatDob.month = neo4j.int(formatDob.month);
     formatDob.day = neo4j.int(formatDob.day);
@@ -251,73 +262,74 @@ const updateUser = async (req, res) => {
       month: $formatDob.month,
       day: $formatDob.day
     }),
-    `
+    `;
     const queryParams = {
       userid: req.user.id,
       name,
       username,
-      formatDob
-    }
+      formatDob,
+    };
     if (bio) {
-      buildquery += `u.bio = $bio,`
+      buildquery += `u.bio = $bio,`;
       queryParams.bio = bio;
     }
     if (location) {
-      buildquery += `u.location = $location,`
-      queryParams.location = location
+      buildquery += `u.location = $location,`;
+      queryParams.location = location;
     }
     if (website) {
-      buildquery += `u.website = $website,`
-      queryParams.website = website
+      buildquery += `u.website = $website,`;
+      queryParams.website = website;
     }
     if (firebaseProfilePic) {
-      buildquery += `u.profile_pic = $profile_pic,`
+      buildquery += `u.profile_pic = $profile_pic,`;
       queryParams.profile_pic = firebaseProfilePic;
     }
     if (firebaseCover !== null && firebaseCover !== undefined) {
-      buildquery += `u.cover = $cover,`
+      buildquery += `u.cover = $cover,`;
       queryParams.cover = firebaseCover;
     }
     buildquery = buildquery.trim().replace(/,+$/, ""); // remove trailing comma
     buildquery += ` RETURN u`;
 
-    console.log(buildquery, 'buildquery')
-    console.log(queryParams, 'queryParams')
+    console.log(buildquery, "buildquery");
+    console.log(queryParams, "queryParams");
 
-
-    
     const session = getDriver().session();
-    const result = await session.run(
-      buildquery,
-      queryParams
-    );
+    const result = await session.run(buildquery, queryParams);
     return res.status(statusCodes.success).json({ message: "User updated" });
   } catch (err) {
-    console.log(err)
+    console.log(err);
     logger.error(err);
-    return res .status(statusCodes.serverError).json({ message: "Error updating user" });
+    return res
+      .status(statusCodes.serverError)
+      .json({ message: "Error updating user" });
   }
 };
 
-
-
 const getFollowData = async (req, res) => {
-  // returns a list of users that a user follows or that follow a user with 
+  // returns a list of users that a user follows or that follow a user with
   try {
-      const { userId, followType, verified, limit, page } = req.query;
-      if (!userId || !followType || (followType !== 'followers' && followType !== 'following')) {
-          throw new Error('Missing fields or invalid followType');
-      }
+    const { userId, followType, verified, limit, page } = req.query;
+    if (
+      !userId ||
+      !followType ||
+      (followType !== "followers" && followType !== "following")
+    ) {
+      throw new Error("Missing fields or invalid followType");
+    }
 
-      const pageSize = parseInt(page) ??  0;
-      const resolveLimit = parseInt(limit) ?? 20;
-      const toSkip = pageSize * resolveLimit;
-      const resolveVerified = verified === 'true' ? 'WHERE u.verified = true' : '';
-      const resolveFollowType = followType === 'followers' ? '<-[:FOLLOWS]-' : '-[:FOLLOWS]->';
+    const pageSize = parseInt(page) ?? 0;
+    const resolveLimit = parseInt(limit) ?? 20;
+    const toSkip = pageSize * resolveLimit;
+    const resolveVerified =
+      verified === "true" ? "WHERE u.verified = true" : "";
+    const resolveFollowType =
+      followType === "followers" ? "<-[:FOLLOWS]-" : "-[:FOLLOWS]->";
 
-      const session = getDriver().session();
-      const result = await session.run(
-        `MATCH (u:User {id: $userId})${resolveFollowType}(f:User)
+    const session = getDriver().session();
+    const result = await session.run(
+      `MATCH (u:User {id: $userId})${resolveFollowType}(f:User)
        ${resolveVerified} 
        OPTIONAL MATCH (f)-[:FOLLOWS]->(following:User) 
        WITH f, count(following) as followingCount
@@ -327,105 +339,124 @@ const getFollowData = async (req, res) => {
        RETURN f {.*, followingCount: followingCount, followersCount: followersCount, is_followed: CASE WHEN is_followed_check IS NOT NULL THEN 1 ELSE 0 END}
        SKIP $toSkip
        LIMIT $resolveLimit`,
-        { userId, toSkip: neo4j.int(toSkip), resolveLimit: neo4j.int(resolveLimit) }
-      );
+      {
+        userId,
+        toSkip: neo4j.int(toSkip),
+        resolveLimit: neo4j.int(resolveLimit),
+      }
+    );
 
-      const follow_data = result.records.map(record => record.get(0));
-      
-      return res.status(statusCodes.success).json({users: follow_data});
-      } catch (error) {
-          console.log(error)
-      return res.status(statusCodes.serverError).json({ message: 'An error occurred' });
+    const follow_data = result.records.map((record) => record.get(0));
+
+    return res.status(statusCodes.success).json({ users: follow_data });
+  } catch (error) {
+    console.log(error);
+    return res
+      .status(statusCodes.serverError)
+      .json({ message: "An error occurred" });
   }
-}
-       
+};
+
 const addFollower = async (req, res) => {
-    const { otherUserId } = req.body;
-      try {
+  const { otherUserId } = req.body;
+  try {
+    if (!otherUserId) {
+      return res
+        .status(statusCodes.badRequest)
+        .json({ message: "Missing fields" });
+    }
 
-        if ( !otherUserId) {
-          return res.status(statusCodes.badRequest).json({ message: "Missing fields" });
-        } 
-       
-        const session = getDriver().session();
-        await session.run(
-          `MATCH (u:User {id: $userid}), (f:User {id: $otherUserId}) MERGE (u)-[:FOLLOWS]->(f)`,
-          { userid: req.user.id, otherUserId }
-        );
+    const session = getDriver().session();
+    await session.run(
+      `MATCH (u:User {id: $userid}), (f:User {id: $otherUserId}) MERGE (u)-[:FOLLOWS]->(f)`,
+      { userid: req.user.id, otherUserId }
+    );
 
-        res.status(statusCodes.success).json({ message: "Follower added" });
-        } catch (error) {
-        logger.error("Error adding follower", error);
-        res.status(statusCodes.serverError).json({ message: "Error" });
-      } 
-}
-
- 
+    res.status(statusCodes.success).json({ message: "Follower added" });
+  } catch (error) {
+    logger.error("Error adding follower", error);
+    res.status(statusCodes.serverError).json({ message: "Error" });
+  }
+};
 
 const removeFollower = async (req, res) => {
-    const { otherUserId } = req.body;
-   
-        try { 
-          if (!otherUserId) {
-          return res.status(statusCodes.badRequest).json({ message: "Missing follow id" });
-          }
-        const session = getDriver().session();
-        await session.run(
-          `MATCH (u:User {id: $1})-[r:FOLLOWS]->(f:User {id: $2}) DELETE r`,
-          { 1: req.user.id, 2: otherUserId }
-        );
-        res.status(statusCodes.success).json({ message: "Follower removed" });
-        } catch (error) {
-        logger.error("Error removing follower", error);
-        res.status(statusCodes.serverError).json({ message: "Error" });
-        } 
-}
+  const { otherUserId } = req.body;
+
+  try {
+    if (!otherUserId) {
+      return res
+        .status(statusCodes.badRequest)
+        .json({ message: "Missing follow id" });
+    }
+    const session = getDriver().session();
+    await session.run(
+      `MATCH (u:User {id: $1})-[r:FOLLOWS]->(f:User {id: $2}) DELETE r`,
+      { 1: req.user.id, 2: otherUserId }
+    );
+    res.status(statusCodes.success).json({ message: "Follower removed" });
+  } catch (error) {
+    logger.error("Error removing follower", error);
+    res.status(statusCodes.serverError).json({ message: "Error" });
+  }
+};
 
 const setPostNotification = async (req, res) => {
   const { otherUserId } = req.body;
   try {
     if (!otherUserId) {
-      return res.status(statusCodes.badRequest).json({ message: "Missing fields" });
+      return res
+        .status(statusCodes.badRequest)
+        .json({ message: "Missing fields" });
     }
     const session = getDriver().session();
     await session.run(
       `MATCH (u:User {id: $currentUser}), (f:User {id: $otherUser}) MERGE (u)-[:NOTIFIES]->(f)`,
-      {currentUser: req.user.id, otherUser: otherUserId}
+      { currentUser: req.user.id, otherUser: otherUserId }
     );
     res.status(statusCodes.success).json({ message: "Notification set" });
   } catch (error) {
     logger.error("Error setting post notification", error);
-    res.status(statusCodes.serverError).json({ message: "Error setting post notification" });
+    res
+      .status(statusCodes.serverError)
+      .json({ message: "Error setting post notification" });
   }
-}
+};
 
 const removePostNotification = async (req, res) => {
   const { otherUserId } = req.body;
-  console.log(otherUserId, 'otherUserId')
+  console.log(otherUserId, "otherUserId");
   try {
     if (!otherUserId) {
-      return res.status(statusCodes.badRequest).json({ message: "Missing fields" });
+      return res
+        .status(statusCodes.badRequest)
+        .json({ message: "Missing fields" });
     }
     const session = getDriver().session();
     await session.run(
       `MATCH (u:User {id: $currentUser})-[r:NOTIFIES]->(f:User {id: $otherUser}) DELETE r`,
-      {currentUser: req.user.id, otherUser: otherUserId}
+      { currentUser: req.user.id, otherUser: otherUserId }
     );
     res.status(statusCodes.success).json({ message: "Notification removed" });
   } catch (error) {
     logger.error("Error removing post notification", error);
-    res.status(statusCodes.serverError).json({ message: "Error removing post notification" });
+    res
+      .status(statusCodes.serverError)
+      .json({ message: "Error removing post notification" });
   }
-}
+};
 
 const blockUser = async (req, res) => {
   const { otherUserId } = req.body;
   try {
     if (!otherUserId) {
-      return res.status(statusCodes.badRequest).json({ message: "Missing fields" });
+      return res
+        .status(statusCodes.badRequest)
+        .json({ message: "Missing fields" });
     }
     if (otherUserId === req.user.id) {
-      return res.status(statusCodes.badRequest).json({ message: "Cannot block self" });
+      return res
+        .status(statusCodes.badRequest)
+        .json({ message: "Cannot block self" });
     }
 
     const session = getDriver().session();
@@ -439,24 +470,30 @@ const blockUser = async (req, res) => {
     res.status(statusCodes.success).json({ message: "User blocked" });
   } catch (error) {
     logger.error("Error blocking user", error);
-    res.status(statusCodes.serverError).json({ message: "Error blocking user" });
+    res
+      .status(statusCodes.serverError)
+      .json({ message: "Error blocking user" });
   }
-}
+};
 
 const unblockUser = async (req, res) => {
   const { otherUserId } = req.body;
   try {
     if (!otherUserId) {
-      return res.status(statusCodes.badRequest).json({ message: "Missing fields" });
+      return res
+        .status(statusCodes.badRequest)
+        .json({ message: "Missing fields" });
     }
     if (otherUserId === req.user.id) {
-      return res.status(statusCodes.badRequest).json({ message: "Cannot block self" });
+      return res
+        .status(statusCodes.badRequest)
+        .json({ message: "Cannot block self" });
     }
-    
+
     const session = getDriver().session();
     await session.run(
       `MATCH (u:User {id: $currentUser})-[r:BLOCKS]->(f:User {id: $blockedUser}) DELETE r`,
-      {currentUser: req.user.id, blockedUser: otherUserId}
+      { currentUser: req.user.id, blockedUser: otherUserId }
     );
     res.status(statusCodes.success).json({ message: "User unblocked" });
   } catch (error) {

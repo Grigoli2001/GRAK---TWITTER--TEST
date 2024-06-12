@@ -2,6 +2,8 @@ const notificationModel = require("../models/notificationModel");
 const statusCode = require("../constants/statusCode");
 const logger = require("../middleware/winston");
 const mongoose = require("mongoose");
+const { getUserById } = require("../utils/notification.utils");
+
 const { ObjectId } = mongoose.Types;
 // sockets
 
@@ -9,11 +11,13 @@ const createNotification = async (req, res) => {
   const { userId, tweetId, triggeredByUserId, notificationType, fromTwitter } =
     req.body;
   if (!userId || !triggeredByUserId || !notificationType) {
+    console.error("missing required fields");
     return res
       .status(statusCode.badRequest)
       .json({ message: "Missing required fields" });
   }
   if (userId === triggeredByUserId) {
+    console.error("userId and triggeredByUserId cannot be the same");
     return res;
   }
   try {
@@ -47,7 +51,8 @@ const getNotifications = async (req, res) => {
       .lean();
 
     for (let i = 0; i < notifications.length; i++) {
-      const user = await getUserById(notifications[i].triggeredByUserId, "id");
+      const user = await getUserById(notifications[i].triggeredByUserId);
+
       notifications[i].triggeredByUser = user;
     }
     return res.status(statusCode.success).json({ notifications });
