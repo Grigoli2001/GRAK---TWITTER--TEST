@@ -7,19 +7,3 @@ const makeUsername = (name) => {
 
     return username;
     }
-
-const checkExistingUsername = async (username) => {
-    const client = await pool.connect();
-    try {
-        const { rows } = await client.query(
-            "SELECT * FROM users WHERE username = $1;",
-            [username]
-        );
-        return rows.length > 0;
-    } catch (error) {
-        logger.error("Error while checking existing username:", error);
-        return true;
-    } finally {
-        client.release();
-    }
-}

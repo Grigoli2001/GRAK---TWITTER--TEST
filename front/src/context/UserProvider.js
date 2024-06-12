@@ -25,7 +25,7 @@ export const UserProvider = ({ children }) => {
       socket.connect();
     }
     socket.on("connect", () => {
-      console.log("Connected to socket");
+      console.log("cts-200");
     });
     return () => {
       socket.disconnect();

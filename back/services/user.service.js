@@ -58,11 +58,14 @@ const getUsers = async (req, res) => {
   const { q } = req.query;
 
   try {
-    let qformat = q?.trim() ?? "";
+    let qformat = q?.trim().toLowerCase() ?? "";
 
     const session = getDriver().session();
     const result = await session.run(
-      `MATCH (u:User) WHERE u.id <> $current_userid AND (u.username  CONTAINS $query_user OR u.name CONTAINS $query_user) 
+      `MATCH (u:User) 
+      WHERE u.id <> $current_userid 
+      AND NOT EXISTS((u)-[:BLOCKS]->({id: $current_userid}))
+      AND  (u.username  CONTAINS $query_user OR u.name CONTAINS $query_user) 
       RETURN 
       {
         id: u.id, 
@@ -84,11 +87,6 @@ const getUsers = async (req, res) => {
   }
 };
 
-  // const user = await pool.query(`SELECT id, name, username, email, profile_pic, created_at, bio, website, location, cover, dob FROM users WHERE id = $1`, [id]);
-
-  // if (!user.rowCount) {
-  //   return res.status(statusCodes.notFound).json({ message: "User not found" });
-  // }
 const getUserById = async (req, res) => {
   try {
     const { id } = req.query;
@@ -150,7 +148,6 @@ const getUserByUsername = async (req, res) => {
           { is_deleted: { $exists: false } }
       ]});
       user.post_count = postcount;
-      console.log('userProifke', user)
       return res.status(statusCodes.success).json({ user });
 
   } catch (err) {
@@ -174,7 +171,7 @@ const getExploreUsers = async (req, res) => {
     const intSkip = intPage * intLimit;
 
     const result = await session.run(
-      `MATCH (u:User) WHERE u.id <> $userid AND NOT (u)<-[:FOLLOWS]-(:User {id: $userid})  
+      `MATCH (u:User) WHERE u.id <> $userid AND NOT (u)<-[:FOLLOWS]-(:User {id: $userid})  AND NOT EXISTS((u)<-[:BLOCKS]->({id: $userid}))
       OPTIONAL MATCH (u)-[:FOLLOWS]->(f:User)
       OPTIONAL MATCH (u)<-[:FOLLOWS]-(f2:User)
       RETURN 
@@ -433,7 +430,10 @@ const blockUser = async (req, res) => {
 
     const session = getDriver().session();
     await session.run(
-      `MATCH (u:User {id: $currentUser}), (f:User {id: $blockedUser}) MERGE (u)-[:BLOCKS]->(f)`,
+      `MATCH (u:User {id: $currentUser}), (f:User {id: $blockedUser}) MERGE (u)-[:BLOCKS]->(f)
+      with u, f
+      OPTIONAL MATCH (u)-[brel:FOLLOWS]-(f)
+      DELETE brel`,
       {currentUser: req.user.id, blockedUser: otherUserId}
     );
     res.status(statusCodes.success).json({ message: "User blocked" });
@@ -464,38 +464,6 @@ const unblockUser = async (req, res) => {
     res.status(statusCodes.serverError).json({ message: "Error unblocking user" });
   }
 }
- 
-const checkBlocked = async (req, res, next) => { 
-
-  try{
-    const { otherUserId } = req.body;
-
-    if (!otherUserId) {
-      return res.status(statusCodes.badRequest).json({ message: "Missing fields (otherUser)" });
-    }
-
-    if (otherUserId === req.user.id) {
-      return res.status(statusCodes.badRequest).json({ message: "Cannot perform action on self" });
-    }
-    
-    if (req.path !== "/unblock"){
-    const session = getDriver().session();
-    const result = await session.run(
-      `MATCH (u:User {id: $currentUser})-[r:BLOCKS]->(f:User {id: $blockedUser}) RETURN f`,
-      {currentUser: req.user.id, blockedUser: otherUserId}
-    );
-
-    if (result.records.length) {
-      return res.status(statusCodes.forbidden).json({ message: "Blocked" });
-    }
-  }
-    next();
-  } catch (error) {
-    console.log(error)
-    logger.error("Error checking blocked", error);
-    res.status(statusCodes.serverError).json({ message: "Error checking blocked" });
-  } 
-}
 
 module.exports = {
     getUsers,
@@ -510,130 +478,4 @@ module.exports = {
     removePostNotification,
     blockUser,
     unblockUser, 
-    checkBlocked
 };
-
-
-   // const user = await pool.query(`SELECT id, name, username, email, dob, profile_pic, created_at, cover FROM users WHERE username = $1`, [username]);
-    // if (!user.rowCount) {
-    //   return res.status(statusCodes.notFound).json({ message: "User not found" });
-    // }
-    // ------------------
-
-    // const userData = await pool.query(`SELECT id, name, username, email, profile_pic, created_at, bio, website, location, cover, dob FROM users WHERE username = $1`, [username]);
-
-
-    // const userData = await pool.query(`
-    // SELECT u.id, name, username, email, profile_pic, u.created_at, cover, website, location, bio, dob,
-    // COUNT(DISTINCT f1.following) AS following_count,
-    // COUNT(DISTINCT f2.user_id) AS followers_count,
-    // CASE
-    //   WHEN u.id IN (SELECT following from follows where user_id= $1)
-    //   THEN 1
-    //   ELSE 0
-    //   END
-    //   AS is_followed
-    // FROM
-    //     users u
-    // LEFT JOIN
-    //     follows f1 ON u.id = f1.user_id
-    // LEFT JOIN
-    //     follows f2 ON u.id = f2.following
-    // WHERE u.username = $2
-    // GROUP BY
-    //     u.id
-    // `, [req.user.id, username]);
-
-    // if (!userData?.rowCount) {
-    //     return res.status(statusCodes.notFound).json({ message: "User not found" });
-    // }
-
-    //     const session = getDriver().session();
-    //     const result = await session.run(
-    //       `MATCH (u:User) WHERE u.username = $1 
-    //       RETURN  u
-    //       `,
-    //       { 1: username }
-    //     );
-    //     const userData = result.records.map(record => record.get('u').properties)?.[0];
-    //     const { password, ...user } = userData;
-    //     console.log(userData, 'userData')
-
-    //     if (!userData.length) {
-    //       return res.status(statusCodes.notFound).json({ message: "User not found" });
-    //     }
-    // // console.log(user, 'user')
-    //     return res.status(statusCodes.success).json({ user });
-
-    // console.log(userData.rows[0], 'userData')
-
-      //   let user = userData.rows[0];
-// ----------------------------------------
-
-
-    // const users = await pool.query(`
-    // SELECT id, name, username, email, profile_pic, created_at
-    // FROM users
-    // WHERE (username LIKE $1 OR name LIKE $2)
-    // AND id != $3
-    // LIMIT 6 `, [qformat, qformat, req.user.id]);
-
-    // if (!users?.rowCount) {
-    //   return res.status(statusCodes.notFound).json({ message: "No users found" });
-    // }
-    // ------------------------------------
-
- // await pool.query(
-        //     `DELETE FROM follows WHERE user_id = $1 AND following = $2`,
-        //     [req.user.id, otherUserId]
-        // );
-        //---------------------
-// 
-  // if (!id || !name || !username || !bio || !location || !website || !profile_pic || !dob) {
-  //   return res.status(statusCodes.badRequest).json({ message: "Missing fields" });
-  // }
-
-  // -------------------
-    // console.log(users, 'users')
-    // const exploreUsers = await pool.query(
-    //   `SELECT
-    //     u.id, username, bio, profile_pic,name,
-    //     COUNT(DISTINCT f1.following) AS following_count,
-    //     COUNT(DISTINCT f2.user_id) AS followers_count,
-    //     0 as is_followed
-    //   FROM
-    //       users u
-    //   LEFT JOIN
-    //       follows f1 ON u.id = f1.user_id
-    //   LEFT JOIN
-    //       follows f2 ON u.id = f2.following
-    //   WHERE u.id != $1
-    //   AND u.id NOT IN (SELECT following from follows where user_id= $1)
-    //   GROUP BY
-    //       u.id
-    //   ORDER BY RANDOM()
-    //   LIMIT $2`,
-    //   [req.user.id, limit ?? 3]
-
-    // -----
-
-      // const query = `
-      // SELECT f1.user_id, users.id, username, name, profile_pic,
-      // COUNT(DISTINCT f2.user_id) AS followers_count,
-      // COUNT(DISTINCT f1.following) AS following_count,
-      // CASE WHEN users.id IN (SELECT following from follows where user_id= $1) THEN 1 ELSE 0 END as is_followed
-      // FROM follows f1
-      // JOIN users 
-      // ON f1.${followType === 'following' ? 'following' : 'user_id'} = users.id
-      // FULL OUTER JOIN follows f2 ON f1.${followType === 'following' ? 'following' : 'user_id'} = f2.${followType === 'following' ? 'user_id' : 'following'}
-      // WHERE f1.${followType === 'following' ? 'user_id' : 'following'} = $1
-      // ${resolveVerified}
-      // GROUP BY f1.user_id, users.id, username, name, profile_pic
-      // ORDER BY users.username
-      // OFFSET $2 ROWS FETCH NEXT $3 ROWS ONLY
-      // `
-      // ;
-      // const follow_data = await pool.query(
-      //     query,
-      //     [userId, toSkip, resolveLimit] // default limit is 20 
-      // );

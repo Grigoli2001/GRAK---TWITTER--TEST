@@ -136,7 +136,7 @@ const Profile = () => {
 
   const { username } = useParams()
   const { user } = useUserContext()
-  const { activeUser: userProfile, isLoading } = useContext(ValidUserContext)
+  const { activeUser: userProfile, isLoading, isBlocked, setIsBlocked} = useContext(ValidUserContext)
   const [isUser, setIsUser] = useState(false) 
   
    
@@ -178,7 +178,7 @@ const Profile = () => {
     navigate(-1)
   }
   
-  if (isLoading) return (
+  if (isLoading || isBlocked === null) return ( // isblocked must be resolved before rendering
     <div className="w-full h-full flex items-center justify-center">
         <ReactLoading type="spin" color="#1da1f2" height={30} width={30} />
     </div>
@@ -190,7 +190,13 @@ const Profile = () => {
 
       console.log(res)
       if (res.status === 200) {
-        
+        setIsBlocked(true)
+        // if following, 
+        console.log("CHECK IS FOLLOWED ON BLOCK", userProfile.is_followed)
+        if (userProfile.is_followed) {
+          setFollowerCount((prev) => prev - 1)
+          userProfile.is_followed = false
+        }
         createToast(`You have blocked @${userProfile.username}`, 'info')
         // navigate('/home')
       }else{
@@ -212,7 +218,7 @@ const Profile = () => {
 
       console.log(res)
       if (res.status === 200) {
-        
+        setIsBlocked(false)
         createToast(`You have unblocked @${userProfile.username}`, 'info')
       }else{
         throw new Error('Could not unblock user')
@@ -358,10 +364,12 @@ const Profile = () => {
               :    
               <span className='space-x-2'>
 
+                { isBlocked ?
                   <Button onClick={handleUnblock} variant="icon" size="icon-sm" className="text-black hover:bg-gray-300/50 border" tooltip={`Unblock @${username}`} >
                     <CgUnblock />
                   </Button>
-
+                  :
+                  <>
                   <Button onClick={handleBlock} variant="icon" size="icon-sm" className="text-red-500 hover:bg-gray-300/50 border" tooltip={`Block @${username}`}>
                     <MdBlock />
                   </Button>
@@ -381,7 +389,9 @@ const Profile = () => {
                         <FaRegEnvelope />
                       </Button>
                     </NavLink>
-                  <FollowButton followed={userProfile.is_followed} userid={user.id} followerid={userProfile.id} setFollowerCount={setFollowerCount} size='md' />
+                  <FollowButton followed={userProfile.is_followed} userid={user.id} followerid={userProfile.id} setFollowerCount={setFollowerCount}  userProfile={userProfile} size='md' />
+                  </>
+                }
               </span>
             }
             </div>
@@ -392,6 +402,8 @@ const Profile = () => {
               </h3>
               <p className="text-slate-500 text-sm">{ showUsername(userProfile) }</p>
 
+            {!isBlocked &&
+            <>
               <div className='flex items-center flex-wrap gap-x-4'>
 
                   { userProfile.location &&
@@ -414,14 +426,16 @@ const Profile = () => {
                     Joined { getJoinDate(userProfile.created_at) }
                   </span>
               </div>
-              {
-                userProfile.bio && <p>{ userProfile.bio }</p>
-              }
+                {
+                  userProfile.bio && <p>{ userProfile.bio }</p>
+                }
               
               <div className="flex gap-x-4">
                 <NavLink to={`/${userProfile.username}/followers`} className="hover:underline"><b>{ quantityFormat(followerCount) }</b> Follower{ followerCount !== 1 && 's'}</NavLink>
                 <NavLink to={`/${userProfile.username}/following`} className="hover:underline"><b>{ quantityFormat(userProfile.following_count) }</b> Following</NavLink>
               </div>
+              </>
+            }
             </div>
           </div>
 
@@ -435,7 +449,7 @@ const Profile = () => {
 
         </div>
         {
-          userProfile ? 
+          userProfile && !isBlocked ? 
       
           <Tabs value={location.pathname} className=''>
                 <TabsList className='flex justify-around  items-center  bg-white/50 w-full z-[50] gap-y-2 border-b border-b-solid border-slate-200 backdrop-blur-md'>
@@ -477,8 +491,14 @@ const Profile = () => {
             </Tabs>
             : 
             <div className="flex flex-col  m-32 gap-y-2 px-12">
-              <h4 className='text-3xl font-bold'>This account does not exist</h4>
+              { isBlocked ?
+              <h4 className='text-3xl font-bold'>You have blocked @{username}</h4>
+              :
+                <>
+              <h4 className='text-3xl font-bold'>Could not find this account</h4>
               <p className='text-slate-500 '>Try Searching for another.</p>
+              </>
+            }       
             </div>
             
             

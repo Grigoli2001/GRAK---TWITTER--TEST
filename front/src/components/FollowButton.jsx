@@ -11,7 +11,7 @@ import { SocketContext } from "../context/socketContext"
  * Follow button component which takes followed prop
  * Special Case of Button Component with its own internal state
  */
-export const FollowButton = ({followed ,setFollowerCount, followerid, userid, ...props}) => {
+export const FollowButton = ({followed ,setFollowerCount, followerid, userid,userProfile,  ...props}) => {
 
     const [isFollowed, setIsFollowed] = useState(followed)
     const [isHovered, setIsHovered] = useState(false)
@@ -32,6 +32,7 @@ export const FollowButton = ({followed ,setFollowerCount, followerid, userid, ..
         })
         .then(res => {  
             setIsFollowed(true)
+            if (userProfile) userProfile.is_followed = true
             socket?.emit("notification:new", {
                 userId: followerid,
                 triggeredByUserId: userid,
@@ -57,6 +58,8 @@ export const FollowButton = ({followed ,setFollowerCount, followerid, userid, ..
         .post(followRequests.unfollow, {otherUserId: followerid})
         .then(res =>{ 
             setIsFollowed(false); 
+            if (userProfile) userProfile.is_followed =false
+
             if (setFollowerCount) setFollowerCount((prev) => prev <= 0 ? 0 : prev - 1)
         })
         .catch(err => console.error(err))

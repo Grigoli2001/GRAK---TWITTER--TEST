@@ -1,4 +1,4 @@
-import { useEffect, createContext, useCallback } from "react";
+import { useEffect, createContext, useCallback, useState } from "react";
 import { useParams, Outlet, useNavigate, useLocation } from "react-router-dom";
 // import useInstance from "../hooks/useInstance";
 import ReactLoading from 'react-loading'
@@ -16,6 +16,7 @@ const RequireValidUser = ({redirect}) => {
     const navigate = useNavigate()
     const location = useLocation()
     const accessingProfile = location.pathname.split('/')[1] === username
+    const [isBlocked, setIsBlocked] = useState(null)
 
 
     const naviagteTo404 = useCallback(() => {
@@ -25,6 +26,7 @@ const RequireValidUser = ({redirect}) => {
 
     useEffect(() => {
 
+        setIsBlocked(null)
         if (!username) {
             return naviagteTo404()
         }  
@@ -35,6 +37,12 @@ const RequireValidUser = ({redirect}) => {
           keepPreviousData: true,
           queryFn: async () => {
             const response = await instance.get(`users/username/${username}`)
+            
+            if (response.data.user?.is_blocked) {
+                setIsBlocked(true)
+            }else{
+                setIsBlocked(false)
+            }
             return response.data
           },
         retry: 1,
@@ -67,7 +75,7 @@ const RequireValidUser = ({redirect}) => {
             </div>
         ) : (
              (activeUser?.user || accessingProfile) && (
-                <ValidUserContext.Provider value={{activeUser: activeUser?.user.id === user?.id ? user : activeUser?.user, isLoading}}>
+                <ValidUserContext.Provider value={{activeUser: activeUser?.user.id === user?.id ? user : activeUser?.user, isLoading, isBlocked, setIsBlocked }}>
                     <Outlet />
                 </ValidUserContext.Provider>
             )

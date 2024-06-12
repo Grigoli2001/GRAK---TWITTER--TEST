@@ -195,56 +195,66 @@ const getActiveChats = async (req, res) => {
       let checkRedis2 = await redisClient.keys(`message-room:${req.user.id}-*`)
 
       keys = [...checkRedis1, ...checkRedis2]
+
+      const roomsExcluded = req.excludedUsers.flatMap(user => [
+        `message-room:${req.user.id}-${user}`,
+        `message-room:${user}-${req.user.id}`
+      ]);
+
+      filteredKeys =  keys.filter(key => !new Set(roomsExcluded).has(key))
+      console.log("KEYS", keys, "Excluded", roomsExcluded, 'filteredKeys', filteredKeys) 
+
+
       let userIds = [];
-      if (keys.length > 0) {
-        keys = keys.map(key => key.split(':')[1])
-        userIds = keys.map(key => key.split('-')).map(key => key[0] === req.user.id ? key[1] : key[0])
+      if (filteredKeys.length > 0) {
+        filteredKeys = filteredKeys.map(key => key.split(':')[1])
+        userIds = filteredKeys.map(key => key.split('-')).map(key => key[0] === req.user.id ? key[1] : key[0])
       }
 
-      
         // get any message where the current user is the send er or receiver and the message is not deleted
         const activeChatsQuery = await messageModel.aggregate([
             {
-              '$match': {
-                '$or': [
+              $match: {
+                $or: [
                   {
                     'sender_id': req.user.id
                   }, {
                     'receiver_id': req.user.id
                   }
                 ], 
-                'is_deleted_for': {
-                  '$nin': [
+                is_deleted_for: {
+                  $nin: [
                     req.user.id
-                  ],
-                }
+                  ]
+                },
+                room_id: { $nin: roomsExcluded }
               }
             }, {
-              '$sort': {
+              $sort: {
                 'date': -1
               }
             }, {
-              '$group': {
-                '_id': 1, 
-                'combined_ids': {
-                  '$addToSet': {
-                    '$cond': {
-                      'if': {
-                        '$eq': [
+              $group: {
+                _id: 1, 
+                combined_ids: {
+                  $addToSet: {
+                    $cond: {
+                      if: {
+                        $eq: [
                           '$sender_id', req.user.id
                         ]
                       }, 
-                      'then': '$receiver_id', 
-                      'else': '$sender_id'
+                      then: '$receiver_id', 
+                      else: '$sender_id'
                     }
                   }
                 }
               }
             }, {
-              '$project': {
-                '_id': 0, 
-                'combined_ids': {
-                  '$setDifference': ['$combined_ids', userIds]
+              $project: {
+                _id: 0, 
+                combined_ids: {
+                  $setDifference: ['$combined_ids', userIds]
                 }
               }
             }
@@ -252,8 +262,10 @@ const getActiveChats = async (req, res) => {
 
 
         if (activeChatsQuery.length > 0) {
-        userIds = [...userIds, ...activeChatsQuery[0].combined_ids]
+        userIds = [...filteredKeys, ...activeChatsQuery[0].combined_ids]
         }
+
+        console.log("FINAL USERIDS", userIds)
         const session = getDriver().session();
         const result = await session.run(
           `MATCH (u:User) WHERE u.id <> $current_userid AND u.id IN $userIds
@@ -289,79 +301,3 @@ module.exports = {
     getActiveChats
 }
 
-        
- //   const userData = await pool.query(
-      //     `SELECT id, username, name, profile_pic 
-      //      FROM users 
-      //      WHERE id = ANY($1)
-      //      AND username like $2
-      //      ORDER BY ARRAY_POSITION($1, id) 
-      //      LIMIT 10`,
-      //     [activeChatsQuery[0].combined_ids, q ? `%${q}%` : '%']
-      // )
-        // const messages = await messageModel.find({ 
-        //     room_id: req.params.room, 
-        //     is_deleted_for: { $nin: [req.user.id] }, 
-        //     is_room_deleted_for: { $nin: [req.user.id] }
-        // })
-        // .sort({ date: -1 })
-        // .skip(totalToSkip)
-        // .limit(MESSAGE_PAGE_SIZE)
-
-//-------------------------------------------------------
-            // changed to handle with socket
-        // // update redis via score
-        // // get last index of : to get the score and room
-        // pos = msg_id.lastIndexOf(':')
-        // let room = msg_id.substring(0, pos)
-        // console.log('room', room)
-        // if (!room || !room.startsWith('message-room:')) {
-        //   console.log('Invalid message id (room)') 
-        //     return res.status(statusCode.badRequest).json({
-        //         message: 'Invalid message id (room)'
-        //     })
-        // }
-
-        // let score = msg_id.split(':')[2] // should be in format message-room:<room>:<score>
-        // console.log('score', score, /^\d+$/.test(score))
-        // if (!score || !/^\d+$/.test(score)) {
-        //   console.log('Invalid message id (score)') 
-        //     return res.status(statusCode.badRequest).json({
-        //         message: 'Invalid message id (score)'
-        //     })
-        // }
-
-
-        // score = parseInt(score)
-
-        // console.log('room', room, 'score', typeof score) 
-        // let outputMessage
-        // let messageToDelete = await redisClient.zRangeByScore(room, score, score)
-        // let newMessage = null
-
-        // if (messageToDelete && messageToDelete.length > 0) {
-        //   messageToDelete = messageToDelete.map(msg => JSON.parse(msg)) 
-        //   messageToDelete = messageToDelete[0]
-        //   newMessage = {...messageToDelete}
-
-        //   if (!newMessage.is_deleted_for) { // should be an array
-        //     newMessage.is_deleted_for = [req.user.id]
-        //   }else{
-        //     // psuh only if not already in the array
-        //     if (!newMessage.is_deleted_for.includes(req.user.id)) {
-        //       newMessage.is_deleted_for.push(req.user.id)
-        //     }
-        //   }
-
-        //   outputMessage = "Message deleted for you!"
-
-        //   if (deletefor === 'everyone') {
-        //     // remove from redis
-        //     await redisClient.zRemRangeByScore(room, score, score)
-        //     // let otherUser = newMessage.sender_id === req.user.id ? newMessage.receiver_id : newMessage.sender_id
-        //     // if (!newMessage.is_deleted_for.includes(otherUser) && !newMessage.is_read) {
-        //     //   newMessage.is_deleted_for.push(otherUser)
-        //       outputMessage = "Message deleted for everyone!"
-        //     }
-        //     return res.status(statusCode.success).send({ message: outputMessage })
-        //   }

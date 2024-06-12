@@ -1,6 +1,5 @@
 const statusCodes = require("../constants/statusCode");
 const logger = require("../middleware/winston");
-// const pool = require("../database/db_setup");
 const { getDriver } = require("../database/neo4j_setup");
 const { comparePassword, hashPassword } = require("../utils/auth.utils");
 

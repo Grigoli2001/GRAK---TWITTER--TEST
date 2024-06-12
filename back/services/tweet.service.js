@@ -4,11 +4,9 @@ const Interaction = require("../models/interactionModel");
 const statusCode = require("../constants/statusCode");
 const mongoose = require("mongoose");
 const ObjectId = mongoose.Types.ObjectId;
-// const pool = require("../database/db_setup");
 const { tweetQuery, checkTweetText } = require('../utils/tweet.utils');
 const { getUserFullDetails, allFollowers } = require('../utils/user.utils');
 const { validateFiles, firebaseUpload } = require('../utils/firebase.utils');
-const { json } = require("express");
 const { getDriver } = require("../database/neo4j_setup");
 
 const getAllTweets = async (req, res) => {
@@ -101,9 +99,9 @@ const getTweetsByCategory = async (req, res) => {
             const following = await allFollowers(userid);
             const followingIds = following.map(follower => follower.following);
             if (category === 'following'){
-                tweets = await tweetQuery({matchOptions:{userId : { $in: followingIds} }, currentUID:req.user.id, page:resolvePage})
+                tweets = await tweetQuery({matchOptions:{userId : { $in: followingIds} }, currentUID:req.user.id, page:resolvePage}, excludeIds=req.excludedUsers)
             }else{
-                tweets = await tweetQuery({matchOptions: {userId : { $nin: followingIds} }, currentUID:req.user.id, page:resolvePage})
+                tweets = await tweetQuery({matchOptions: {userId : { $nin: followingIds} }, currentUID:req.user.id, page:resolvePage, excludedIds: req.excludedUsers})
             }
         } else {
             tweets = await tweetQuery({
@@ -111,7 +109,8 @@ const getTweetsByCategory = async (req, res) => {
                 currentUID:userid, 
                 page:resolvePage, 
                 sort:category==='replies' ? 1 : -1, 
-                sortByInteraction: category === 'likes' ? 'like' : category === 'bookmarks'?'bookmark' : null
+                sortByInteraction: category === 'likes' ? 'like' : category === 'bookmarks'?'bookmark' : null,
+                excludedIds: req.excludedUsers
             });
             }
         return res.status(statusCode.success).json({
@@ -499,10 +498,17 @@ const getReplies = async (req, res) => {
         const { id } = req.params
         try {
 
-            const tweet = await tweetModel.findOne({ _id: new ObjectId(id), $or: [
-                { is_deleted: false }, 
-                { is_deleted: { $exists: false } }
-            ] });
+            const tweet = await tweetModel.findOne({ _id: new ObjectId(id),  $and: [
+                {
+                  $or: [
+                    { is_deleted: false },
+                    { is_deleted: { $exists: false } }
+                  ]
+                },
+                {
+                  userId: { $nin: req.excludedUsers }
+                }
+              ] });
             if (!tweet) throw new Error("invalid id")
         }catch (err){
             console.log(err)
@@ -516,9 +522,6 @@ const getReplies = async (req, res) => {
         const replies = await tweetQuery({matchOptions:{ reference_id: new ObjectId(req.params.id), tweetType: 'reply' }, currentUID: req.user.id});
         for (let i = 0; i < replies.length; i++) {
          const user = await getUserFullDetails(replies[i].userId, req.user.id, 'id');
-        // const user = await pool.query(
-        //     `SELECT id, username, name, profile_pic FROM users WHERE id = ${replies[i].userId}`
-        // );
             replies[i].user = user;
         }
         return res.status(statusCode.success).json({
@@ -540,15 +543,22 @@ const likeTweet = async (req, res) => {
     try {
         const { tweetId, willLike } = req.body
         // console.log(tweetId, isLiked)
-        const tweet = await tweetModel.findOne({ _id: tweetId, $or: [
-            { is_deleted: false }, 
-            { is_deleted: { $exists: false } }
-        ] });
+        const tweet = await tweetModel.findOne({ _id: tweetId,  $and: [
+            {
+              $or: [
+                { is_deleted: false },
+                { is_deleted: { $exists: false } }
+              ]
+            },
+            {
+              userId: { $nin: req.excludedUsers }
+            }
+          ] });
         if (!tweet) {
             return (
                 res.status(statusCode.notFound).json({
                     status: "fail",
-                    message: "No tweet found with that ID",
+                    message: "Could not process request, tweet not found",
                 })
             );
         }
@@ -587,10 +597,17 @@ const likeTweet = async (req, res) => {
 const bookmarkTweet = async (req, res) => {
     try {
         const { tweetId, willBookmark } = req.body
-        const tweet = await tweetModel.findOne({ _id: tweetId, $or: [
-            { is_deleted: false }, 
-            { is_deleted: { $exists: false } }
-        ] });
+        const tweet = await tweetModel.findOne({ _id: tweetId,  $and: [
+            {
+              $or: [
+                { is_deleted: false },
+                { is_deleted: { $exists: false } }
+              ]
+            },
+            {
+              userId: { $nin: req.excludedUsers }
+            }
+          ] });
         if (!tweet) {
             return (
                 res.status(statusCode.notFound).json({
@@ -642,10 +659,17 @@ const highlightTweet = async (req, res) => {
         const tweet = await tweetModel.findOneAndUpdate({ 
             _id: tweetId,
             userId: req.user.id, 
-            $or: [
-                { is_deleted: false }, 
-                { is_deleted: { $exists: false } }
-            ]
+            $and: [
+                {
+                  $or: [
+                    { is_deleted: false },
+                    { is_deleted: { $exists: false } }
+                  ]
+                },
+                {
+                  userId: { $nin: excludedIds }
+                }
+              ]
         }, { is_highlighted: willHighlight }, { new: true });
         if (!tweet) {
             return res.status(statusCode.notFound).json({
@@ -668,19 +692,33 @@ const highlightTweet = async (req, res) => {
 const getTrendingTags = async (req, res) => {
     try {
         const trends = await tweetModel.aggregate([
-            { $match: { tweetType: 'tweet' } },
+            {
+            $match: {
+                $and: [
+                { tweetType: 'tweet' },
+                {
+                    $or: [
+                        { is_deleted: false },
+                        { is_deleted: { $exists: false } }
+                    ]
+                    }
+                ]
+                }
+            },
             { $unwind: "$tags" },
             { $group: { _id: "$tags", count: { $sum: 1 } } },
             { $project: { _id: 0, tag: "$_id", count: 1 } },
-            { $sort: { count: -1, tag: 1} },
-            { $limit: 10 },
+            { $sort: { count: -1, tag: 1 } },
+            { $limit: 10 }
         ]);
+        
 
         res.status(statusCode.success).json({
                 trends,
         });
     }
     catch (err) {
+        console.log(err)
         res.status(statusCode.serverError).json({
             message: "error finding the tweet", err,
         });
@@ -694,7 +732,11 @@ const getTags = async (req, res) => {
         const pipeline = [
             {
                 $match: {
-                    tags: { $regex: q, $options: 'i' }
+                    tags: { $regex: q, $options: 'i' },
+                    $or: [
+                        { is_deleted: false },
+                        { is_deleted: { $exists: false } }
+                    ]
                 }
             },
             {
@@ -732,7 +774,7 @@ const getTweetsByTag = async(req, res) => {
 
     try {
         const { q } = req.query;
-        const tweets = await tweetQuery({matchOptions:{ tags: { $regex: q, $options: 'i' } }, currentUID:req.user.id});
+        const tweets = await tweetQuery({matchOptions:{ tags: { $regex: q, $options: 'i' }, }, currentUID:req.user.id, excludeIds:req.excludedUsers});
         res.status(statusCode.success).json({
             tweets,
         });
@@ -747,6 +789,8 @@ const getTweetsByTag = async(req, res) => {
 
 }
 
+
+
 module.exports = {
     getAllTweets,
     getTweetById,
@@ -760,6 +804,5 @@ module.exports = {
     highlightTweet,
     getTrendingTags,
     getTags,
-    getTweetsByTag
-
+    getTweetsByTag,
 };

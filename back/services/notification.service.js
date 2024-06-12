@@ -2,7 +2,6 @@ const notificationModel = require("../models/notificationModel");
 const statusCode = require("../constants/statusCode");
 const logger = require("../middleware/winston");
 const mongoose = require("mongoose");
-const { getUserById } = require("../utils/notification.utils");
 const { ObjectId } = mongoose.Types;
 // sockets
 

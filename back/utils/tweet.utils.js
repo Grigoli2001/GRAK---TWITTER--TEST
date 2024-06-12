@@ -11,6 +11,7 @@ const tweetQuery = async ({
   page,
   sortByInteraction,
   sort,
+  excludedIds=[],
 }) => {
 
   if (isNaN(page)) {
@@ -24,7 +25,17 @@ const tweetQuery = async ({
     // still allow is deleted for everyone to be queried
     {
       $match: {
-        $or: [{ is_deleted: false }, { is_deleted: { $exists: false } }],
+        $and: [
+          {
+            $or: [
+              { is_deleted: false },
+              { is_deleted: { $exists: false } }
+            ]
+          },
+          {
+            userId: { $nin: excludedIds }
+          }
+        ]
       },
     },
     {
@@ -285,12 +296,6 @@ const checkTweetText = (tweetText) => {
   }
   return resolveTweetText;
 };
-
-  // const followers = await pool.query(
-  //   `SELECT following FROM follows WHERE user_id = $1`,
-  //   [userId]
-  // );
-
 
 
 module.exports = {

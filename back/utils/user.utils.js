@@ -9,6 +9,8 @@ const getUserFullDetails = async (targetUser, currentUser, fetch_how) => {
   const session = getDriver().session();
   const result = await session.run(
     `MATCH (u:User {${fetch_how}: $targetUser})
+    WHERE NOT EXISTS((u)-[:BLOCKS]->({id: $currentUser}))
+    OPTIONAL MATCH (u)<-[b:BLOCKS]-(User {id: $currentUser})
     OPTIONAL MATCH (u)-[f1:FOLLOWS]->(following:User)
     OPTIONAL MATCH (u)<-[f2:FOLLOWS]-(follower:User)
     OPTIONAL MATCH (u)<-[f:FOLLOWS]-(currentUser:User {id: $currentUser})
@@ -28,18 +30,25 @@ const getUserFullDetails = async (targetUser, currentUser, fetch_how) => {
       WHEN f IS NOT NULL THEN 1
       ELSE 0
       END
-      AS is_followed
+      AS is_followed,
+      CASE
+        WHEN b IS NOT NULL THEN 1
+        ELSE 0
+      END as is_blocked
     `,
     { targetUser, currentUser }
   );
-  if (!result.records.length) {
-    throw new Error("User not found");
-  }
+
+  console.log("targetUser", targetUser, "currentUser", currentUser);
+  // if (!result.records.length) {
+  //   throw new Error("User not found");
+  // }
   const user = result.records.map((record) => record.toObject())[0];
-  // console.log(user);  
+  console.log(user);  
   return user;
 
 };
+
 const allFollowers = async (userId) => {
 
     const session = getDriver().session();
@@ -64,31 +73,3 @@ module.exports = {
     allFollowers,
     getUserFullDetails
 }
-
-
-  // const user = await pool.query(
-  //   `SELECT u.id, name, username, email, profile_pic, u.created_at,
-  //   COUNT(DISTINCT f1.following) AS following_count,
-  //   COUNT(DISTINCT f2.user_id) AS followers_count,
-  //   CASE 
-  //     WHEN u.id IN (SELECT following from follows where user_id= $1) 
-  //     THEN 1 
-  //     ELSE 0 
-  //     END 
-  //     AS is_followed
-  //   FROM 
-  //       users u
-  //   LEFT JOIN 
-  //       follows f1 ON u.id = f1.user_id
-  //   LEFT JOIN 
-  //       follows f2 ON u.id = f2.following
-  //   WHERE u.id = $1
-  //   GROUP BY 
-  //       u.id  `,
-  //   [currentUIDasInt]
-  // );
-
-  // if (!user.rowCount) {
-  //   throw new Error("User not found");
-  // }
-  // return user.rows[0];
