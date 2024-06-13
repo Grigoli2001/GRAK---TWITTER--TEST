@@ -250,8 +250,6 @@ const verifyOTP = async (req, res) => {
     }
     const otpInRedis = await redisClient.get(`otp:${email}`);
 
-    console.log("INPUT OTP", otp, "OTP IN REDIS", otpInRedis);
-
     if (otpInRedis === otp) {
       await redisClient.del(`otp:${email}`);
       return res.status(statusCodes.success).json({ message: "OTP verified" });

@@ -1,8 +1,9 @@
 import { io } from 'socket.io-client';
 import { createContext} from 'react';
 import { createToast } from '../hooks/createToast';
+
 // TODO connect socket when logged in
-const socket = io('http://localhost:4000', {
+const socket = io('http://backend:4000', {
   auth: {
     token: localStorage.getItem('user')  ? JSON.parse(localStorage.getItem('user')).token : null,
   },

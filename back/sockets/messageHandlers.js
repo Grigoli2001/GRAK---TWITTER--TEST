@@ -8,8 +8,8 @@ const evalRoom = (user, otherUser) => {
   return 'message-room:'+[ user, otherUser ].sort().join('-')
 }
 
-const LIMIT = 50
-const maxPeriod = 20 * 60  * 1000 // 20 minutes
+// const LIMIT = 50
+const maxPeriod = 30 * 60  * 1000 // 20 minutes
 
 
 module.exports = (io, socket) => {
@@ -176,20 +176,3 @@ setInterval(messageExpirationWorker, 10 * 60 * 1000); // 10 minutes
     socket.to(data.room).emit("message:typing", data);
   });
 };
-
-
-   // const newMessage = new Message({
-      //   sender_id,
-      //   receiver_id,
-      //   room_id: data.room,
-      //   message,
-      //   date,
-      //   is_read: false,
-      // });
-      // DID NOT IMPLEMENT SENDING IMAGE
-
-      // await newMessage.save();
-
-      
-      // ideally get username from db instead of socket
-      // data._id = newMessage._id;

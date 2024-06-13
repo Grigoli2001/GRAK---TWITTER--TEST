@@ -62,7 +62,7 @@ const Message = forwardRef(({ message, messageType, isLastMessage,  handleModalO
                       <li onClick={handleCopyMessage} className='hover:bg-slate-200/50 p-2 cursor-pointer flex items-center gap-2 whitespace-nowrap'><CIAddSquare/> Copy this message</li>
                       <li  onClick={() => {handleModalOpen(message.message_id); setShowMore(false)}} className='hover:bg-slate-200/50 p-2 cursor-pointer flex items-center gap-2 whitespace-nowrap'><RiDeleteBinLine className="text-2xl"/> Delete for you</li>
                       
-                      {/* message still in redis then del for everyone:  since back is set to experire after 20 we set this to 15 to be safe minute
+                      {/* message still in redis then del for everyone:  since back is set to experire after 30 we set this to 15 to be safe minute
                       so user has 15 minutes to delete message for everyone 
                       */}
                       {new Date(message.date) > new Date() - 1000 * 60 * 15  && messageType === 'sent' && 

@@ -168,7 +168,8 @@ const Profile = () => {
         // setLikesIsPublic(userProfile.likes_is_public) // not implemented
         setIsUser(userProfile.id === user?.id)
         setFollowerCount(userProfile.followers_count)
-        setIsSetUp(userProfile.location || (userProfile.profile_pic && userProfile.profile_pic !== 'default_profile_pic.png') || userProfile.bio || userProfile.website || userProfile.dob || userProfile.cover)
+        console.log("LOCATION", userProfile.location, "BIO", userProfile.bio, "WEBSITE", userProfile.website, "COVER", userProfile.cover, "PROFILE PIC", userProfile.profile_pic, "ISSETUP", isSetUp)
+        setIsSetUp(userProfile.location || (userProfile.profile_pic && userProfile.profile_pic !== 'default_profile_pic.png') || userProfile.bio || userProfile.website || userProfile.cover)
   }
   }, [userProfile, user?.id])
 
@@ -178,7 +179,7 @@ const Profile = () => {
     navigate(-1)
   }
   
-  if (isLoading || isBlocked === null) return ( // isblocked must be resolved before rendering
+  if (isLoading) return ( // isblocked must be resolved before rendering
     <div className="w-full h-full flex items-center justify-center">
         <ReactLoading type="spin" color="#1da1f2" height={30} width={30} />
     </div>
@@ -380,7 +381,7 @@ const Profile = () => {
                     <FaRegBell />
                   </Button>
 
-                  <Button onClick={handleTurnOffPostNotifications} variant="icon" size="icon-sm" className="text-black hover:bg-gray-300/50 border" tooltip="Turn on post notifications">
+                  <Button onClick={handleTurnOffPostNotifications} variant="icon" size="icon-sm" className="text-black hover:bg-gray-300/50 border" tooltip="Turn off post notifications">
                     <FaBellSlash />
                   </Button>
 

@@ -15,26 +15,29 @@ const getUserSimple = async (req, res) => {
     } else if (username) {
       const session = getDriver().session();
       const result = await session.run(
-        `MATCH (u:User) WHERE u.username = $username 
-      RETURN {
-        id: u.id,
-        name: u.name,
-        username: u.username,
-        email: u.email,
-        profile_pic: u.profile_pic,
-        cover: u.cover,
-        created_at: u.created_at,
-        dob: u.dob,
-        bio: u.bio,
-        website: u.website,
-        location: u.location
+        `MATCH (u:User {username: $username})
+        RETURN {
+          id: u.id,
+          name: u.name,
+          username: u.username,
+          email: u.email,
+          profile_pic: u.profile_pic,
+          cover: u.cover,
+          created_at: u.created_at,
+          dob: u.dob,
+          bio: u.bio,
+          website: u.website,
+          location: u.location
       } as u
       `,
         { username }
       );
+
       const user = result.records.map(
-        (record) => record.get("u").properties
+        (record) => record.get("u")
       )?.[0];
+
+
       if (!user) {
         return res
           .status(statusCodes.notFound)
@@ -463,8 +466,12 @@ const blockUser = async (req, res) => {
     await session.run(
       `MATCH (u:User {id: $currentUser}), (f:User {id: $blockedUser}) MERGE (u)-[:BLOCKS]->(f)
       with u, f
-      OPTIONAL MATCH (u)-[brel:FOLLOWS]-(f)
-      DELETE brel`,
+      OPTIONAL MATCH (u)-[fbrel:FOLLOWS]-(f)
+      DELETE fbrel
+      with u, f
+      OPTIONAL MATCH (f)-[nbrel:NOTIFIES]-(u)
+      DELETE nbrel
+      `,
       {currentUser: req.user.id, blockedUser: otherUserId}
     );
     res.status(statusCodes.success).json({ message: "User blocked" });

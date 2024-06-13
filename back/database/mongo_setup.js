@@ -8,11 +8,13 @@ if (!MONGO_URI) {
   process.exit(1);
 }
 
+console.log("MONGO_URI", MONGO_URI);
+
 const connectToMongo = async () => {
     mongoose
       .connect(MONGO_URI)
       .then(() => logger.info("MongoDB connected successfully"))
-      .catch((err) => logger.error("MongoDB connection error: ", err));
+      .catch((err) => {throw new Error(err)});
   };
 
 module.exports = {

@@ -265,7 +265,6 @@ const getActiveChats = async (req, res) => {
         userIds = [...filteredKeys, ...activeChatsQuery[0].combined_ids]
         }
 
-        console.log("FINAL USERIDS", userIds)
         const session = getDriver().session();
         const result = await session.run(
           `MATCH (u:User) WHERE u.id <> $current_userid AND u.id IN $userIds

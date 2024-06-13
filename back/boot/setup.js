@@ -71,6 +71,9 @@ const registerCoreMiddleWare = async () => {
     // );
 
     // routes
+    app.use("/health", (req, res) => {
+      res.status(200).send("Server is up and running");
+    });
     app.use("/auth", authRoutes);
     app.use("/token", tokenRoutes);
     app.use(verifyToken);
@@ -103,24 +106,17 @@ const startApp = async () => {
     await connectToMongo();
     await connectToRedis();
     await connectToNeo4j();
-    await connectToFirebase();
+    connectToFirebase();
     initSockets(app);
 
     app.listen(PORT, () => {
-      logger.info("Application Listening on 127.0.0.1:" + PORT);
+      logger.info("Application Listening on port:" + PORT);
     });
 
     handleError();
   } catch (err) {
     console.log(err);
-    // logger.error(
-    //   `startup :: Error while booting the applicaiton ${JSON.stringify(
-    //     err,
-    //     undefined,
-    //     2
-    //   )}`
-    // );
-    // throw err;
+    process.exit(1);;
   }
 };
 

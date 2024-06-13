@@ -1,0 +1,4 @@
+data
+mongo*_config
+mongo*_data
+neo4j_db

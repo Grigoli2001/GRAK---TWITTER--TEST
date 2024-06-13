@@ -8,7 +8,6 @@ module.exports = (expireSeconds, maxRequests) => {
     const key = `rate-limit:${req.path}:${ip}`;
     try {
         const count = await redisClient.incr(key);
-        console.log("count", count);
         if (count === 1) {
           redisClient.expire(key, expireSeconds);
         }
